@@ -53,8 +53,8 @@ const drive = await new ShdwDrive(connection, wallet as AnchorWallet).init();
 
 | package                                                                                                               | description                                                                |
 | --------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| [node](https://github.com/genesysgo/shadow-drive/examples/node)                         | Using shadow-drive in a nodejs environment components                                                     |
-| [react](https://github.com/genesysgo/shadow-drive/examples/web) | Using shadow-drive in a react/browser environment |
+| [node](https://github.com/GenesysGo/shadow-drive/examples/node)                         | Using shadow-drive in a nodejs environment components                                                     |
+| [react](https://github.com/GenesysGo/shadow-drive/examples/web) | Using shadow-drive in a react/browser environment |
 
 ### Build From Source
 1. Clone the project:
