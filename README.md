@@ -3,7 +3,7 @@
 
   <h1>Shadow Drive</h1>
    <p>
-    <a href="https://shdw-drive-url-typedoc"><img alt="Docs" src="https://img.shields.io/badge/docs-typedoc-blueviolet" /></a>
+    <a href="https://genesysgo.github.io/shadow-drive/"><img alt="Docs" src="https://img.shields.io/badge/docs-typedoc-blueviolet" /></a>
 	</p>
 </div>
 
