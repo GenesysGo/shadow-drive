@@ -29,7 +29,7 @@
     "nuke": "shx rm -rf node_modules yarn.lock"
   },
   "dependencies": {
-    "@genesygo/shadowdrive": "file:../..",
+    "@shadow-drive/sdk": "^1.0.0",
     "@project-serum/anchor": "^0.24.2",
     "@solana/wallet-adapter-base": "^0.9.4",
     "@solana/wallet-adapter-react": "^0.15.3",

@@ -23,7 +23,7 @@ yarn add @shadow-drive/sdk
 ```tsx
 import React, { useEffect } from "react";
 import * as anchor from "@project-serum/anchor";
-import ShdwDrive from "@genesygo/shadow-drive";
+import ShdwDrive from "@shadow-drive/sdk";
 import { AnchorWallet, useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 
 export default function Drive() {
@@ -44,7 +44,7 @@ export default function Drive() {
 
 ### Setup (NodeJS)
 ```js
-import ShdwDrive from "@genesygo/shadow-drive";
+import ShdwDrive from "@shadow-drive/sdk";
 const drive = await new ShdwDrive(connection, wallet as AnchorWallet).init();
 
 ```
