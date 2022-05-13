@@ -16,7 +16,7 @@ Typescript components for Shadow Drive.
 Install these dependencies:
 
 ```shell
-yarn add @genesysgo/shadow-drive
+yarn add @shadow-drive/sdk
 ```
 
 ### Setup (React)
