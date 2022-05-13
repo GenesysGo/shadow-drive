@@ -1,8 +1,25 @@
 # Nodejs Shadow Drive Example
 
-- Create a paper wallet using solana-keygen with -o specifying the outfile name
-- replace the import path below with the path to your new wallet
+## Getting Started
+
+- From the root directory of this project:
+
+
+```bash
+yarn install
+cd examples/node
+yarn install
+```
+
+- Create a paper wallet using solana-keygen with -o specifying the outfile name.
+  
+- Replace the import path below with the path to your new wallet.
   ```js
   import driveUser from "some_shdw_funded_wallet";
   ```
-- fund that wallet with $SHDW and a small amount of $SOL in order to use shadow-drive commands
+- Fund that wallet with $SHDW and a small amount of $SOL in order to use shadow-drive commands
+
+```bash
+yarn build
+yarn start
+```
