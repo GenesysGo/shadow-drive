@@ -1,6 +1,6 @@
 {
   "name": "@shadow-drive/sdk",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Interfaces for GenesysGo ShadowDrive",
   "repository": {
     "type": "git",
