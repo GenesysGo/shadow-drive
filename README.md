@@ -32,7 +32,7 @@ export default function Drive() {
 	useEffect(() => {
 		(async () => {
 			if (wallet?.publicKey) {
-				const drive = await new ShdwDrive(connection, wallet as AnchorWallet).init();
+				const drive = await new ShdwDrive(connection, wallet).init();
 			}
 		})();
 	}, [wallet?.publicKey])
@@ -45,7 +45,7 @@ export default function Drive() {
 ### Setup (NodeJS)
 ```js
 import ShdwDrive from "@shadow-drive/sdk";
-const drive = await new ShdwDrive(connection, wallet as AnchorWallet).init();
+const drive = await new ShdwDrive(connection, wallet).init();
 
 ```
 
