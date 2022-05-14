@@ -1,8 +1,7 @@
 import * as anchor from "@project-serum/anchor";
-import { getStakeAccount } from "../utils/helpers";
+import { getStakeAccount, sendAndConfirm } from "../utils/helpers";
 import { isBrowser, SHDW_DRIVE_ENDPOINT, tokenMint } from "../utils/common";
 import { PublicKey } from "@solana/web3.js";
-import { sendAndConfirmWithRetry } from "@strata-foundation/spl-utils";
 import { ShadowDriveResponse } from "../types";
 import fetch from "node-fetch";
 /**
@@ -59,7 +58,7 @@ export default async function cancelDeleteFile(
     } else {
       await this.wallet.signTransaction(txn);
     }
-    const res = await sendAndConfirmWithRetry(
+    const res = await sendAndConfirm(
       this.provider.connection,
       txn.serialize(),
       { skipPreflight: false },
