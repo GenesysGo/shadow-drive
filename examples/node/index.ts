@@ -1,6 +1,6 @@
 import * as solanaWeb3 from "@solana/web3.js";
 import * as anchor from "@project-serum/anchor";
-import shadowDrive from "@genesygo/shadowdrive";
+import shadowDrive from "@shadow-drive/sdk";
 //Replace the paper wallet being used here
 import driveUser from "some_shdw_funded_wallet";
 import fs from "fs";
