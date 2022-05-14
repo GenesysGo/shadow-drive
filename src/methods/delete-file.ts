@@ -1,9 +1,9 @@
 import * as anchor from "@project-serum/anchor";
 import { isBrowser, SHDW_DRIVE_ENDPOINT, tokenMint } from "../utils/common";
 import { PublicKey } from "@solana/web3.js";
-import { sendAndConfirmWithRetry } from "@strata-foundation/spl-utils";
 import { ShadowDriveResponse } from "../types";
 import fetch from "node-fetch";
+import { sendAndConfirm } from "../utils/helpers";
 /**
  *
  * @param {PublicKey} key - Publickey of Storage Account
@@ -56,7 +56,7 @@ export default async function deleteFile(
     } else {
       await this.wallet.signTransaction(txn);
     }
-    const res = await sendAndConfirmWithRetry(
+    const res = await sendAndConfirm(
       this.provider.connection,
       txn.serialize(),
       { skipPreflight: false },

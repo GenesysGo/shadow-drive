@@ -1,12 +1,15 @@
 import * as anchor from "@project-serum/anchor";
-import { getStakeAccount, findAssociatedTokenAddress } from "../utils/helpers";
+import {
+  getStakeAccount,
+  findAssociatedTokenAddress,
+  sendAndConfirm,
+} from "../utils/helpers";
 import { emissions, isBrowser, tokenMint } from "../utils/common";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
-import { sendAndConfirmWithRetry } from "@strata-foundation/spl-utils";
 import { ShadowDriveResponse } from "../types";
 
 /**
@@ -53,7 +56,7 @@ export default async function makeStorageImmutable(
       await this.wallet.signTransaction(txn);
     }
 
-    const res = await sendAndConfirmWithRetry(
+    const res = await sendAndConfirm(
       this.provider.connection,
       txn.serialize(),
       { skipPreflight: false },

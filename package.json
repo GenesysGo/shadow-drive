@@ -37,7 +37,6 @@
     "@solana/spl-token": "^0.2.0",
     "@solana/wallet-adapter-react": "^0.15.4",
     "@solana/web3.js": "^1.41.4",
-    "@strata-foundation/spl-utils": "^3.5.7",
     "bs58": "^5.0.0",
     "crypto": "^1.0.1",
     "form-data": "^4.0.0",

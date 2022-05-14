@@ -1,8 +1,8 @@
 import * as anchor from "@project-serum/anchor";
 import { isBrowser, tokenMint } from "../utils/common";
 import { PublicKey } from "@solana/web3.js";
-import { sendAndConfirmWithRetry } from "@strata-foundation/spl-utils";
 import { ShadowDriveResponse } from "../types";
+import { sendAndConfirm } from "../utils/helpers";
 
 /**
  *
@@ -35,7 +35,7 @@ export default async function deleteStorageAccount(
     } else {
       await this.wallet.signTransaction(txn);
     }
-    const res = await sendAndConfirmWithRetry(
+    const res = await sendAndConfirm(
       this.provider.connection,
       txn.serialize(),
       { skipPreflight: false },
