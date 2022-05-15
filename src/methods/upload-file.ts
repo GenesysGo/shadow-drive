@@ -10,6 +10,7 @@ import crypto from "crypto";
 import { PublicKey } from "@solana/web3.js";
 import fetch from "node-fetch";
 import { ShadowUploadResponse } from "../types";
+import { Buffer } from "buffer";
 /**
  *
  * @param {PublicKey} key - Publickey of Storage Account

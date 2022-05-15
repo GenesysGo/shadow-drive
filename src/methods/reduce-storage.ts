@@ -9,6 +9,7 @@ import { emissions, isBrowser, tokenMint } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
 import { ShadowDriveResponse } from "../types";
+import { Buffer } from "buffer";
 
 /**
  *

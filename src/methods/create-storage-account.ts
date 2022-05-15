@@ -14,6 +14,7 @@ import {
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import fetch from "node-fetch";
 import { CreateStorageResponse } from "../types";
+import { Buffer } from "buffer";
 /**
  *
  * @param {string} name - What you want your storage account to be named. (Does not have to be unique)

@@ -49,7 +49,8 @@ function generateConfig(configType, format) {
       '@solana/web3.js',
       'bs58',
       'crypto',
-      'form-data'
+      'form-data',
+      'buffer'
     ];
   }
 
@@ -73,7 +74,8 @@ function generateConfig(configType, format) {
             '@solana/web3.js',
             'bs58',
             'crypto',
-            'form-data'
+            'form-data',
+            'buffer'
           ];
 
           break;

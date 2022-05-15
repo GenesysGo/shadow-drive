@@ -10,6 +10,7 @@ import FormData from "form-data";
 import crypto from "crypto";
 import { ShadowUploadResponse } from "../types";
 import fetch from "node-fetch";
+import { Buffer } from "buffer";
 /**
  *
  * @param {PublicKey} key - Publickey of Storage Account
