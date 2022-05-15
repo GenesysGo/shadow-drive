@@ -16,6 +16,7 @@ import {
   Transaction,
   TransactionSignature,
 } from "@solana/web3.js";
+import { Buffer } from "buffer";
 const DEFAULT_TIMEOUT = 3 * 60 * 1000; // 3 minutes
 /**
  *
