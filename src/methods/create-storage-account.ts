@@ -80,17 +80,9 @@ export default async function createStorageAccount(
       await this.connection.getLatestBlockhash()
     ).blockhash;
     txn.feePayer = this.wallet.publicKey;
-    console.log(txn);
     if (!isBrowser) {
-      console.log("Not browserssss");
-      try {
-        await txn.partialSign(this.wallet.payer);
-      } catch (e) {
-        console.log("signing failed?");
-        console.log(e);
-      }
+      await txn.partialSign(this.wallet.payer);
     } else {
-      console.log("browser");
       await this.wallet.signTransaction(txn);
     }
     const serializedTxn = txn.serialize({ requireAllSignatures: false });
