@@ -4,8 +4,7 @@ import { web3 } from "@project-serum/anchor";
  * false if in a Node process
  */
 export const isBrowser =
-  process.env.SHDW_BROWSER ||
-  (typeof window !== "undefined" && !window.process?.hasOwnProperty("type"));
+  (typeof window !== "undefined" && !window.process?.hasOwnProperty("type")) || process.env.SHDW_BROWSER;
 
 export const programAddress = new web3.PublicKey(
   "2e1wdyNhUvE76y6yUCvah2KaviavMJYKoRun8acMRBZZ"
