@@ -1,18 +1,17 @@
 import * as anchor from "@project-serum/anchor";
 import { getStakeAccount, sendAndConfirm } from "../utils/helpers";
 import { isBrowser, SHDW_DRIVE_ENDPOINT, tokenMint } from "../utils/common";
-import { PublicKey } from "@solana/web3.js";
 import { ShadowDriveResponse } from "../types";
-import fetch from "node-fetch";
+import fetch from "cross-fetch";
 /**
  *
- * @param {PublicKey} key - Publickey of Storage Account
+ * @param {anchor.web3.PublicKey} key - Publickey of Storage Account
  * @param {string} url - Shadow Drive URL of the file you are requesting to undelete.
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 
 export default async function cancelDeleteFile(
-  key: PublicKey,
+  key: anchor.web3.PublicKey,
   url: string
 ): Promise<ShadowDriveResponse> {
   const selectedAccount = await this.program.account.storageAccount.fetch(key);

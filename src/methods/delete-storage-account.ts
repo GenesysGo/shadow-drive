@@ -1,18 +1,17 @@
 import * as anchor from "@project-serum/anchor";
 import { isBrowser, tokenMint } from "../utils/common";
-import { PublicKey } from "@solana/web3.js";
 import { ShadowDriveResponse } from "../types";
 import { sendAndConfirm } from "../utils/helpers";
 
 /**
  *
- * @param {PublicKey} key - PublicKey of a StorageAccount
+ * @param {anchor.web3.PublicKey} key - PublicKey of a StorageAccount
  *
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 
 export default async function deleteStorageAccount(
-  key: PublicKey
+  key: anchor.web3.PublicKey
 ): Promise<ShadowDriveResponse> {
   const selectedAccount = await this.program.account.storageAccount.fetch(key);
   try {
