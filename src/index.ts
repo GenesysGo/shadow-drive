@@ -108,11 +108,13 @@ export class ShdwDrive implements ShadowDrive {
   }
   public async init() {
     this.storageConfigPDA = (await getStorageConfigPDA(this.program))[0];
-    const user = (await getUserInfo(this.program, this.wallet.publicKey))[0];
-    if (user) {
-      this.userInfo = user;
+    if (this.wallet) {
+      const user = (await getUserInfo(this.program, this.wallet.publicKey))[0];
+      if (user) {
+        this.userInfo = user;
+      }
+      return this;
     }
-    return this;
   }
 }
 

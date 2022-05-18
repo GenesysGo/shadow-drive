@@ -8,7 +8,7 @@ import {
 import crypto from "crypto";
 import { ShadowBatchUploadResponse, ShadowFile } from "../types";
 import NodeFormData from "form-data";
-import { sleep, sortByProperty } from "../utils/helpers";
+import { sleep, sortByProperty, getChunkLength } from "../utils/helpers";
 import fetch from "cross-fetch";
 
 interface FileData {
@@ -142,17 +142,23 @@ export default async function uploadMultipleFiles(
     }
   });
   let chunks = [];
-  let indivChunk = [];
-  for (let chunkIdx = 0; chunkIdx < fileData.length + 1; chunkIdx++) {
+  let indivChunk: Array<number> = [];
+  for (let chunkIdx = 0; chunkIdx < fileData.length; chunkIdx++) {
     if (indivChunk.length === 0) {
       indivChunk.push(chunkIdx);
+      // Handle when a fresh individual chunk is equal to the file data's length
+      let allChunksSum = getChunkLength(indivChunk, chunks);
+      if (allChunksSum === fileData.length) {
+        chunks.push(indivChunk);
+        continue;
+      }
       continue;
     }
-    let fileNames = indivChunk.map((c) => fileData[c].name);
-    // let indivChunkNames = indivChunk.map((c) => c.fileName);
+
+    let fileNames = indivChunk.map((c: any) => fileData[c].name);
     const namesLength = Buffer.byteLength(Buffer.from(fileNames.join()));
     const currentNameBufferLength = Buffer.byteLength(
-      Buffer.from(fileData[chunkIdx - 1].name)
+      Buffer.from(fileData[chunkIdx].name)
     );
     if (
       indivChunk.length < 5 &&
@@ -160,17 +166,18 @@ export default async function uploadMultipleFiles(
       currentNameBufferLength + namesLength < 154
     ) {
       indivChunk.push(chunkIdx);
-      if (
-        chunkIdx == fileData.length &&
-        chunks.length == 0 &&
-        indivChunk.length > 0
-      ) {
+      if (chunkIdx == fileData.length - 1) {
         chunks.push(indivChunk);
         indivChunk = [];
       }
     } else {
       chunks.push(indivChunk);
-      indivChunk = [];
+      indivChunk = [chunkIdx];
+      let allChunksSum = getChunkLength(indivChunk, chunks);
+      if (allChunksSum === fileData.length) {
+        chunks.push(indivChunk);
+        continue;
+      }
     }
   }
   let previousSeed = selectedAccount.initCounter;
@@ -184,7 +191,7 @@ export default async function uploadMultipleFiles(
     let sizes = [];
     let fileAccounts = [];
     let fileSeeds = [];
-    for (let j = 0; j < indivChunk.length - 1; j++) {
+    for (let j = 0; j <= indivChunk.length - 1; j++) {
       let index = indivChunk[j];
       const { name, buffer, file, form, size, url } = fileData[index];
       let fileSeed = new anchor.BN(newFileSeedToSet);
@@ -198,7 +205,6 @@ export default async function uploadMultipleFiles(
           this.program.programId
         );
       fileNames.push(name);
-      // createds.push(created);
       sizes.push(size);
       fileAccounts.push({ fileAccount, seed: fileSeed });
       fileSeeds.push(fileSeed);
@@ -249,8 +255,9 @@ export default async function uploadMultipleFiles(
       }
       await sleep(1000);
     }
-
-    existingUploadJSON.push(existingFiles);
+    if (existingFiles.length > 0) {
+      existingUploadJSON.push(existingFiles);
+    }
     while (!continueToNextBatch) {
       try {
         const txn = await this.program.methods

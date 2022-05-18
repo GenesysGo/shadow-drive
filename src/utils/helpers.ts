@@ -375,3 +375,10 @@ export function sortByProperty(property: any) {
     return 0;
   };
 }
+export function getChunkLength(array1: any[], array2: any[]) {
+  let starting = array1.length;
+  if (array2.length) {
+    return array2.reduce((total, next) => (total += next.length), starting);
+  }
+  return starting;
+}
