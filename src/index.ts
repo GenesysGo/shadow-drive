@@ -36,40 +36,35 @@ interface ShadowDrive {
     name: string,
     size: string
   ): Promise<CreateStorageResponse>;
-  addStorage: (
-    key: web3.PublicKey,
-    size: string
-  ) => Promise<ShadowDriveResponse>;
-  claimStake?(key: web3.PublicKey): Promise<ShadowDriveResponse>;
-  deleteFile?(key: web3.PublicKey, url: string): Promise<ShadowDriveResponse>;
-  editFile?(
+  addStorage(key: web3.PublicKey, size: string): Promise<ShadowDriveResponse>;
+  claimStake(key: web3.PublicKey): Promise<ShadowDriveResponse>;
+  deleteFile(key: web3.PublicKey, url: string): Promise<ShadowDriveResponse>;
+  editFile(
     key: web3.PublicKey,
     url: string,
     data: File | ShadowFile
   ): Promise<ShadowUploadResponse>;
   getStorageAcc?(key: web3.PublicKey): Promise<StorageAccount>;
   getStorageAccs?(): Promise<StorageAccount[]>;
-  makeStorageImmutable?(key: web3.PublicKey): Promise<ShadowDriveResponse>;
-  reduceStorage?(
+  makeStorageImmutable(key: web3.PublicKey): Promise<ShadowDriveResponse>;
+  reduceStorage(
     key: web3.PublicKey,
     size: string
   ): Promise<ShadowDriveResponse>;
-  cancelDeleteFile?(
+  cancelDeleteFile(
     key: web3.PublicKey,
     url: string
   ): Promise<ShadowDriveResponse>;
-  cancelDeleteStorageAccount?(
-    key: web3.PublicKey
-  ): Promise<ShadowDriveResponse>;
-  uploadFile?(
+  cancelDeleteStorageAccount(key: web3.PublicKey): Promise<ShadowDriveResponse>;
+  uploadFile(
     key: web3.PublicKey,
     data: File | ShadowFile
   ): Promise<ShadowUploadResponse>;
-  uploadMultipleFiles?(
+  uploadMultipleFiles(
     key: web3.PublicKey,
     data: FileList | ShadowFile[]
   ): Promise<ShadowBatchUploadResponse[]>;
-  deleteStorageAccount?(key: web3.PublicKey): Promise<ShadowDriveResponse>;
+  deleteStorageAccount(key: web3.PublicKey): Promise<ShadowDriveResponse>;
 }
 
 export class ShdwDrive implements ShadowDrive {
