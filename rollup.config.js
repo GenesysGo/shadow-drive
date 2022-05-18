@@ -5,6 +5,7 @@ import nodeResolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
 import {terser} from 'rollup-plugin-terser';
 import nodePolyfills from 'rollup-plugin-node-polyfills';
+import ignore from "rollup-plugin-ignore"
 
 const extensions = ['.js', '.ts'];
 
@@ -21,7 +22,9 @@ function generateConfig(configType, format) {
         extensions,
         preferBuiltins: !browser,
       }),
-      typescript(),
+      typescript({
+        exclude: ["**/examples"]
+      }),
       nodePolyfills(),
       replace({
         preventAssignment: true,
@@ -46,11 +49,15 @@ function generateConfig(configType, format) {
       '@project-serum/anchor',
       '@solana/spl-token',
       '@solana/wallet-adapter-react',
-      '@solana/web3.js',
-      'bs58',
+      'buffer',
       'crypto',
+      'cross-fetch',
       'form-data',
-      'buffer'
+      'react'
+    ];
+  } else {
+    config.external = [
+      'react'
     ];
   }
 
@@ -71,11 +78,11 @@ function generateConfig(configType, format) {
             '@project-serum/anchor',
             '@solana/spl-token',
             '@solana/wallet-adapter-react',
-            '@solana/web3.js',
-            'bs58',
+            'buffer',
             'crypto',
+            'cross-fetch',
             'form-data',
-            'buffer'
+            'react'
           ];
 
           break;
