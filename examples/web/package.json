@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@project-serum/anchor": "^0.24.2",
-    "@shadow-drive/sdk": "1.0.2",
+    "@shadow-drive/sdk": "2",
     "@solana/wallet-adapter-base": "^0.9.4",
     "@solana/wallet-adapter-react": "^0.15.3",
     "@solana/wallet-adapter-react-ui": "^0.9.5",
