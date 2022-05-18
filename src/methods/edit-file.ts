@@ -8,6 +8,7 @@ import {
 import crypto from "crypto";
 import { ShadowFile, ShadowUploadResponse } from "../types";
 import fetch from "cross-fetch";
+import NodeFormData from "form-data";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Publickey of Storage Account
@@ -27,11 +28,10 @@ export default async function editFile(
   let file;
   if (!isBrowser) {
     data = data as ShadowFile;
-    const { default: FormData } = await import("form-data");
-    form = new FormData();
-    file = data.file as Buffer;
-    form.append("file", data.file, data.name);
-    fileBuffer = form.getBuffer();
+    form = new NodeFormData();
+    file = data.file;
+    form.append("file", file, data.name);
+    fileBuffer = file;
   } else {
     file = data as File;
     form = new FormData();
@@ -126,7 +126,7 @@ export default async function editFile(
     const uploadResponse = await fetch(`${SHDW_DRIVE_ENDPOINT}/edit`, {
       method: "POST",
       //@ts-ignore
-      body: data,
+      body: form,
     });
     if (!uploadResponse.ok) {
       return Promise.reject(
