@@ -1,13 +1,15 @@
-import { StorageAccount } from "../types";
+import { StorageAccountResponse } from "../types";
 
 /**
  *
  * Get all storage accounts for the current user
  *
- * @returns {StorageAccount[]} - List of storage accounts
+ * @returns {StorageAccountResponse[]} - List of storage accounts
  *
  */
-export default async function getStorageAccs(): Promise<StorageAccount[]> {
+export default async function getStorageAccs(): Promise<
+  StorageAccountResponse[]
+> {
   try {
     const storageAccounts = await this.program.account.storageAccount.all([
       {

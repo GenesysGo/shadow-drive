@@ -7,17 +7,16 @@ import {
 } from "../utils/helpers";
 import { isBrowser, tokenMint } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { PublicKey } from "@solana/web3.js";
 import { ShadowDriveResponse } from "../types";
 /**
  *
- * @param {PublicKey} key - Public Key of the existing storage to increase size on
+ * @param {anchor.web3.PublicKey} key - Public Key of the existing storage to increase size on
  * @param {string} size - Amount of storage you are requesting to add to your storage account. Should be in a string like '1KB', '1MB', '1GB'. Only KB, MB, and GB storage delineations are supported currently.
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 
 export default async function addStorage(
-  key: PublicKey,
+  key: anchor.web3.PublicKey,
   size: string
 ): Promise<ShadowDriveResponse> {
   let storageInputAsBytes = humanSizeToBytes(size);

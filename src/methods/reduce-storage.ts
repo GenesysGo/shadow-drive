@@ -7,18 +7,17 @@ import {
 } from "../utils/helpers";
 import { emissions, isBrowser, tokenMint } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { PublicKey } from "@solana/web3.js";
 import { ShadowDriveResponse } from "../types";
 import { Buffer } from "buffer";
 
 /**
  *
- * @param {PublicKey} key - Publickey of a Storage Account
+ * @param {anchor.web3.PublicKey} key - Publickey of a Storage Account
  * @param {string} size - Amount of storage you are requesting to reduce from your storage account. Should be in a string like '1KB', '1MB', '1GB'. Only KB, MB, and GB storage delineations are supported currently.
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 export default async function reduceStorage(
-  key: PublicKey,
+  key: anchor.web3.PublicKey,
   size: string
 ): Promise<ShadowDriveResponse> {
   let storageInputAsBytes = humanSizeToBytes(size);

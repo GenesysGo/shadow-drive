@@ -39,7 +39,7 @@ const Context: FC<{ children: ReactNode }> = ({ children }) => {
 	);
 
 	return (
-		<ConnectionProvider endpoint={network}>
+		<ConnectionProvider endpoint={network} config={{ commitment: 'max' }}>
 			<WalletProvider wallets={wallets} autoConnect>
 				<WalletModalProvider>{children}</WalletModalProvider>
 			</WalletProvider>

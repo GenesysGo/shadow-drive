@@ -23,7 +23,7 @@ yarn add @shadow-drive/sdk
 ```tsx
 import React, { useEffect } from "react";
 import * as anchor from "@project-serum/anchor";
-import ShdwDrive from "@shadow-drive/sdk";
+import {ShdwDrive} from "@shadow-drive/sdk";
 import { AnchorWallet, useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 
 export default function Drive() {
@@ -44,7 +44,7 @@ export default function Drive() {
 
 ### Setup (NodeJS)
 ```js
-import ShdwDrive from "@shadow-drive/sdk";
+import {ShdwDrive} from "@shadow-drive/sdk";
 const drive = await new ShdwDrive(connection, wallet).init();
 
 ```
@@ -53,8 +53,8 @@ const drive = await new ShdwDrive(connection, wallet).init();
 
 | package                                                                                                               | description                                                                |
 | --------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| [node](https://github.com/GenesysGo/shadow-drive/tree/master/examples/node)                         | Using shadow-drive in a nodejs environment components                                                     |
-| [react](https://github.com/GenesysGo/shadow-drive/tree/master/examples/web) | Using shadow-drive in a react/browser environment |
+| [node](https://github.com/GenesysGo/shadow-drive/tree/main/examples/node)                         | Using shadow-drive in a nodejs environment components                                                     |
+| [react](https://github.com/GenesysGo/shadow-drive/tree/main/examples/web) | Using shadow-drive in a react/browser environment |
 
 ### Build From Source
 1. Clone the project:

@@ -12,7 +12,7 @@ import {
   uploader,
 } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import fetch from "node-fetch";
+import fetch from "cross-fetch";
 import { CreateStorageResponse } from "../types";
 import { Buffer } from "buffer";
 /**
@@ -81,9 +81,17 @@ export default async function createStorageAccount(
       await this.connection.getLatestBlockhash()
     ).blockhash;
     txn.feePayer = this.wallet.publicKey;
+    console.log(txn);
     if (!isBrowser) {
-      await txn.partialSign(this.wallet.payer);
+      console.log("Not browserssss");
+      try {
+        await txn.partialSign(this.wallet.payer);
+      } catch (e) {
+        console.log("signing failed?");
+        console.log(e);
+      }
     } else {
+      console.log("browser");
       await this.wallet.signTransaction(txn);
     }
     const serializedTxn = txn.serialize({ requireAllSignatures: false });
@@ -111,6 +119,7 @@ export default async function createStorageAccount(
     const responseJson = (await uploadResponse.json()) as CreateStorageResponse;
     return Promise.resolve(responseJson);
   } catch (e) {
+    console.log(`Error from fileserver ${e}`);
     return Promise.reject(new Error(e));
   }
 }

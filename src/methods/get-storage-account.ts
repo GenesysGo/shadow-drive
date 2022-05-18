@@ -1,4 +1,4 @@
-import { PublicKey } from "@solana/web3.js";
+import { web3 } from "@project-serum/anchor";
 import { StorageAccount } from "../types";
 
 /**
@@ -9,7 +9,7 @@ import { StorageAccount } from "../types";
  *
  */
 export default async function getStorageAcc(
-  key: PublicKey
+  key: web3.PublicKey
 ): Promise<StorageAccount> {
   try {
     const storageAccount = await this.program.account.storageAccount.fetch(key);
