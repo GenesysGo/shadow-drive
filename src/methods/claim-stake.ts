@@ -2,17 +2,16 @@ import * as anchor from "@project-serum/anchor";
 import { findAssociatedTokenAddress, sendAndConfirm } from "../utils/helpers";
 import { isBrowser, tokenMint } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { PublicKey } from "@solana/web3.js";
 import { ShadowDriveResponse } from "../types";
 
 /**
  *
- * @param {PublicKey} key - PublicKey of a Storage Account
+ * @param {anchor.web3.PublicKey} key - PublicKey of a Storage Account
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 
 export default async function claimStake(
-  key: PublicKey
+  key: anchor.web3.PublicKey
 ): Promise<ShadowDriveResponse> {
   const selectedAccount = await this.program.account.storageAccount.fetch(key);
   const [unstakeAccount] = await anchor.web3.PublicKey.findProgramAddress(

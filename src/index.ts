@@ -1,5 +1,4 @@
-import { Program, Wallet, Provider } from "@project-serum/anchor";
-import { Connection, PublicKey } from "@solana/web3.js";
+import { Program, Wallet, Provider, web3 } from "@project-serum/anchor";
 import {
   getStorageConfigPDA,
   getUserInfo,
@@ -25,45 +24,65 @@ import {
 import { AnchorWallet } from "@solana/wallet-adapter-react";
 import {
   CreateStorageResponse,
+  ShadowBatchUploadResponse,
   ShadowDriveResponse,
+  ShadowFile,
   ShadowUploadResponse,
   StorageAccount,
+  StorageAccountResponse,
 } from "./types";
-import FormData from "form-data";
 interface ShadowDrive {
-  createStorageAccount?(
+  createStorageAccount(
     name: string,
     size: string
   ): Promise<CreateStorageResponse>;
-  addStorage?(key: PublicKey, size: string): Promise<ShadowDriveResponse>;
-  claimStake?(key: PublicKey): Promise<ShadowDriveResponse>;
-  deleteFile?(key: PublicKey, url: string): Promise<ShadowDriveResponse>;
+  addStorage: (
+    key: web3.PublicKey,
+    size: string
+  ) => Promise<ShadowDriveResponse>;
+  claimStake?(key: web3.PublicKey): Promise<ShadowDriveResponse>;
+  deleteFile?(key: web3.PublicKey, url: string): Promise<ShadowDriveResponse>;
   editFile?(
-    key: PublicKey,
+    key: web3.PublicKey,
     url: string,
-    data: FormData
+    data: File | ShadowFile
   ): Promise<ShadowUploadResponse>;
-  getStorageAcc?(key: PublicKey): Promise<StorageAccount>;
+  getStorageAcc?(key: web3.PublicKey): Promise<StorageAccount>;
   getStorageAccs?(): Promise<StorageAccount[]>;
-  makeStorageImmutable?(key: PublicKey): Promise<ShadowDriveResponse>;
-  reduceStorage?(key: PublicKey, size: string): Promise<ShadowDriveResponse>;
-  cancelDeleteFile?(key: PublicKey, url: string): Promise<ShadowDriveResponse>;
-  cancelDeleteStorageAccount?(key: PublicKey): Promise<ShadowDriveResponse>;
-  uploadFile?(key: PublicKey, data: FormData): Promise<ShadowUploadResponse>;
-  //Todo update params here, array of upload files with formdata as a key
-  //   uploadMultipleFiles?(
-  //     key: PublicKey,
-  //     size: string,
-  //     data: FormData[]
-  //   ): Promise<Error | Object>;
-  deleteStorageAccount?(key: PublicKey): Promise<ShadowDriveResponse>;
+  makeStorageImmutable?(key: web3.PublicKey): Promise<ShadowDriveResponse>;
+  reduceStorage?(
+    key: web3.PublicKey,
+    size: string
+  ): Promise<ShadowDriveResponse>;
+  cancelDeleteFile?(
+    key: web3.PublicKey,
+    url: string
+  ): Promise<ShadowDriveResponse>;
+  cancelDeleteStorageAccount?(
+    key: web3.PublicKey
+  ): Promise<ShadowDriveResponse>;
+  uploadFile?(
+    key: web3.PublicKey,
+    data: File | ShadowFile
+  ): Promise<ShadowUploadResponse>;
+  uploadMultipleFiles?(
+    key: web3.PublicKey,
+    data: FileList | ShadowFile[]
+  ): Promise<ShadowBatchUploadResponse[]>;
+  deleteStorageAccount?(key: web3.PublicKey): Promise<ShadowDriveResponse>;
 }
 
-export default class ShdwDrive implements ShadowDrive {
+export class ShdwDrive implements ShadowDrive {
   private provider: Provider;
   private program: Program<ShadowDriveUserStaking>;
-  private storageConfigPDA: PublicKey;
-  private userInfo: PublicKey;
+  private storageConfigPDA: web3.PublicKey;
+  private userInfo: web3.PublicKey;
+  /**
+   *
+   * Todo - Typescript does not currently support splitting up class definition into multiple files. These methods
+   * are therefore added as properties to the ShdwDrive class. Can move all method definitions into this file to resolve.
+   *
+   */
   createStorageAccount = createStorageAccount;
   addStorage = addStorage;
   claimStake = claimStake;
@@ -77,18 +96,18 @@ export default class ShdwDrive implements ShadowDrive {
   cancelDeleteFile = cancelDeleteFile;
   cancelDeleteStorageAccount = cancelDeleteStorageAccount;
   uploadFile = uploadFile;
-  //   uploadMultipleFiles = uploadMultipleFiles;
+  uploadMultipleFiles = uploadMultipleFiles;
 
   constructor(
-    private connection: Connection,
+    private connection: web3.Connection,
     private wallet: Wallet | AnchorWallet
   ) {
-    this.connection = connection;
     this.wallet = wallet;
     const [program, provider] = getAnchorEnvironmet(
       wallet as Wallet,
       connection
     );
+    this.connection = provider.connection;
     this.provider = provider;
     this.program = program;
   }
@@ -102,4 +121,12 @@ export default class ShdwDrive implements ShadowDrive {
   }
 }
 
-export { CreateStorageResponse, ShadowDriveResponse, ShadowUploadResponse };
+export {
+  CreateStorageResponse,
+  ShadowDriveResponse,
+  ShadowUploadResponse,
+  ShadowFile,
+  StorageAccount,
+  StorageAccountResponse,
+  ShadowBatchUploadResponse,
+};

@@ -6,16 +6,6 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import {
-  Commitment,
-  Connection,
-  RpcResponseAndContext,
-  SendOptions,
-  SignatureStatus,
-  SimulatedTransactionResponse,
-  Transaction,
-  TransactionSignature,
-} from "@solana/web3.js";
 const DEFAULT_TIMEOUT = 3 * 60 * 1000; // 3 minutes
 /**
  *
@@ -151,7 +141,7 @@ export function bytesToHuman(bytes: any, si = false, dp = 1) {
 
   return bytes.toFixed(dp) + " " + units[u];
 }
-function sleep(ms: number): Promise<any> {
+export function sleep(ms: number): Promise<any> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
@@ -175,14 +165,14 @@ function getUnixTime(): number {
 }
 
 export const awaitTransactionSignatureConfirmation = async (
-  txid: TransactionSignature,
+  txid: anchor.web3.TransactionSignature,
   timeout: number,
-  connection: Connection,
-  commitment: Commitment = "recent",
+  connection: anchor.web3.Connection,
+  commitment: anchor.web3.Commitment = "recent",
   queryStatus = false
-): Promise<SignatureStatus | null | void> => {
+): Promise<anchor.web3.SignatureStatus | null | void> => {
   let done = false;
-  let status: SignatureStatus | null | void = {
+  let status: anchor.web3.SignatureStatus | null | void = {
     slot: 0,
     confirmations: 0,
     err: null,
@@ -265,10 +255,12 @@ export const awaitTransactionSignatureConfirmation = async (
   return status;
 };
 async function simulateTransaction(
-  connection: Connection,
-  transaction: Transaction,
-  commitment: Commitment
-): Promise<RpcResponseAndContext<SimulatedTransactionResponse>> {
+  connection: anchor.web3.Connection,
+  transaction: anchor.web3.Transaction,
+  commitment: anchor.web3.Commitment
+): Promise<
+  anchor.web3.RpcResponseAndContext<anchor.web3.SimulatedTransactionResponse>
+> {
   // @ts-ignore
   transaction.recentBlockhash = await connection._recentBlockhash(
     // @ts-ignore
@@ -300,10 +292,10 @@ async function simulateTransaction(
     until it’s gone to a confirmed status to move on.
   */
 export async function sendAndConfirm(
-  connection: Connection,
+  connection: anchor.web3.Connection,
   txn: Buffer,
-  sendOptions: SendOptions,
-  commitment: Commitment,
+  sendOptions: anchor.web3.SendOptions,
+  commitment: anchor.web3.Commitment,
   timeout = DEFAULT_TIMEOUT
 ): Promise<{ txid: string }> {
   try {
@@ -336,10 +328,15 @@ export async function sendAndConfirm(
       if (err.timeout) {
         throw new Error("Timed out awaiting confirmation on transaction");
       }
-      let simulateResult: SimulatedTransactionResponse | null = null;
+      let simulateResult: anchor.web3.SimulatedTransactionResponse | null =
+        null;
       try {
         simulateResult = (
-          await simulateTransaction(connection, Transaction.from(txn), "single")
+          await simulateTransaction(
+            connection,
+            anchor.web3.Transaction.from(txn),
+            "single"
+          )
         ).value;
       } catch (e) {}
       if (simulateResult && simulateResult.err) {
@@ -363,4 +360,18 @@ export async function sendAndConfirm(
   } catch (e) {
     throw new Error(e);
   }
+}
+export function chunks(array: any, size: any) {
+  return Array.apply(0, new Array(Math.ceil(array.length / size))).map(
+    (_: any, index: any) => array.slice(index * size, (index + 1) * size)
+  );
+}
+
+export function sortByProperty(property: any) {
+  return function (a: any, b: any) {
+    if (a[property].toNumber() > b[property].toNumber()) return 1;
+    else if (a[property].toNumber() < b[property].toNumber()) return -1;
+
+    return 0;
+  };
 }

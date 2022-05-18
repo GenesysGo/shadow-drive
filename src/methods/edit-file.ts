@@ -5,37 +5,48 @@ import {
   tokenMint,
   uploader,
 } from "../utils/common";
-import { PublicKey } from "@solana/web3.js";
-import FormData from "form-data";
 import crypto from "crypto";
-import { ShadowUploadResponse } from "../types";
-import fetch from "node-fetch";
+import { ShadowFile, ShadowUploadResponse } from "../types";
+import fetch from "cross-fetch";
 /**
  *
- * @param {PublicKey} key - Publickey of Storage Account
+ * @param {anchor.web3.PublicKey} key - Publickey of Storage Account
  * @param {string} url - URL of existing file
- * @param {FormData} data - File data
+ * @param {File | ShadowFile} data - File or ShadowFile object, file extensions should be included in the name property of ShadowFiles.
  * @returns {ShadowUploadResponse} - File location and transaction signature
  */
 
 export default async function editFile(
-  key: PublicKey,
+  key: anchor.web3.PublicKey,
   url: string,
-  data: FormData
+  data: File | ShadowFile
 ): Promise<ShadowUploadResponse> {
   let fileErrors = [];
+  let fileBuffer: Buffer;
+  let form;
+  let file;
+  if (!isBrowser) {
+    data = data as ShadowFile;
+    const { default: FormData } = await import("form-data");
+    form = new FormData();
+    file = data.file as Buffer;
+    form.append("file", data.file, data.name);
+    fileBuffer = form.getBuffer();
+  } else {
+    file = data as File;
+    form = new FormData();
+    form.append("file", file, file.name);
+    fileBuffer = Buffer.from(await file.text());
+  }
   const selectedAccount = await this.program.account.storageAccount.fetch(key);
-  const fileBufferString = data.getBuffer().toString("utf-8");
-  //Filename parsed from the FormData buffer
-  const file = fileBufferString.split('"')[3];
 
-  if (data.getBuffer().buffer.byteLength > 1_073_741_824 * 1) {
+  if (fileBuffer.byteLength > 1_073_741_824 * 1) {
     fileErrors.push({
       file: file,
       erorr: "Exceeds the 1GB limit.",
     });
   }
-  const fileNameBytes = new TextEncoder().encode(file).length;
+  const fileNameBytes = new TextEncoder().encode(data.name).length;
   if (fileNameBytes > 32) {
     fileErrors.push({
       file: file,
@@ -76,9 +87,9 @@ export default async function editFile(
     fileDataResponse.file_data["file-account-pubkey"]
   );
   const hashSum = crypto.createHash("sha256");
-  hashSum.update(data.getBuffer());
+  hashSum.update(fileBuffer);
   const sha256Hash = hashSum.digest("hex");
-  let size = new anchor.BN(data.getBuffer().buffer.byteLength);
+  let size = new anchor.BN(fileBuffer.byteLength);
   let txn;
   try {
     txn = await this.program.methods
@@ -103,7 +114,7 @@ export default async function editFile(
       await this.wallet.signTransaction(txn);
     }
     const serializedTxn = txn.serialize({ requireAllSignatures: false });
-    data.append(
+    form.append(
       "transaction",
       Buffer.from(serializedTxn.toJSON().data).toString("base64")
     );
