@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import ShdwDrive from "@shadow-drive/sdk";
+import { ShdwDrive } from "@shadow-drive/sdk";
 import { AnchorWallet, useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 
 export default function Drive() {
