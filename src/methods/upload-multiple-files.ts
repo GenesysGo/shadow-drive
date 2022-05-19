@@ -124,7 +124,9 @@ export default async function uploadMultipleFiles(
   if (!allObjectsRequest.status) {
     return Promise.reject(
       new Error(`Server response status code: ${allObjectsRequest.status} \n
-        			Server response status message: ${allObjectsRequest.statusText}`)
+        			Server response status message: ${
+                (await allObjectsRequest.json()).error
+              }`)
     );
   }
   const allObjects = await allObjectsRequest.json();
@@ -327,14 +329,15 @@ export default async function uploadMultipleFiles(
           body: fd,
         });
         if (!request.ok) {
+          const error = (await request.json()).error;
           console.log(`Server response status code: ${request.status}`);
-          console.log(`Server response status message: ${request.statusText}`);
+          console.log(`Server response status message: ${error}`);
           if (
-            request.statusText.toLowerCase().includes("timed out") ||
-            request.statusText.toLowerCase().includes("blockhash") ||
-            request.statusText.toLowerCase().includes("unauthorized signer") ||
-            request.statusText.toLowerCase().includes("node is behind") ||
-            request.statusText.toLowerCase().includes("was not confirmed in")
+            error.toLowerCase().includes("timed out") ||
+            error.toLowerCase().includes("blockhash") ||
+            error.toLowerCase().includes("unauthorized signer") ||
+            error.toLowerCase().includes("node is behind") ||
+            error.toLowerCase().includes("was not confirmed in")
           ) {
             currentRetries += 1;
             console.log(`Transaction Retry #${currentRetries}`);
@@ -343,7 +346,7 @@ export default async function uploadMultipleFiles(
             fileNames.map((name, idx) => {
               existingUploadJSON.push({
                 fileName: name,
-                status: `Not uploaded: ${request.statusText}`,
+                status: `Not uploaded: ${error}`,
                 location: null,
               });
             });

@@ -104,7 +104,7 @@ export default async function createStorageAccount(
     if (!uploadResponse.ok) {
       return Promise.reject(
         new Error(`Server response status code: ${uploadResponse.status} \n 
-		Server response status message: ${uploadResponse.statusText}`)
+		Server response status message: ${(await uploadResponse.json()).error}`)
       );
     }
     const responseJson = (await uploadResponse.json()) as CreateStorageResponse;
