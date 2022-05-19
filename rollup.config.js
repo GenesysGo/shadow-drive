@@ -5,7 +5,6 @@ import nodeResolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
 import {terser} from 'rollup-plugin-terser';
 import nodePolyfills from 'rollup-plugin-node-polyfills';
-import ignore from "rollup-plugin-ignore"
 
 const extensions = ['.js', '.ts'];
 
@@ -52,12 +51,7 @@ function generateConfig(configType, format) {
       'buffer',
       'crypto',
       'cross-fetch',
-      'form-data',
-      'react'
-    ];
-  } else {
-    config.external = [
-      'react'
+      'form-data'
     ];
   }
 
@@ -67,22 +61,10 @@ function generateConfig(configType, format) {
         case 'esm': {
           config.output = [
             {
-              file: 'dist.browser/index.browser.esm.js',
+              file: 'dist/index.browser.esm.js',
               format: 'es',
               sourcemap: true,
             },
-          ];
-
-          // Prevent dependencies from being bundled
-          config.external = [
-            '@project-serum/anchor',
-            '@solana/spl-token',
-            '@solana/wallet-adapter-react',
-            'buffer',
-            'crypto',
-            'cross-fetch',
-            'form-data',
-            'react'
           ];
 
           break;
@@ -92,13 +74,13 @@ function generateConfig(configType, format) {
 
           config.output = [
             {
-              file: 'dist.browser/index.iife.js',
+              file: 'dist/index.iife.js',
               format: 'iife',
               name: 'ShdwDrive',
               sourcemap: true,
             },
             {
-              file: 'dist.browser/index.iife.min.js',
+              file: 'dist/index.iife.min.js',
               format: 'iife',
               name: 'ShdwDrive',
               sourcemap: true,
@@ -120,12 +102,12 @@ function generateConfig(configType, format) {
     case 'node':
       config.output = [
         {
-          file: 'dist.browser/index.cjs.js',
+          file: 'dist/index.cjs.js',
           format: 'cjs',
           sourcemap: true,
         },
         {
-          file: 'dist.browser/index.esm.js',
+          file: 'dist/index.esm.js',
           format: 'es',
           sourcemap: true,
         },
@@ -139,6 +121,7 @@ function generateConfig(configType, format) {
 }
 
 export default [
+  generateConfig('node'),
   generateConfig('browser', 'esm'),
   generateConfig('browser', 'iife'),
 ];
