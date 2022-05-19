@@ -68,3 +68,16 @@ cd shadow-drive
 yarn install
 ```
 
+### Troubleshooting
+
+#### Getting a 400 HTTP error code when performing POST requests
+
+If you are getting a 400 HTTP error status code when using the POST `ShdwDrive` methods such as `createStorageAccount`, `uploadFile`, `addStorage`, etc.
+
+Make sure to set your wallet adapter <code>commitment</code> config to <code>max</code>.
+
+```TSX
+<ConnectionProvider endpoint={network} config={{ commitment: 'max' }}>
+  ...
+</ConnectionProvider>
+```
