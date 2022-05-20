@@ -18,7 +18,6 @@ import FormData from "form-data";
   const acc = new solanaWeb3.PublicKey(storageAcc.shdw_bucket);
   const retrievedAcc = await drive.getStorageAccount(acc);
   console.log(retrievedAcc);
-  const fd = new FormData();
   let file = {
     name: "hey.txt",
     file: fs.readFileSync("./test-files/hey.txt"),
