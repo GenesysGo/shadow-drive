@@ -78,8 +78,8 @@ export default async function uploadMultipleFiles(
       let file = shdwFile;
       let form = new FormData();
       form.append("file", file, shdwFile.name);
-      let fileBuffer = Buffer.from(await file.text());
-      if (fileBuffer.byteLength > 1_073_741_824 * 1) {
+      let arrayBuff = await file.arrayBuffer();
+      if (arrayBuff.byteLength > 1_073_741_824 * 1) {
         fileErrors.push({
           file: file,
           erorr: "Exceeds the 1GB limit.",
@@ -95,10 +95,10 @@ export default async function uploadMultipleFiles(
       const url = encodeURI(
         `https://shdw-drive.genesysgo.net/${key.toString()}/${shdwFile.name}`
       );
-      let size = new anchor.BN(fileBuffer.byteLength);
+      let size = new anchor.BN(arrayBuff.byteLength);
       fileData.push({
         name: shdwFile.name,
-        buffer: fileBuffer,
+        buffer: Buffer.from(arrayBuff),
         file: file,
         form: form,
         size: size,
