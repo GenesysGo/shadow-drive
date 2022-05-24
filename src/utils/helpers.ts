@@ -144,22 +144,6 @@ export function bytesToHuman(bytes: any, si = false, dp = 1) {
 export function sleep(ms: number): Promise<any> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-
-async function promiseAllInOrder<T>(
-  it: (() => Promise<T>)[]
-): Promise<Iterable<T>> {
-  let ret: T[] = [];
-  for (const i of it) {
-    ret.push(await i());
-  }
-
-  return ret;
-}
-type Truthy<T> = T extends false | "" | 0 | null | undefined ? never : T; // from lodash
-
-function truthy<T>(value: T): value is Truthy<T> {
-  return !!value;
-}
 function getUnixTime(): number {
   return new Date().valueOf() / 1000;
 }
@@ -179,7 +163,7 @@ export const awaitTransactionSignatureConfirmation = async (
   };
   let subId = 0;
   status = await new Promise(async (resolve, reject) => {
-    setTimeout(() => {
+    let timer: any = setTimeout(() => {
       if (done) {
         return;
       }
@@ -223,6 +207,16 @@ export const awaitTransactionSignatureConfirmation = async (
           if (!done) {
             if (!status) {
               console.log("REST null result for", txid, status);
+              if (timer === null) {
+                timer = setTimeout(() => {
+                  if (done) {
+                    return;
+                  }
+                  done = true;
+                  console.log("Rejecting for timeout...");
+                  reject({ timeout: true });
+                }, timeout);
+              }
             } else if (status.err) {
               console.log("REST error for", txid, status);
               done = true;
@@ -231,6 +225,10 @@ export const awaitTransactionSignatureConfirmation = async (
               console.log("REST no confirmations for", txid, status);
             } else {
               console.log("REST confirmation for", txid, status);
+              if (timer !== null) {
+                clearTimeout(timer);
+                timer = null;
+              }
               if (
                 !status.confirmationStatus ||
                 status.confirmationStatus == commitment

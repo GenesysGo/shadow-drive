@@ -124,7 +124,7 @@ export default async function uploadFile(
     if (!uploadResponse.ok) {
       return Promise.reject(
         new Error(`Server response status code: ${uploadResponse.status} \n
-        			Server response status message: ${uploadResponse.statusText}`)
+        			Server response status message: ${(await uploadResponse.json()).error}`)
       );
     }
     const responseJson = await uploadResponse.json();

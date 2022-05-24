@@ -80,17 +80,9 @@ export default async function createStorageAccount(
       await this.connection.getLatestBlockhash()
     ).blockhash;
     txn.feePayer = this.wallet.publicKey;
-    console.log(txn);
     if (!isBrowser) {
-      console.log("Not browserssss");
-      try {
-        await txn.partialSign(this.wallet.payer);
-      } catch (e) {
-        console.log("signing failed?");
-        console.log(e);
-      }
+      await txn.partialSign(this.wallet.payer);
     } else {
-      console.log("browser");
       await this.wallet.signTransaction(txn);
     }
     const serializedTxn = txn.serialize({ requireAllSignatures: false });
@@ -112,7 +104,7 @@ export default async function createStorageAccount(
     if (!uploadResponse.ok) {
       return Promise.reject(
         new Error(`Server response status code: ${uploadResponse.status} \n 
-		Server response status message: ${uploadResponse.statusText}`)
+		Server response status message: ${(await uploadResponse.json()).error}`)
       );
     }
     const responseJson = (await uploadResponse.json()) as CreateStorageResponse;
