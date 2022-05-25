@@ -348,6 +348,7 @@ export default async function uploadMultipleFiles(
                 fileName: name,
                 status: `Not uploaded: ${error}`,
                 location: null,
+                transaction_signature: null
               });
             });
             continueToNextBatch = true;
@@ -374,6 +375,7 @@ export default async function uploadMultipleFiles(
             fileName: name,
             status: `Not uploaded: ${e}`,
             location: null,
+            transaction_signature: null
           });
         });
         continueToNextBatch = true;
