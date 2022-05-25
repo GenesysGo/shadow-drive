@@ -74,10 +74,17 @@ yarn install
 
 If you are getting a 400 HTTP error status code when using the POST `ShdwDrive` methods such as `createStorageAccount`, `uploadFile`, `addStorage`, etc.
 
-Make sure to set your wallet adapter <code>commitment</code> config to <code>max</code>.
+Make sure to set your wallet adapter or connection <code>commitment</code> config to <code>max</code>.
 
 ```TSX
 <ConnectionProvider endpoint={network} config={{ commitment: 'max' }}>
   ...
 </ConnectionProvider>
+```
+
+```JS
+const connection = new solanaWeb3.Connection(
+    "https://ssc-dao.genesysgo.net/",
+	"max"
+  );
 ```
