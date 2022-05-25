@@ -17,7 +17,7 @@ export type ShadowBatchUploadResponse = {
   fileName: string;
   status: string;
   location: string;
-  transaction_signature?: string;
+  transaction_signature: string | null;
 };
 
 export type StorageAccountResponse = {
