@@ -34,7 +34,7 @@ export default async function uploadMultipleFiles(
   const selectedAccount = await this.program.account.storageAccount.fetch(key);
   let fileData: Array<FileData> = [];
   const fileErrors: Array<object> = [];
-  let existingUploadJSON = [];
+  let existingUploadJSON: ShadowBatchUploadResponse[] = [];
   /**
    *
    * Prepare files for uploading.
@@ -348,6 +348,7 @@ export default async function uploadMultipleFiles(
                 fileName: name,
                 status: `Not uploaded: ${error}`,
                 location: null,
+                transaction_signature: null
               });
             });
             continueToNextBatch = true;
@@ -363,6 +364,7 @@ export default async function uploadMultipleFiles(
               fileName: name,
               status: "Uploaded.",
               location: actualFiles[idx].url,
+              transaction_signature: responseJson.transaction_signature
             });
           });
           continueToNextBatch = true;
@@ -373,6 +375,7 @@ export default async function uploadMultipleFiles(
             fileName: name,
             status: `Not uploaded: ${e}`,
             location: null,
+            transaction_signature: null
           });
         });
         continueToNextBatch = true;
