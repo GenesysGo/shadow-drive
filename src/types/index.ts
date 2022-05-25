@@ -17,7 +17,9 @@ export type ShadowBatchUploadResponse = {
   fileName: string;
   status: string;
   location: string;
+  transaction_signature?: string;
 };
+
 export type StorageAccountResponse = {
   publicKey: anchor.web3.PublicKey;
   account: StorageAccount;
