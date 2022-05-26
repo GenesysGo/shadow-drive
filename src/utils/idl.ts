@@ -1,5 +1,5 @@
 export type ShadowDriveUserStaking = {
-  version: "0.1.0";
+  version: "0.1.1";
   name: "shadow_drive_user_staking";
   constants: [
     {
@@ -17,7 +17,7 @@ export type ShadowDriveUserStaking = {
     {
       name: "INITIAL_STORAGE_AVAILABLE";
       type: "u128";
-      value: "1_000_000_000_000_000";
+      value: "109_951_162_777_600";
     },
     {
       name: "BYTES_PER_GIB";
@@ -27,12 +27,12 @@ export type ShadowDriveUserStaking = {
     {
       name: "MAX_ACCOUNT_SIZE";
       type: "u64";
-      value: "1_000_000_000_000";
+      value: "1_099_511_627_776";
     },
     {
       name: "MIN_ACCOUNT_SIZE";
       type: "u64";
-      value: "1_000_000";
+      value: "1024";
     },
     {
       name: "MAX_FILENAME_SIZE";
@@ -366,86 +366,6 @@ export type ShadowDriveUserStaking = {
         {
           name: "size";
           type: "u64";
-        }
-      ];
-    },
-    {
-      name: "storeFiles";
-      accounts: [
-        {
-          name: "storageConfig";
-          isMut: false;
-          isSigner: false;
-        },
-        {
-          name: "storageAccount";
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: "userInfo";
-          isMut: false;
-          isSigner: false;
-        },
-        {
-          name: "owner";
-          isMut: true;
-          isSigner: true;
-        },
-        {
-          name: "uploader";
-          isMut: false;
-          isSigner: true;
-        },
-        {
-          name: "systemProgram";
-          isMut: false;
-          isSigner: false;
-        },
-        {
-          name: "file";
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: "file2";
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: "file3";
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: "file4";
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: "file5";
-          isMut: true;
-          isSigner: false;
-        }
-      ];
-      args: [
-        {
-          name: "filename";
-          type: {
-            vec: "string";
-          };
-        },
-        {
-          name: "sha256Hash";
-          type: {
-            vec: "string";
-          };
-        },
-        {
-          name: "size";
-          type: {
-            vec: "u64";
-          };
         }
       ];
     },
@@ -1137,7 +1057,7 @@ export type ShadowDriveUserStaking = {
   ];
   accounts: [
     {
-      name: "unstakeInfo";
+      name: "UnstakeInfo";
       type: {
         kind: "struct";
         fields: [
@@ -1157,7 +1077,7 @@ export type ShadowDriveUserStaking = {
       };
     },
     {
-      name: "storageAccount";
+      name: "StorageAccount";
       type: {
         kind: "struct";
         fields: [
@@ -1237,7 +1157,7 @@ export type ShadowDriveUserStaking = {
       };
     },
     {
-      name: "userInfo";
+      name: "UserInfo";
       type: {
         kind: "struct";
         fields: [
@@ -1261,7 +1181,7 @@ export type ShadowDriveUserStaking = {
       };
     },
     {
-      name: "storageConfig";
+      name: "StorageConfig";
       type: {
         kind: "struct";
         fields: [
@@ -1311,7 +1231,7 @@ export type ShadowDriveUserStaking = {
       };
     },
     {
-      name: "file";
+      name: "File";
       type: {
         kind: "struct";
         fields: [
@@ -1353,370 +1273,172 @@ export type ShadowDriveUserStaking = {
       };
     }
   ];
-  types: [
-    {
-      name: "CrankError";
-      type: {
-        kind: "enum";
-        variants: [
-          {
-            name: "StorageAccountMarkedImmutable";
-          },
-          {
-            name: "SolanaStorageAccountNotMutable";
-          }
-        ];
-      };
-    },
-    {
-      name: "DecreaseStorageError";
-      type: {
-        kind: "enum";
-        variants: [
-          {
-            name: "MarkedImmutable";
-          },
-          {
-            name: "RemovingTooMuchStorage";
-          },
-          {
-            name: "UnsignedIntegerCastFailed";
-          }
-        ];
-      };
-    },
-    {
-      name: "DeleteAccountError";
-      type: {
-        kind: "enum";
-        variants: [
-          {
-            name: "StorageAccountMarkedImmutable";
-          },
-          {
-            name: "NonzeroRemainingFileAccounts";
-          },
-          {
-            name: "AccountStillInGracePeriod";
-          },
-          {
-            name: "NotMarkedToBeDeleted";
-          }
-        ];
-      };
-    },
-    {
-      name: "DeleteFileError";
-      type: {
-        kind: "enum";
-        variants: [
-          {
-            name: "StorageAccountMarkedImmutable";
-          },
-          {
-            name: "AccountStillInGracePeriod";
-          },
-          {
-            name: "NotMarkedToBeDeleted";
-          }
-        ];
-      };
-    },
-    {
-      name: "EditFileError";
-      type: {
-        kind: "enum";
-        variants: [
-          {
-            name: "NotEnoughStorage";
-          },
-          {
-            name: "FileNameLengthExceedsLimit";
-          },
-          {
-            name: "FileMarkedImmutable";
-          },
-          {
-            name: "StorageAccountMarkedImmutable";
-          }
-        ];
-      };
-    },
-    {
-      name: "IncreaseStorageError";
-      type: {
-        kind: "enum";
-        variants: [
-          {
-            name: "MarkedImmutable";
-          },
-          {
-            name: "UnsignedIntegerCastFailed";
-          },
-          {
-            name: "NoStorageIncrease";
-          }
-        ];
-      };
-    },
-    {
-      name: "StorageAccountError";
-      type: {
-        kind: "enum";
-        variants: [
-          {
-            name: "ExceededStorageLimit";
-          },
-          {
-            name: "InsufficientFunds";
-          },
-          {
-            name: "NotEnoughStorageOnShadowDrive";
-          },
-          {
-            name: "AccountTooSmall";
-          },
-          {
-            name: "DidNotAgreeToToS";
-          },
-          {
-            name: "HasHadBadCsam";
-          }
-        ];
-      };
-    },
-    {
-      name: "MakeAccountImmutableError";
-      type: {
-        kind: "enum";
-        variants: [
-          {
-            name: "InvalidTokenTransferAmounts";
-          },
-          {
-            name: "UnsignedIntegerCastFailed";
-          },
-          {
-            name: "FailedToCloseAccount";
-          },
-          {
-            name: "FailedToTransferToEmissionsWallet";
-          },
-          {
-            name: "FailedToTransferToEmissionsWalletFromUser";
-          },
-          {
-            name: "FailedToReturnUserFunds";
-          }
-        ];
-      };
-    },
-    {
-      name: "MutableFeesError";
-      type: {
-        kind: "enum";
-        variants: [
-          {
-            name: "NeedSomeFees";
-          },
-          {
-            name: "NeedSomeCrankBps";
-          }
-        ];
-      };
-    },
-    {
-      name: "RefreshStakeError";
-      type: {
-        kind: "enum";
-        variants: [
-          {
-            name: "MarkedImmutable";
-          },
-          {
-            name: "UnsignedIntegerCastFailed";
-          },
-          {
-            name: "NoStorageIncrease";
-          }
-        ];
-      };
-    },
-    {
-      name: "RequestDeleteAccountError";
-      type: {
-        kind: "enum";
-        variants: [
-          {
-            name: "NotEnoughStorage";
-          },
-          {
-            name: "FileNameLengthExceedsLimit";
-          },
-          {
-            name: "StorageAccountMarkedImmutable";
-          },
-          {
-            name: "AlreadyMarkedForDeletion";
-          }
-        ];
-      };
-    },
-    {
-      name: "RequestDeleteFileError";
-      type: {
-        kind: "enum";
-        variants: [
-          {
-            name: "NotEnoughStorage";
-          },
-          {
-            name: "FileNameLengthExceedsLimit";
-          },
-          {
-            name: "MarkedImmutable";
-          },
-          {
-            name: "AlreadyMarkedForDeletion";
-          }
-        ];
-      };
-    },
-    {
-      name: "StoreFileError";
-      type: {
-        kind: "enum";
-        variants: [
-          {
-            name: "NotEnoughStorage";
-          },
-          {
-            name: "FileNameLengthExceedsLimit";
-          },
-          {
-            name: "InvalidSha256Hash";
-          },
-          {
-            name: "InvalidCEPHHash";
-          },
-          {
-            name: "HasHadBadCsam";
-          },
-          {
-            name: "StorageAccountMarkedImmutable";
-          }
-        ];
-      };
-    },
-    {
-      name: "StoreFileError";
-      type: {
-        kind: "enum";
-        variants: [
-          {
-            name: "NotEnoughStorage";
-          },
-          {
-            name: "FileNameLengthExceedsLimit";
-          },
-          {
-            name: "InvalidSha256Hash";
-          },
-          {
-            name: "InvalidCEPHHash";
-          },
-          {
-            name: "HasHadBadCsam";
-          },
-          {
-            name: "StorageAccountMarkedImmutable";
-          }
-        ];
-      };
-    },
-    {
-      name: "UnmarkDeleteAccountError";
-      type: {
-        kind: "enum";
-        variants: [
-          {
-            name: "NotEnoughStorage";
-          },
-          {
-            name: "FileNameLengthExceedsLimit";
-          },
-          {
-            name: "StorageAccountMarkedImmutable";
-          },
-          {
-            name: "NotMarkedToBeDeleted";
-          },
-          {
-            name: "EmptyStakeAccount";
-          }
-        ];
-      };
-    },
-    {
-      name: "UnmarkDeleteFileError";
-      type: {
-        kind: "enum";
-        variants: [
-          {
-            name: "NotEnoughStorage";
-          },
-          {
-            name: "FileNameLengthExceedsLimit";
-          },
-          {
-            name: "MarkedImmutable";
-          },
-          {
-            name: "NotMarkedToBeDeleted";
-          },
-          {
-            name: "EmptyStakeAccount";
-          }
-        ];
-      };
-    },
-    {
-      name: "UpdateAccountError";
-      type: {
-        kind: "enum";
-        variants: [
-          {
-            name: "MarkedImmutable";
-          },
-          {
-            name: "IdentifierExceededMaxLength";
-          }
-        ];
-      };
-    },
-    {
-      name: "UpdateConfigError";
-      type: {
-        kind: "enum";
-        variants: [
-          {
-            name: "OnlyAdmin1CanChangeAdmins";
-          }
-        ];
-      };
-    }
-  ];
   errors: [
     {
       code: 6000;
+      name: "NotEnoughStorage";
+      msg: "Not enough storage available on this Storage Account";
+    },
+    {
+      code: 6001;
+      name: "FileNameLengthExceedsLimit";
+      msg: "The length of the file name exceeds the limit of 32 bytes";
+    },
+    {
+      code: 6002;
+      name: "InvalidSha256Hash";
+      msg: "Invalid sha256 hash";
+    },
+    {
+      code: 6003;
+      name: "HasHadBadCsam";
+      msg: "User at some point had a bad csam scan";
+    },
+    {
+      code: 6004;
+      name: "StorageAccountMarkedImmutable";
+      msg: "Storage account is marked as immutable";
+    },
+    {
+      code: 6005;
       name: "ClaimingStakeTooSoon";
       msg: "User has not waited enough time to claim stake";
+    },
+    {
+      code: 6006;
+      name: "SolanaStorageAccountNotMutable";
+      msg: "The storage account needs to be marked as mutable to update last fee collection epoch";
+    },
+    {
+      code: 6007;
+      name: "RemovingTooMuchStorage";
+      msg: "Attempting to decrease storage by more than is available";
+    },
+    {
+      code: 6008;
+      name: "UnsignedIntegerCastFailed";
+      msg: "u128 -> u64 cast failed";
+    },
+    {
+      code: 6009;
+      name: "NonzeroRemainingFileAccounts";
+      msg: "This storage account still has some file accounts associated with it that have not been deleted";
+    },
+    {
+      code: 6010;
+      name: "AccountStillInGracePeriod";
+      msg: "This account is still within deletion grace period";
+    },
+    {
+      code: 6011;
+      name: "AccountNotMarkedToBeDeleted";
+      msg: "This account is not marked to be deleted";
+    },
+    {
+      code: 6012;
+      name: "FileStillInGracePeriod";
+      msg: "This file is still within deletion grace period";
+    },
+    {
+      code: 6013;
+      name: "FileNotMarkedToBeDeleted";
+      msg: "This file is not marked to be deleted";
+    },
+    {
+      code: 6014;
+      name: "FileMarkedImmutable";
+      msg: "File has been marked as immutable and cannot be edited";
+    },
+    {
+      code: 6015;
+      name: "NoStorageIncrease";
+      msg: "User requested an increase of zero bytes";
+    },
+    {
+      code: 6016;
+      name: "ExceededStorageLimit";
+      msg: "Requested a storage account with storage over the limit";
+    },
+    {
+      code: 6017;
+      name: "InsufficientFunds";
+      msg: "User does not have enough funds to store requested number of bytes.";
+    },
+    {
+      code: 6018;
+      name: "NotEnoughStorageOnShadowDrive";
+      msg: "There is not available storage on Shadow Drive. Good job!";
+    },
+    {
+      code: 6019;
+      name: "AccountTooSmall";
+      msg: "Requested a storage account with storage under the limit";
+    },
+    {
+      code: 6020;
+      name: "DidNotAgreeToToS";
+      msg: "User did not agree to terms of service";
+    },
+    {
+      code: 6021;
+      name: "InvalidTokenTransferAmounts";
+      msg: "Invalid token transfers. Stake account nonempty.";
+    },
+    {
+      code: 6022;
+      name: "FailedToCloseAccount";
+      msg: "Failed to close spl token account";
+    },
+    {
+      code: 6023;
+      name: "FailedToTransferToEmissionsWallet";
+      msg: "Failed to transfer to emissions wallet";
+    },
+    {
+      code: 6024;
+      name: "FailedToTransferToEmissionsWalletFromUser";
+      msg: "Failed to transfer to emissions wallet from user";
+    },
+    {
+      code: 6025;
+      name: "FailedToReturnUserFunds";
+      msg: "Failed to return user funds";
+    },
+    {
+      code: 6026;
+      name: "NeedSomeFees";
+      msg: "Turning on fees and passing in None for storage cost per epoch";
+    },
+    {
+      code: 6027;
+      name: "NeedSomeCrankBps";
+      msg: "Turning on fees and passing in None for crank bps";
+    },
+    {
+      code: 6028;
+      name: "AlreadyMarkedForDeletion";
+      msg: "This account is already marked to be deleted";
+    },
+    {
+      code: 6029;
+      name: "EmptyStakeAccount";
+      msg: "User has an empty stake account and must refresh stake account before unmarking account for deletion";
+    },
+    {
+      code: 6030;
+      name: "IdentifierExceededMaxLength";
+      msg: "New identifier exceeds maximum length of 64 bytes";
+    },
+    {
+      code: 6031;
+      name: "OnlyAdmin1CanChangeAdmins";
+      msg: "Only admin1 can change admins";
     }
   ];
 };
 
 export const IDL: ShadowDriveUserStaking = {
-  version: "0.1.0",
+  version: "0.1.1",
   name: "shadow_drive_user_staking",
   constants: [
     {
@@ -1734,7 +1456,7 @@ export const IDL: ShadowDriveUserStaking = {
     {
       name: "INITIAL_STORAGE_AVAILABLE",
       type: "u128",
-      value: "1_000_000_000_000_000",
+      value: "109_951_162_777_600",
     },
     {
       name: "BYTES_PER_GIB",
@@ -1744,12 +1466,12 @@ export const IDL: ShadowDriveUserStaking = {
     {
       name: "MAX_ACCOUNT_SIZE",
       type: "u64",
-      value: "1_000_000_000_000",
+      value: "1_099_511_627_776",
     },
     {
       name: "MIN_ACCOUNT_SIZE",
       type: "u64",
-      value: "1_000_000",
+      value: "1024",
     },
     {
       name: "MAX_FILENAME_SIZE",
@@ -2083,86 +1805,6 @@ export const IDL: ShadowDriveUserStaking = {
         {
           name: "size",
           type: "u64",
-        },
-      ],
-    },
-    {
-      name: "storeFiles",
-      accounts: [
-        {
-          name: "storageConfig",
-          isMut: false,
-          isSigner: false,
-        },
-        {
-          name: "storageAccount",
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: "userInfo",
-          isMut: false,
-          isSigner: false,
-        },
-        {
-          name: "owner",
-          isMut: true,
-          isSigner: true,
-        },
-        {
-          name: "uploader",
-          isMut: false,
-          isSigner: true,
-        },
-        {
-          name: "systemProgram",
-          isMut: false,
-          isSigner: false,
-        },
-        {
-          name: "file",
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: "file2",
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: "file3",
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: "file4",
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: "file5",
-          isMut: true,
-          isSigner: false,
-        },
-      ],
-      args: [
-        {
-          name: "filename",
-          type: {
-            vec: "string",
-          },
-        },
-        {
-          name: "sha256Hash",
-          type: {
-            vec: "string",
-          },
-        },
-        {
-          name: "size",
-          type: {
-            vec: "u64",
-          },
         },
       ],
     },
@@ -2854,7 +2496,7 @@ export const IDL: ShadowDriveUserStaking = {
   ],
   accounts: [
     {
-      name: "unstakeInfo",
+      name: "UnstakeInfo",
       type: {
         kind: "struct",
         fields: [
@@ -2874,7 +2516,7 @@ export const IDL: ShadowDriveUserStaking = {
       },
     },
     {
-      name: "storageAccount",
+      name: "StorageAccount",
       type: {
         kind: "struct",
         fields: [
@@ -2954,7 +2596,7 @@ export const IDL: ShadowDriveUserStaking = {
       },
     },
     {
-      name: "userInfo",
+      name: "UserInfo",
       type: {
         kind: "struct",
         fields: [
@@ -2978,7 +2620,7 @@ export const IDL: ShadowDriveUserStaking = {
       },
     },
     {
-      name: "storageConfig",
+      name: "StorageConfig",
       type: {
         kind: "struct",
         fields: [
@@ -3028,7 +2670,7 @@ export const IDL: ShadowDriveUserStaking = {
       },
     },
     {
-      name: "file",
+      name: "File",
       type: {
         kind: "struct",
         fields: [
@@ -3070,364 +2712,166 @@ export const IDL: ShadowDriveUserStaking = {
       },
     },
   ],
-  types: [
-    {
-      name: "CrankError",
-      type: {
-        kind: "enum",
-        variants: [
-          {
-            name: "StorageAccountMarkedImmutable",
-          },
-          {
-            name: "SolanaStorageAccountNotMutable",
-          },
-        ],
-      },
-    },
-    {
-      name: "DecreaseStorageError",
-      type: {
-        kind: "enum",
-        variants: [
-          {
-            name: "MarkedImmutable",
-          },
-          {
-            name: "RemovingTooMuchStorage",
-          },
-          {
-            name: "UnsignedIntegerCastFailed",
-          },
-        ],
-      },
-    },
-    {
-      name: "DeleteAccountError",
-      type: {
-        kind: "enum",
-        variants: [
-          {
-            name: "StorageAccountMarkedImmutable",
-          },
-          {
-            name: "NonzeroRemainingFileAccounts",
-          },
-          {
-            name: "AccountStillInGracePeriod",
-          },
-          {
-            name: "NotMarkedToBeDeleted",
-          },
-        ],
-      },
-    },
-    {
-      name: "DeleteFileError",
-      type: {
-        kind: "enum",
-        variants: [
-          {
-            name: "StorageAccountMarkedImmutable",
-          },
-          {
-            name: "AccountStillInGracePeriod",
-          },
-          {
-            name: "NotMarkedToBeDeleted",
-          },
-        ],
-      },
-    },
-    {
-      name: "EditFileError",
-      type: {
-        kind: "enum",
-        variants: [
-          {
-            name: "NotEnoughStorage",
-          },
-          {
-            name: "FileNameLengthExceedsLimit",
-          },
-          {
-            name: "FileMarkedImmutable",
-          },
-          {
-            name: "StorageAccountMarkedImmutable",
-          },
-        ],
-      },
-    },
-    {
-      name: "IncreaseStorageError",
-      type: {
-        kind: "enum",
-        variants: [
-          {
-            name: "MarkedImmutable",
-          },
-          {
-            name: "UnsignedIntegerCastFailed",
-          },
-          {
-            name: "NoStorageIncrease",
-          },
-        ],
-      },
-    },
-    {
-      name: "StorageAccountError",
-      type: {
-        kind: "enum",
-        variants: [
-          {
-            name: "ExceededStorageLimit",
-          },
-          {
-            name: "InsufficientFunds",
-          },
-          {
-            name: "NotEnoughStorageOnShadowDrive",
-          },
-          {
-            name: "AccountTooSmall",
-          },
-          {
-            name: "DidNotAgreeToToS",
-          },
-          {
-            name: "HasHadBadCsam",
-          },
-        ],
-      },
-    },
-    {
-      name: "MakeAccountImmutableError",
-      type: {
-        kind: "enum",
-        variants: [
-          {
-            name: "InvalidTokenTransferAmounts",
-          },
-          {
-            name: "UnsignedIntegerCastFailed",
-          },
-          {
-            name: "FailedToCloseAccount",
-          },
-          {
-            name: "FailedToTransferToEmissionsWallet",
-          },
-          {
-            name: "FailedToTransferToEmissionsWalletFromUser",
-          },
-          {
-            name: "FailedToReturnUserFunds",
-          },
-        ],
-      },
-    },
-    {
-      name: "MutableFeesError",
-      type: {
-        kind: "enum",
-        variants: [
-          {
-            name: "NeedSomeFees",
-          },
-          {
-            name: "NeedSomeCrankBps",
-          },
-        ],
-      },
-    },
-    {
-      name: "RefreshStakeError",
-      type: {
-        kind: "enum",
-        variants: [
-          {
-            name: "MarkedImmutable",
-          },
-          {
-            name: "UnsignedIntegerCastFailed",
-          },
-          {
-            name: "NoStorageIncrease",
-          },
-        ],
-      },
-    },
-    {
-      name: "RequestDeleteAccountError",
-      type: {
-        kind: "enum",
-        variants: [
-          {
-            name: "NotEnoughStorage",
-          },
-          {
-            name: "FileNameLengthExceedsLimit",
-          },
-          {
-            name: "StorageAccountMarkedImmutable",
-          },
-          {
-            name: "AlreadyMarkedForDeletion",
-          },
-        ],
-      },
-    },
-    {
-      name: "RequestDeleteFileError",
-      type: {
-        kind: "enum",
-        variants: [
-          {
-            name: "NotEnoughStorage",
-          },
-          {
-            name: "FileNameLengthExceedsLimit",
-          },
-          {
-            name: "MarkedImmutable",
-          },
-          {
-            name: "AlreadyMarkedForDeletion",
-          },
-        ],
-      },
-    },
-    {
-      name: "StoreFileError",
-      type: {
-        kind: "enum",
-        variants: [
-          {
-            name: "NotEnoughStorage",
-          },
-          {
-            name: "FileNameLengthExceedsLimit",
-          },
-          {
-            name: "InvalidSha256Hash",
-          },
-          {
-            name: "InvalidCEPHHash",
-          },
-          {
-            name: "HasHadBadCsam",
-          },
-          {
-            name: "StorageAccountMarkedImmutable",
-          },
-        ],
-      },
-    },
-    {
-      name: "StoreFileError",
-      type: {
-        kind: "enum",
-        variants: [
-          {
-            name: "NotEnoughStorage",
-          },
-          {
-            name: "FileNameLengthExceedsLimit",
-          },
-          {
-            name: "InvalidSha256Hash",
-          },
-          {
-            name: "InvalidCEPHHash",
-          },
-          {
-            name: "HasHadBadCsam",
-          },
-          {
-            name: "StorageAccountMarkedImmutable",
-          },
-        ],
-      },
-    },
-    {
-      name: "UnmarkDeleteAccountError",
-      type: {
-        kind: "enum",
-        variants: [
-          {
-            name: "NotEnoughStorage",
-          },
-          {
-            name: "FileNameLengthExceedsLimit",
-          },
-          {
-            name: "StorageAccountMarkedImmutable",
-          },
-          {
-            name: "NotMarkedToBeDeleted",
-          },
-          {
-            name: "EmptyStakeAccount",
-          },
-        ],
-      },
-    },
-    {
-      name: "UnmarkDeleteFileError",
-      type: {
-        kind: "enum",
-        variants: [
-          {
-            name: "NotEnoughStorage",
-          },
-          {
-            name: "FileNameLengthExceedsLimit",
-          },
-          {
-            name: "MarkedImmutable",
-          },
-          {
-            name: "NotMarkedToBeDeleted",
-          },
-          {
-            name: "EmptyStakeAccount",
-          },
-        ],
-      },
-    },
-    {
-      name: "UpdateAccountError",
-      type: {
-        kind: "enum",
-        variants: [
-          {
-            name: "MarkedImmutable",
-          },
-          {
-            name: "IdentifierExceededMaxLength",
-          },
-        ],
-      },
-    },
-    {
-      name: "UpdateConfigError",
-      type: {
-        kind: "enum",
-        variants: [
-          {
-            name: "OnlyAdmin1CanChangeAdmins",
-          },
-        ],
-      },
-    },
-  ],
   errors: [
     {
       code: 6000,
+      name: "NotEnoughStorage",
+      msg: "Not enough storage available on this Storage Account",
+    },
+    {
+      code: 6001,
+      name: "FileNameLengthExceedsLimit",
+      msg: "The length of the file name exceeds the limit of 32 bytes",
+    },
+    {
+      code: 6002,
+      name: "InvalidSha256Hash",
+      msg: "Invalid sha256 hash",
+    },
+    {
+      code: 6003,
+      name: "HasHadBadCsam",
+      msg: "User at some point had a bad csam scan",
+    },
+    {
+      code: 6004,
+      name: "StorageAccountMarkedImmutable",
+      msg: "Storage account is marked as immutable",
+    },
+    {
+      code: 6005,
       name: "ClaimingStakeTooSoon",
       msg: "User has not waited enough time to claim stake",
+    },
+    {
+      code: 6006,
+      name: "SolanaStorageAccountNotMutable",
+      msg: "The storage account needs to be marked as mutable to update last fee collection epoch",
+    },
+    {
+      code: 6007,
+      name: "RemovingTooMuchStorage",
+      msg: "Attempting to decrease storage by more than is available",
+    },
+    {
+      code: 6008,
+      name: "UnsignedIntegerCastFailed",
+      msg: "u128 -> u64 cast failed",
+    },
+    {
+      code: 6009,
+      name: "NonzeroRemainingFileAccounts",
+      msg: "This storage account still has some file accounts associated with it that have not been deleted",
+    },
+    {
+      code: 6010,
+      name: "AccountStillInGracePeriod",
+      msg: "This account is still within deletion grace period",
+    },
+    {
+      code: 6011,
+      name: "AccountNotMarkedToBeDeleted",
+      msg: "This account is not marked to be deleted",
+    },
+    {
+      code: 6012,
+      name: "FileStillInGracePeriod",
+      msg: "This file is still within deletion grace period",
+    },
+    {
+      code: 6013,
+      name: "FileNotMarkedToBeDeleted",
+      msg: "This file is not marked to be deleted",
+    },
+    {
+      code: 6014,
+      name: "FileMarkedImmutable",
+      msg: "File has been marked as immutable and cannot be edited",
+    },
+    {
+      code: 6015,
+      name: "NoStorageIncrease",
+      msg: "User requested an increase of zero bytes",
+    },
+    {
+      code: 6016,
+      name: "ExceededStorageLimit",
+      msg: "Requested a storage account with storage over the limit",
+    },
+    {
+      code: 6017,
+      name: "InsufficientFunds",
+      msg: "User does not have enough funds to store requested number of bytes.",
+    },
+    {
+      code: 6018,
+      name: "NotEnoughStorageOnShadowDrive",
+      msg: "There is not available storage on Shadow Drive. Good job!",
+    },
+    {
+      code: 6019,
+      name: "AccountTooSmall",
+      msg: "Requested a storage account with storage under the limit",
+    },
+    {
+      code: 6020,
+      name: "DidNotAgreeToToS",
+      msg: "User did not agree to terms of service",
+    },
+    {
+      code: 6021,
+      name: "InvalidTokenTransferAmounts",
+      msg: "Invalid token transfers. Stake account nonempty.",
+    },
+    {
+      code: 6022,
+      name: "FailedToCloseAccount",
+      msg: "Failed to close spl token account",
+    },
+    {
+      code: 6023,
+      name: "FailedToTransferToEmissionsWallet",
+      msg: "Failed to transfer to emissions wallet",
+    },
+    {
+      code: 6024,
+      name: "FailedToTransferToEmissionsWalletFromUser",
+      msg: "Failed to transfer to emissions wallet from user",
+    },
+    {
+      code: 6025,
+      name: "FailedToReturnUserFunds",
+      msg: "Failed to return user funds",
+    },
+    {
+      code: 6026,
+      name: "NeedSomeFees",
+      msg: "Turning on fees and passing in None for storage cost per epoch",
+    },
+    {
+      code: 6027,
+      name: "NeedSomeCrankBps",
+      msg: "Turning on fees and passing in None for crank bps",
+    },
+    {
+      code: 6028,
+      name: "AlreadyMarkedForDeletion",
+      msg: "This account is already marked to be deleted",
+    },
+    {
+      code: 6029,
+      name: "EmptyStakeAccount",
+      msg: "User has an empty stake account and must refresh stake account before unmarking account for deletion",
+    },
+    {
+      code: 6030,
+      name: "IdentifierExceededMaxLength",
+      msg: "New identifier exceeds maximum length of 64 bytes",
+    },
+    {
+      code: 6031,
+      name: "OnlyAdmin1CanChangeAdmins",
+      msg: "Only admin1 can change admins",
     },
   ],
 };
