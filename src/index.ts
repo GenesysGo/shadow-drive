@@ -20,6 +20,7 @@ import {
   uploadFile,
   uploadMultipleFiles,
   getStorageAccs,
+  listObjects,
 } from "./methods";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
 import {
@@ -46,6 +47,7 @@ interface ShadowDrive {
   ): Promise<ShadowUploadResponse>;
   getStorageAcc?(key: web3.PublicKey): Promise<StorageAccount>;
   getStorageAccs?(): Promise<StorageAccount[]>;
+  listObjects(key: web3.PublicKey): Promise<string[]>;
   makeStorageImmutable(key: web3.PublicKey): Promise<ShadowDriveResponse>;
   reduceStorage(
     key: web3.PublicKey,
@@ -86,6 +88,7 @@ export class ShdwDrive implements ShadowDrive {
   editFile = editFile;
   getStorageAccount = getStorageAcc;
   getStorageAccounts = getStorageAccs;
+  listObjects = listObjects;
   makeStorageImmutable = makeStorageImmutable;
   reduceStorage = reduceStorage;
   cancelDeleteFile = cancelDeleteFile;
