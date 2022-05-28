@@ -28,7 +28,7 @@ export default async function deleteFile(
   const fileOwnerOnChain = new anchor.web3.PublicKey(
     fileDataResponse.file_data["owner-account-pubkey"]
   );
-  if (fileOwnerOnChain.toBase58() != this.wallet.publicKey.toBase58()) {
+  if (!fileOwnerOnChain.equals(this.wallet.publicKey)) {
     return Promise.reject(new Error("Permission denied: Not file owner"));
   }
   const fileAccount = new anchor.web3.PublicKey(
