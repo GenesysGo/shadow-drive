@@ -21,7 +21,6 @@ import {
   getStorageAccs,
 } from "./methods";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
-import { PublicKey } from "@solana/web3.js";
 import {
   CreateStorageResponse,
   ShadowBatchUploadResponse,
@@ -91,7 +90,11 @@ export class ShdwDrive implements ShadowDrive {
   cancelDeleteFile = cancelDeleteFile;
   cancelDeleteStorageAccount = cancelDeleteStorageAccount;
   // There is probably a cleaner solution for this
-  uploadFile = async (key: PublicKey, data: ShadowFile | File) => uploadMultipleFiles.bind(this)(key, [data]);
+  uploadFile = (
+    key: web3.PublicKey,
+    data: ShadowFile | File
+  ): Promise<ShadowBatchUploadResponse> =>
+    uploadMultipleFiles.bind(this)(key, [data]);
   uploadMultipleFiles = uploadMultipleFiles;
 
   constructor(
