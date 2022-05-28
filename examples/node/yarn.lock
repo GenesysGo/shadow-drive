@@ -212,29 +212,6 @@
   dependencies:
     "@types/node" "*"
 
-"File@>= 0.0.0":
-  version "0.10.2"
-  resolved "https://registry.yarnpkg.com/File/-/File-0.10.2.tgz#e899f776d273e2243ba86105bb3b056d0fb95604"
-  integrity sha512-gomQVTq/10wIR399uhGTWtYcYneTXbfe3p2RO/NR0MPrLkIyOaE9DCEPXihAm+72epLtXaplitwfJ/wkmj88dg==
-  dependencies:
-    mime ">= 0.0.0"
-
-"FileReader@>= 0.0.0":
-  version "0.10.2"
-  resolved "https://registry.yarnpkg.com/FileReader/-/FileReader-0.10.2.tgz#1b117bdb6b5ed85e241ac3cb10f1b7086524e539"
-  integrity sha512-O0K+5KRnDBFNogBPtV5hWjyJSQOoB2j3ZLbre1pBjCdE9CNpeIUPI8IX3G7eafIZ/HsllbGaIucEbt2qL+EX0g==
-
-FormData@^0.10.1:
-  version "0.10.1"
-  resolved "https://registry.yarnpkg.com/FormData/-/FormData-0.10.1.tgz#806853e89fdc03bbb1c620a5184ac5e47b341d00"
-  integrity sha512-Win+aXiahTJE/uwQWcq7BaLRdqOjNlDiWq2RkGvywkUluz8uejQrUPfmuXJJ6+4kaoH0r4S7Y+J6R/PGcNyp5w==
-  dependencies:
-    File ">= 0.0.0"
-    FileReader ">= 0.0.0"
-    bufferjs ">= 0.0.0"
-    forEachAsync ">= 2.0.0"
-    remedial ">= 0.0.0"
-
 JSONStream@^1.3.5:
   version "1.3.5"
   resolved "https://registry.yarnpkg.com/JSONStream/-/JSONStream-1.3.5.tgz#3208c1f08d3a4d99261ab64f92302bc15e111ca0"
@@ -342,11 +319,6 @@ buffer@~6.0.3:
   dependencies:
     base64-js "^1.3.1"
     ieee754 "^1.2.1"
-
-"bufferjs@>= 0.0.0":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/bufferjs/-/bufferjs-3.0.1.tgz#0692e829cb10a10550e647390b035eb06c38e8ef"
-  integrity sha512-qrCIGPcd9ODawCNyqR2o55zgaC/r7XHZ7oUh2s99uk+NVBS3SjIHigxS1S2KXpt8wsoQxAN55iPi8GIH8TGMRg==
 
 bufferutil@^4.0.1:
   version "4.0.6"
@@ -505,11 +477,6 @@ follow-redirects@^1.14.0:
   version "1.15.0"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.0.tgz#06441868281c86d0dda4ad8bdaead2d02dca89d4"
   integrity sha512-aExlJShTV4qOUOL7yF1U5tvLCB0xQuudbf6toyYA0E/acBNw71mvjFTnLaRp50aQaYocMR0a/RMMBIHeZnGyjQ==
-
-"forEachAsync@>= 2.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/forEachAsync/-/forEachAsync-3.0.0.tgz#3475a95a77e4dc2d2800913e6824de77b00cd80a"
-  integrity sha1-NHWpWnfk3C0oAJE+aCTed7AM2Ao=
 
 form-data@^4.0.0:
   version "4.0.0"
@@ -685,11 +652,6 @@ mime-types@^2.1.12:
   dependencies:
     mime-db "1.52.0"
 
-"mime@>= 0.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/mime/-/mime-3.0.0.tgz#b374550dca3a0c18443b0c950a6a58f1931cf7a7"
-  integrity sha512-jSCU7/VB1loIWBZe14aEYHU/+1UMEHoaO7qxCOVJOw9GgH72VAWppxNcjU+x9a2k3GSIBXNKxXQFqRvvZ7vr3A==
-
 mimic-fn@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/mimic-fn/-/mimic-fn-2.1.0.tgz#7ed2c2ccccaf84d3ffcb7a69b57711fc2083401b"
@@ -789,11 +751,6 @@ regenerator-runtime@^0.13.4:
   version "0.13.9"
   resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.13.9.tgz#8925742a98ffd90814988d7566ad30ca3b263b52"
   integrity sha512-p3VT+cOEgxFsRRA9X4lkI1E+k2/CtnKtU4gcxyaCUreilL/vqI6CdZ3wxVUx3UOUg+gnUOQQcRI7BmSI656MYA==
-
-"remedial@>= 0.0.0":
-  version "1.0.8"
-  resolved "https://registry.yarnpkg.com/remedial/-/remedial-1.0.8.tgz#a5e4fd52a0e4956adbaf62da63a5a46a78c578a0"
-  integrity sha512-/62tYiOe6DzS5BqVsNpH/nkGlX45C/Sp6V+NtiN6JQNS1Viay7cWkazmRkrQrdFj2eshDe96SIQNIoMxqhzBOg==
 
 rpc-websockets@^7.4.2:
   version "7.4.18"
