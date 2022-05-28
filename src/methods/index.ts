@@ -10,7 +10,6 @@ import makeStorageImmutable from "./make-storage-immutable";
 import reduceStorage from "./reduce-storage";
 import cancelDeleteFile from "./cancel-delete-file";
 import cancelDeleteStorageAccount from "./cancel-storage-account";
-import uploadFile from "./upload-file";
 import uploadMultipleFiles from "./upload-multiple-files";
 
 export {
@@ -26,6 +25,5 @@ export {
   reduceStorage,
   cancelDeleteFile,
   cancelDeleteStorageAccount,
-  uploadFile,
   uploadMultipleFiles,
 };

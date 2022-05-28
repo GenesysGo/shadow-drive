@@ -382,25 +382,23 @@ export function getChunkLength(array1: any[], array2: any[]) {
 }
 
 
-// FileList API Polyfill taken from https://github.com/node-file-api/FileList
-export function FileList(args: any) {
-  var i;
-
-  if (!(args instanceof Array)) {
-    args = Array.prototype.slice.call(arguments);
-  }
-
-  for (i = 0; i < args.length; i += 1) {
-    this.push(args[i]);
-  }
-
-  this.push = undefined;
-  this.pop = undefined;
-
-  return this;
+let getDataTransfer = () => new DataTransfer();
+try {
+  getDataTransfer();
+} catch {
+  getDataTransfer = () => new ClipboardEvent("").clipboardData;
 }
 
-FileList.prototype = new Array();
-(FileList.prototype as any).item = function (index: number) {
-  return this[index];
-};
+export function createFileList(files: File[]) {
+  let index = 0;
+  const { length } = files;
+
+  const dataTransfer = getDataTransfer();
+
+  for (; index < length; index++) {
+    dataTransfer.items.add(files[index]);
+  }
+
+  return dataTransfer.files;
+}
+
