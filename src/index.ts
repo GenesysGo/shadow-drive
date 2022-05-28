@@ -91,7 +91,7 @@ export class ShdwDrive implements ShadowDrive {
   cancelDeleteFile = cancelDeleteFile;
   cancelDeleteStorageAccount = cancelDeleteStorageAccount;
   // There is probably a cleaner solution for this
-  uploadFile = async (key: PublicKey, data: ShadowFile | File) => uploadMultipleFiles.bind(this)(key, [data], 'single');
+  uploadFile = async (key: PublicKey, data: ShadowFile | File) => uploadMultipleFiles.bind(this)(key, [data]);
   uploadMultipleFiles = uploadMultipleFiles;
 
   constructor(
