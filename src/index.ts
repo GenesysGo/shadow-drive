@@ -22,8 +22,8 @@ import {
   getStorageAccs,
   listObjects,
 } from "./methods";
-import { AnchorWallet } from "@solana/wallet-adapter-react";
 import {
+  AnchorWallet,
   CreateStorageResponse,
   ShadowBatchUploadResponse,
   ShadowDriveResponse,
