@@ -23,7 +23,7 @@ export default async function editFile(
   data: File | ShadowFile
 ): Promise<ShadowUploadResponse> {
   let fileErrors = [];
-  let fileBuffer: Buffer;
+  let fileBuffer: Buffer | ArrayBuffer;
   let form;
   let file;
   if (!isBrowser) {
@@ -36,7 +36,7 @@ export default async function editFile(
     file = data as File;
     form = new FormData();
     form.append("file", file, file.name);
-    fileBuffer = Buffer.from(await file.text());
+    fileBuffer = await file.arrayBuffer();
   }
   const selectedAccount = await this.program.account.storageAccount.fetch(key);
 
@@ -87,7 +87,9 @@ export default async function editFile(
     fileDataResponse.file_data["file-account-pubkey"]
   );
   const hashSum = crypto.createHash("sha256");
-  hashSum.update(fileBuffer);
+  hashSum.update(
+    Buffer.isBuffer(fileBuffer) ? fileBuffer : Buffer.from(fileBuffer)
+  );
   const sha256Hash = hashSum.digest("hex");
   let size = new anchor.BN(fileBuffer.byteLength);
   let txn;
