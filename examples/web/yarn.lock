@@ -869,17 +869,15 @@
     bs58 "^4.0.1"
     eventemitter3 "^4.0.7"
 
-"@shadow-drive/sdk@2":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@shadow-drive/sdk/-/sdk-2.0.0.tgz#5db1361365589386cc755d2d044f2691cd09116c"
-  integrity sha512-vmsL9PXs3JUDCubH3UVHcH6HnIcKnHAnAMsaw31KtML4cfeujvmfH7RrBHCBo3nzXHU4HmpdBE7UOKzksjEV0A==
+"@shadow-drive/sdk@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@shadow-drive/sdk/-/sdk-2.0.4.tgz#57a5e080a9a3f3077517c861f4af9dbadcdc33ee"
+  integrity sha512-ftRHAVsCS+aO5+kQrsoEQ7U9ry3r9CtBv5wjXl38Gl3XUIHtZ7KDSm95ozBnhk/CBLQ52jmz0aY5WRq38QDfSA==
   dependencies:
     "@project-serum/anchor" "^0.24.2"
     "@solana/spl-token" "^0.2.0"
-    "@solana/wallet-adapter-react" "^0.15.4"
     cross-fetch "^3.1.5"
     form-data "^4.0.0"
-    react "^18.1.0"
 
 "@sideway/address@^4.1.3":
   version "4.1.4"
@@ -1047,7 +1045,7 @@
     "@solana/wallet-adapter-react" "^0.15.3"
     "@solana/web3.js" "^1.36.0"
 
-"@solana/wallet-adapter-react@^0.15.3", "@solana/wallet-adapter-react@^0.15.4":
+"@solana/wallet-adapter-react@^0.15.3":
   version "0.15.4"
   resolved "https://registry.yarnpkg.com/@solana/wallet-adapter-react/-/wallet-adapter-react-0.15.4.tgz#413c3fa6893e9d809e5a6dd4730695fba942967b"
   integrity sha512-QB8tE1IqYxvHrdDZP3DGICuCq6xydvjUYhW+usIahORmHniFF62Mp/LPfdAGZRDFF7U2/rZPktGFiOxWUJA7Qw==
@@ -3909,13 +3907,6 @@ react@^17.0.0:
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
-
-react@^18.1.0:
-  version "18.1.0"
-  resolved "https://registry.yarnpkg.com/react/-/react-18.1.0.tgz#6f8620382decb17fdc5cc223a115e2adbf104890"
-  integrity sha512-4oL8ivCz5ZEPyclFQXaNksK3adutVS8l2xzZU0cqEFrE9Sb7fC0EFK5uEk74wIreL1DERyjvsU915j1pcT2uEQ==
-  dependencies:
-    loose-envify "^1.1.0"
 
 readable-stream@^3.5.0, readable-stream@^3.6.0:
   version "3.6.0"
