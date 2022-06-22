@@ -14,6 +14,7 @@ export type ShadowUploadResponse = {
   finalized_location: string;
   transaction_signature: string;
 };
+
 export type ShadowBatchUploadResponse = {
   fileName: string;
   status: string;
@@ -21,10 +22,15 @@ export type ShadowBatchUploadResponse = {
   transaction_signature?: string;
 };
 
+export type ListObjectsResponse = {
+  keys: string[]
+}
+
 export type StorageAccountResponse = {
   publicKey: anchor.web3.PublicKey;
   account: StorageAccount;
 };
+
 export type StorageAccount = {
   isStatic: boolean;
   initCounter: number;

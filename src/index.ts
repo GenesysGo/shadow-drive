@@ -31,6 +31,7 @@ import {
   ShadowUploadResponse,
   StorageAccount,
   StorageAccountResponse,
+  ListObjectsResponse,
 } from "./types";
 interface ShadowDrive {
   createStorageAccount(
@@ -47,7 +48,7 @@ interface ShadowDrive {
   ): Promise<ShadowUploadResponse>;
   getStorageAcc?(key: web3.PublicKey): Promise<StorageAccount>;
   getStorageAccs?(): Promise<StorageAccount[]>;
-  listObjects(key: web3.PublicKey): Promise<string[]>;
+  listObjects(key: web3.PublicKey): Promise<ListObjectsResponse>;
   makeStorageImmutable(key: web3.PublicKey): Promise<ShadowDriveResponse>;
   reduceStorage(
     key: web3.PublicKey,
@@ -129,4 +130,5 @@ export {
   StorageAccount,
   StorageAccountResponse,
   ShadowBatchUploadResponse,
+  ListObjectsResponse,
 };

@@ -6,7 +6,7 @@ import {
   uploader,
 } from "../utils/common";
 import crypto from "crypto";
-import { ShadowBatchUploadResponse, ShadowFile } from "../types";
+import { ShadowBatchUploadResponse, ShadowFile, ListObjectsResponse } from "../types";
 import NodeFormData from "form-data";
 import { sleep, sortByProperty, getChunkLength } from "../utils/helpers";
 import fetch from "cross-fetch";
@@ -129,7 +129,7 @@ export default async function uploadMultipleFiles(
               }`)
     );
   }
-  const allObjects = await allObjectsRequest.json();
+  const allObjects = await allObjectsRequest.json() as ListObjectsResponse;
   let existingFiles: any = [];
   fileData = fileData.filter((item: any) => {
     if (!allObjects.keys.includes(item.name)) {
