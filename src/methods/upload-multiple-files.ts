@@ -146,7 +146,7 @@ export default async function uploadMultipleFiles(
   if (allObjectsRequest.status === 200) allObjects = await allObjectsRequest.json() as ListObjectsResponse;
 
   fileData = fileData.filter((item: FileData) => {
-    if (!allObjects?.keys.includes(item.name)) {
+    if (!allObjects.keys.includes(item.name)) {
       return true;
     } else {
       existingFiles.push({
