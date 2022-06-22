@@ -140,7 +140,7 @@ export default async function uploadMultipleFiles(
     For now we'll need to handle this from here by initializing the objects ourselves.
   */
   let allObjects: ListObjectsResponse = { keys: [] };
-  let existingFiles: Array<{ fileName: string, status: string, location: string }> = [];
+  let existingFiles: ShadowBatchUploadResponse[] = [];
 
   // Only if successful, we assign the objects coming from the response.
   if (allObjectsRequest.status === 200) allObjects = await allObjectsRequest.json() as ListObjectsResponse;
@@ -272,7 +272,7 @@ export default async function uploadMultipleFiles(
       await sleep(1000);
     }
     if (existingFiles.length > 0) {
-      existingUploadJSON.push(existingFiles);
+      existingUploadJSON.push(...existingFiles);
     }
     while (!continueToNextBatch) {
       try {
