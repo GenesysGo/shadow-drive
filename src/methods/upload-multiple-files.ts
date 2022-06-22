@@ -130,9 +130,6 @@ export default async function uploadMultipleFiles(
     );
   }
 
-  let existingFiles: any = [];
-  let allObjects = await allObjectsRequest.json() as ListObjectsResponse;
-
   /*
     Note: Currently if there are no objects stored in an account the API will throw a 500 http error.
 
@@ -140,9 +137,13 @@ export default async function uploadMultipleFiles(
 
     The best way to solve this would be to directly return an empty keys array from the API.
 
-    For now we'll need to handle this from here.
+    For now we'll need to handle this from here by initializing the objects ourselves.
   */
-  if (allObjectsRequest.status === 500) allObjects = { keys: [] };
+  let existingFiles: any = [];
+  let allObjects: ListObjectsResponse = { keys: [] };
+
+  // Only if successful, we assign the objects coming from the response.
+  if (allObjectsRequest.status === 200) allObjects = await allObjectsRequest.json() as ListObjectsResponse;
 
   fileData = fileData.filter((item: any) => {
     if (!allObjects?.keys.includes(item.name)) {
