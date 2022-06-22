@@ -129,10 +129,11 @@ export default async function uploadMultipleFiles(
               }`)
     );
   }
+  // allObjects may be undefined if the storage account is new.
   const allObjects = await allObjectsRequest.json() as ListObjectsResponse;
   let existingFiles: any = [];
   fileData = fileData.filter((item: any) => {
-    if (!allObjects.keys.includes(item.name)) {
+    if (!allObjects?.keys.includes(item.name)) {
       return true;
     } else {
       existingFiles.push({
