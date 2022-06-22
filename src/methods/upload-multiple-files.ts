@@ -145,7 +145,7 @@ export default async function uploadMultipleFiles(
   // Only if successful, we assign the objects coming from the response.
   if (allObjectsRequest.status === 200) allObjects = await allObjectsRequest.json() as ListObjectsResponse;
 
-  fileData = fileData.filter((item: any) => {
+  fileData = fileData.filter((item: FileData) => {
     if (!allObjects?.keys.includes(item.name)) {
       return true;
     } else {
