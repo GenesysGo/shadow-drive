@@ -129,9 +129,21 @@ export default async function uploadMultipleFiles(
               }`)
     );
   }
-  // allObjects may be undefined if the storage account is new.
-  const allObjects = await allObjectsRequest.json() as ListObjectsResponse;
+
   let existingFiles: any = [];
+  let allObjects = await allObjectsRequest.json() as ListObjectsResponse;
+
+  /*
+    Note: Currently if there are no objects stored in an account the API will throw a 500 http error.
+
+    Providing a false negative status and preventing to upload multiple files on new accounts.
+
+    The best way to solve this would be to directly return an empty keys array from the API.
+
+    For now we'll need to handle this from here.
+  */
+  if (allObjectsRequest.status === 500) allObjects = { keys: [] };
+
   fileData = fileData.filter((item: any) => {
     if (!allObjects?.keys.includes(item.name)) {
       return true;
