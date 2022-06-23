@@ -22,7 +22,8 @@
   "scripts": {
     "build": "tsc",
     "docs": "typedoc --excludePrivate --includeVersion --out ./docs src",
-    "test": "jest --forceExit"
+    "test": "jest --forceExit",
+    "prepublishOnly": "yarn build"
   },
   "devDependencies": {
     "@types/jest": "^27.5.0",
