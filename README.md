@@ -1,5 +1,5 @@
 <div align="center">
-  <img height="170x" src="https://dev.portal.genesysgo.net/img/GENGO_LOGO.png" />
+  <img height="170x" src="https://github.com/GenesysGo/shadow-drive/raw/main/assets/genesysgo.jpeg" />
 
   <h1>Shadow Drive</h1>
    <p>
