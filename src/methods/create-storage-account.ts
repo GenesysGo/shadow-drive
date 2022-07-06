@@ -18,11 +18,13 @@ import { CreateStorageResponse } from "../types";
  *
  * @param {string} name - What you want your storage account to be named. (Does not have to be unique)
  * @param {string} size - Amount of storage you are requesting to create. Should be in a string like '1KB', '1MB', '1GB'. Only KB, MB, and GB storage delineations are supported currently.
+ * @param {string} version - ShadowDrive version (V1 or V2)
  * @returns {CreateStorageResponse} - Created bucket and transaction signature
  */
 export default async function createStorageAccount(
   name: string,
-  size: string
+  size: string,
+  version: string
 ): Promise<CreateStorageResponse> {
   let storageInputAsBytes = humanSizeToBytes(size);
   if (storageInputAsBytes === false) {
@@ -60,22 +62,45 @@ export default async function createStorageAccount(
     tokenMint
   );
   try {
-    const txn = await this.program.methods
-      .initializeAccount(name, storageRequested, null)
-      .accounts({
-        storageConfig: this.storageConfigPDA,
-        userInfo: this.userInfo,
-        storageAccount,
-        stakeAccount,
-        tokenMint,
-        owner1: this.wallet.publicKey,
-        uploader: uploader,
-        owner1TokenAccount: ownerAta,
-        systemProgram: anchor.web3.SystemProgram.programId,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-      })
-      .transaction();
+    let txn;
+    switch (version) {
+      case "v1":
+        txn = await this.program.methods
+          .initializeAccount(name, storageRequested)
+          .accounts({
+            storageConfig: this.storageConfigPDA,
+            userInfo: this.userInfo,
+            storageAccount,
+            stakeAccount,
+            tokenMint,
+            owner1: this.wallet.publicKey,
+            uploader: uploader,
+            owner1TokenAccount: ownerAta,
+            systemProgram: anchor.web3.SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+          })
+          .transaction();
+        break;
+      case "v2":
+        txn = await this.program.methods
+          .initializeAccount2(name, storageRequested)
+          .accounts({
+            storageConfig: this.storageConfigPDA,
+            userInfo: this.userInfo,
+            storageAccount,
+            stakeAccount,
+            tokenMint,
+            owner1: this.wallet.publicKey,
+            uploader: uploader,
+            owner1TokenAccount: ownerAta,
+            systemProgram: anchor.web3.SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+          })
+          .transaction();
+        break;
+    }
     txn.recentBlockhash = (
       await this.connection.getLatestBlockhash()
     ).blockhash;
@@ -86,28 +111,52 @@ export default async function createStorageAccount(
       await this.wallet.signTransaction(txn);
     }
     const serializedTxn = txn.serialize({ requireAllSignatures: false });
+    let createStorageResponse;
+    switch (version) {
+      case "v1":
+        createStorageResponse = await fetch(
+          `${SHDW_DRIVE_ENDPOINT}/storage-account`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              transaction: Buffer.from(serializedTxn.toJSON().data).toString(
+                "base64"
+              ),
+            }),
+          }
+        );
+        break;
+      case "v2":
+        createStorageResponse = await fetch(
+          `${SHDW_DRIVE_ENDPOINT}/storage-account`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              transaction: Buffer.from(serializedTxn.toJSON().data).toString(
+                "base64"
+              ),
+            }),
+          }
+        );
+        break;
+    }
 
-    const uploadResponse = await fetch(
-      `${SHDW_DRIVE_ENDPOINT}/storage-account`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          transaction: Buffer.from(serializedTxn.toJSON().data).toString(
-            "base64"
-          ),
-        }),
-      }
-    );
-    if (!uploadResponse.ok) {
+    if (!createStorageResponse.ok) {
       return Promise.reject(
-        new Error(`Server response status code: ${uploadResponse.status} \n 
-		Server response status message: ${(await uploadResponse.json()).error}`)
+        new Error(`Server response status code: ${
+          createStorageResponse.status
+        } \n 
+		Server response status message: ${(await createStorageResponse.json()).error}`)
       );
     }
-    const responseJson = (await uploadResponse.json()) as CreateStorageResponse;
+    const responseJson =
+      (await createStorageResponse.json()) as CreateStorageResponse;
     return Promise.resolve(responseJson);
   } catch (e) {
     console.log(`Error from fileserver ${e}`);

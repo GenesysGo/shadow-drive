@@ -11,19 +11,13 @@ import { ShadowDriveResponse } from "../types";
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 
-export default async function claimStake(
+export default async function redeemRent(
   key: anchor.web3.PublicKey,
-  version: string
+  file: string
 ): Promise<ShadowDriveResponse> {
   let selectedAccount;
-  switch (version) {
-    case "v1":
-      selectedAccount = await this.program.account.storageAccountV1.fetch(key);
-      break;
-    case "v2":
-      selectedAccount = await this.program.account.storageAccountV2.fetch(key);
-      break;
-  }
+
+  selectedAccount = await this.program.account.storageAccountV1.fetch(key);
   const [unstakeAccount] = await anchor.web3.PublicKey.findProgramAddress(
     [Buffer.from("unstake-account"), key.toBytes()],
     this.program.programId
@@ -36,42 +30,21 @@ export default async function claimStake(
     selectedAccount.owner1,
     tokenMint
   );
-  let txn;
   try {
-    switch (version) {
-      case "v1":
-        txn = await this.program.methods
-          .claimStake()
-          .accounts({
-            storageConfig: this.storageConfigPDA,
-            storageAccount: key,
-            unstakeInfo: unstakeInfo,
-            unstakeAccount: unstakeAccount,
-            owner: selectedAccount.owner1,
-            ownerAta,
-            tokenMint,
-            systemProgram: anchor.web3.SystemProgram.programId,
-            tokenProgram: TOKEN_PROGRAM_ID,
-          })
-          .transaction();
-        break;
-      case "v2":
-        txn = await this.program.methods
-          .claimStake2()
-          .accounts({
-            storageConfig: this.storageConfigPDA,
-            storageAccount: key,
-            unstakeInfo: unstakeInfo,
-            unstakeAccount: unstakeAccount,
-            owner: selectedAccount.owner1,
-            ownerAta,
-            tokenMint,
-            systemProgram: anchor.web3.SystemProgram.programId,
-            tokenProgram: TOKEN_PROGRAM_ID,
-          })
-          .transaction();
-        break;
-    }
+    const txn = await this.program.methods
+      .claimStake()
+      .accounts({
+        storageConfig: this.storageConfigPDA,
+        storageAccount: key,
+        unstakeInfo: unstakeInfo,
+        unstakeAccount: unstakeAccount,
+        owner: selectedAccount.owner1,
+        ownerAta,
+        tokenMint,
+        systemProgram: anchor.web3.SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .transaction();
     txn.recentBlockhash = (
       await this.connection.getLatestBlockhash()
     ).blockhash;

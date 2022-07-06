@@ -5,27 +5,54 @@ import { ShadowDriveResponse } from "../types";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Publickey of a Storage Account
- *
+ * @param {string} version - ShadowDrive version (V1 or V2)
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 
 export default async function cancelDeleteStorageAccount(
-  key: anchor.web3.PublicKey
+  key: anchor.web3.PublicKey,
+  version: string
 ): Promise<ShadowDriveResponse> {
-  const selectedAccount = await this.program.account.storageAccount.fetch(key);
+  let selectedAccount;
+  switch (version) {
+    case "v1":
+      selectedAccount = await this.program.account.storageAccountV1.fetch(key);
+      break;
+    case "v2":
+      selectedAccount = await this.program.account.storageAccountV2.fetch(key);
+      break;
+  }
   let stakeAccount = (await getStakeAccount(this.program, key))[0];
+  let txn;
   try {
-    const txn = await this.program.methods
-      .unmarkDeleteAccount()
-      .accounts({
-        storageConfig: this.storageConfigPDA,
-        storageAccount: key,
-        stakeAccount,
-        owner: selectedAccount.owner1,
-        tokenMint: tokenMint,
-        systemProgram: anchor.web3.SystemProgram.programId,
-      })
-      .transaction();
+    switch (version) {
+      case "v1":
+        txn = await this.program.methods
+          .unmarkDeleteAccount()
+          .accounts({
+            storageConfig: this.storageConfigPDA,
+            storageAccount: key,
+            stakeAccount,
+            owner: selectedAccount.owner1,
+            tokenMint: tokenMint,
+            systemProgram: anchor.web3.SystemProgram.programId,
+          })
+          .transaction();
+        break;
+      case "v2":
+        txn = await this.program.methods
+          .unmarkDeleteAccount2()
+          .accounts({
+            storageConfig: this.storageConfigPDA,
+            storageAccount: key,
+            stakeAccount,
+            owner: selectedAccount.owner1,
+            tokenMint: tokenMint,
+            systemProgram: anchor.web3.SystemProgram.programId,
+          })
+          .transaction();
+        break;
+    }
     txn.recentBlockhash = (
       await this.connection.getLatestBlockhash()
     ).blockhash;

@@ -9,23 +9,35 @@ import crypto from "crypto";
 import { ShadowFile, ShadowUploadResponse } from "../types";
 import fetch from "cross-fetch";
 import NodeFormData from "form-data";
+import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Publickey of Storage Account
  * @param {string} url - URL of existing file
  * @param {File | ShadowFile} data - File or ShadowFile object, file extensions should be included in the name property of ShadowFiles.
+ * @param {string} version - ShadowDrive version (V1 or V2)
  * @returns {ShadowUploadResponse} - File location and transaction signature
  */
 
 export default async function editFile(
   key: anchor.web3.PublicKey,
   url: string,
-  data: File | ShadowFile
+  data: File | ShadowFile,
+  version: string
 ): Promise<ShadowUploadResponse> {
   let fileErrors = [];
   let fileBuffer: Buffer | ArrayBuffer;
   let form;
   let file;
+  let selectedAccount;
+  switch (version) {
+    case "v1":
+      selectedAccount = await this.program.account.storageAccountV1.fetch(key);
+      break;
+    case "v2":
+      selectedAccount = await this.program.account.storageAccountV2.fetch(key);
+      break;
+  }
   if (!isBrowser) {
     data = data as ShadowFile;
     form = new NodeFormData();
@@ -36,9 +48,8 @@ export default async function editFile(
     file = data as File;
     form = new FormData();
     form.append("file", file, file.name);
-    fileBuffer = await file.arrayBuffer();
+    fileBuffer = Buffer.from(new Uint8Array(await file.arrayBuffer()));
   }
-  const selectedAccount = await this.program.account.storageAccount.fetch(key);
 
   if (fileBuffer.byteLength > 1_073_741_824 * 1) {
     fileErrors.push({
@@ -93,57 +104,87 @@ export default async function editFile(
   const sha256Hash = hashSum.digest("hex");
   let size = new anchor.BN(fileBuffer.byteLength);
   let txn;
-  try {
-    txn = await this.program.methods
-      .editFile(sha256Hash, size)
-      .accounts({
-        storageConfig: this.storageConfigPDA,
-        storageAccount: key,
-        file: fileAcc,
-        owner: selectedAccount.owner1,
-        uploader: uploader,
-        tokenMint: tokenMint,
-        systemProgram: anchor.web3.SystemProgram.programId,
-      })
-      .transaction();
-    txn.recentBlockhash = (
-      await this.connection.getLatestBlockhash()
-    ).blockhash;
-    txn.feePayer = this.wallet.publicKey;
-    if (!isBrowser) {
-      await txn.partialSign(this.wallet.payer);
-    } else {
-      await this.wallet.signTransaction(txn);
-    }
-    const serializedTxn = txn.serialize({ requireAllSignatures: false });
-    form.append(
-      "transaction",
-      Buffer.from(serializedTxn.toJSON().data).toString("base64")
-    );
-  } catch (e) {
-    return Promise.reject(new Error(e));
-  }
-
-  try {
-    const uploadResponse = await fetch(`${SHDW_DRIVE_ENDPOINT}/edit`, {
-      method: "POST",
-      //@ts-ignore
-      body: form,
-    });
-    if (!uploadResponse.ok) {
-      return Promise.reject(
-        new Error(
-          `Server response status code: ${
-            uploadResponse.status
-          } \n Server response status message: ${
-            (await uploadResponse.json()).error
-          }`
-        )
+  if (version === "v1") {
+    try {
+      txn = await this.program.methods
+        .editFile(sha256Hash, size)
+        .accounts({
+          storageConfig: this.storageConfigPDA,
+          storageAccount: key,
+          file: fileAcc,
+          owner: selectedAccount.owner1,
+          uploader: uploader,
+          tokenMint: tokenMint,
+          systemProgram: anchor.web3.SystemProgram.programId,
+        })
+        .transaction();
+      txn.recentBlockhash = (
+        await this.connection.getLatestBlockhash()
+      ).blockhash;
+      txn.feePayer = this.wallet.publicKey;
+      if (!isBrowser) {
+        await txn.partialSign(this.wallet.payer);
+      } else {
+        await this.wallet.signTransaction(txn);
+      }
+      const serializedTxn = txn.serialize({ requireAllSignatures: false });
+      form.append(
+        "transaction",
+        Buffer.from(serializedTxn.toJSON().data).toString("base64")
       );
+    } catch (e) {
+      return Promise.reject(new Error(e));
     }
-    const responseJson = await uploadResponse.json();
-    return Promise.resolve(responseJson);
-  } catch (e) {
-    return Promise.reject(new Error(e));
+
+    try {
+      const uploadResponse = await fetch(`${SHDW_DRIVE_ENDPOINT}/edit`, {
+        method: "POST",
+        //@ts-ignore
+        body: form,
+      });
+      if (!uploadResponse.ok) {
+        return Promise.reject(
+          new Error(
+            `Server response status code: ${
+              uploadResponse.status
+            } \n Server response status message: ${
+              (await uploadResponse.json()).error
+            }`
+          )
+        );
+      }
+      const responseJson = await uploadResponse.json();
+      return Promise.resolve(responseJson);
+    } catch (e) {
+      return Promise.reject(new Error(e));
+    }
+  } else {
+    try {
+      const msg = Buffer.from(
+        `Shadow Drive Signed Message:\nStorage Account: ${key}\Edit File: ${sha256Hash}`
+      );
+      const msgSig = await this.wallet.signMessage(msg);
+      const encodedMsg = bs58.encode(msgSig);
+      form.append("message", encodedMsg);
+      form.append("storage_account", key.toString());
+      const uploadResponse = await fetch(`${SHDW_DRIVE_ENDPOINT}/edit-2`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        //@ts-ignore
+        body: form,
+      });
+      if (!uploadResponse.ok) {
+        return Promise.reject(
+          new Error(`Server response status code: ${uploadResponse.status} \n 
+					Server response status message: ${(await uploadResponse.json()).error}`)
+        );
+      }
+      const responseJson = await uploadResponse.json();
+      return Promise.resolve(responseJson);
+    } catch (e) {
+      return Promise.reject(new Error(e));
+    }
   }
 }

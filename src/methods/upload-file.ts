@@ -9,21 +9,34 @@ import crypto from "crypto";
 import fetch from "cross-fetch";
 import { ShadowFile, ShadowUploadResponse } from "../types";
 import NodeFormData from "form-data";
+import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Publickey of Storage Account.
  * @param {File | ShadowFile} data - File or ShadowFile object, file extensions should be included in the name property of ShadowFiles.
- *
+ * @param {string} version - ShadowDrive version (V1 or V2)
  * @returns {ShadowUploadResponse} - File location and transaction signature.
  */
 export default async function uploadFile(
   key: anchor.web3.PublicKey,
-  data: File | ShadowFile
+  data: File | ShadowFile,
+  version: string
 ): Promise<ShadowUploadResponse> {
   let fileErrors = [];
-  let fileBuffer: Buffer | ArrayBuffer;
+  let fileBuffer: Buffer;
   let form;
   let file;
+
+  let selectedAccount;
+  switch (version) {
+    case "v1":
+      selectedAccount = await this.program.account.storageAccountV1.fetch(key);
+      break;
+    case "v2":
+      selectedAccount = await this.program.account.storageAccountV2.fetch(key);
+      break;
+  }
+
   if (!isBrowser) {
     data = data as ShadowFile;
     form = new NodeFormData();
@@ -34,9 +47,8 @@ export default async function uploadFile(
     file = data as File;
     form = new FormData();
     form.append("file", file, file.name);
-    fileBuffer = await file.arrayBuffer();
+    fileBuffer = Buffer.from(new Uint8Array(await file.arrayBuffer()));
   }
-  const selectedAccount = await this.program.account.storageAccount.fetch(key);
 
   if (fileBuffer.byteLength > 1_073_741_824 * 1) {
     fileErrors.push({
@@ -87,51 +99,92 @@ export default async function uploadFile(
   );
   let txn;
   try {
-    txn = await this.program.methods
-      .storeFile(data.name, sha256Hash, size)
-      .accounts({
-        storageConfig: this.storageConfigPDA,
-        storageAccount: key,
-        userInfo: this.userInfo,
-        file: fileAcc,
-        owner: selectedAccount.owner1,
-        uploader: uploader,
-        tokenMint: tokenMint,
-        systemProgram: anchor.web3.SystemProgram.programId,
-      })
-      .transaction();
-    txn.recentBlockhash = (
-      await this.connection.getLatestBlockhash()
-    ).blockhash;
-    txn.feePayer = this.wallet.publicKey;
-    if (!isBrowser) {
-      await txn.partialSign(this.wallet.payer);
-    } else {
-      await this.wallet.signTransaction(txn);
-    }
-    const serializedTxn = txn.serialize({ requireAllSignatures: false });
-    form.append(
-      "transaction",
-      Buffer.from(serializedTxn.toJSON().data).toString("base64")
+    const msg = new TextEncoder().encode(
+      `Shadow Drive Signed Message:\nStorage Account: ${key}\nUpload file with hash: ${sha256Hash}`
     );
+    const msgSig = await this.wallet.signMessage(msg);
+    const encodedMsg = bs58.encode(msgSig);
+    form.append("message", encodedMsg);
+    form.append("storage_account", key.toString());
+    form.append("signer", this.wallet.publicKey.toString());
   } catch (e) {
     return Promise.reject(new Error(e));
   }
-  try {
-    const uploadResponse = await fetch(`${SHDW_DRIVE_ENDPOINT}/upload`, {
-      method: "POST",
-      //@ts-ignore
-      body: form,
-    });
-    if (!uploadResponse.ok) {
-      return Promise.reject(
-        new Error(`Server response status code: ${uploadResponse.status} \n
-        			Server response status message: ${(await uploadResponse.json()).error}`)
+  if (version === "v1") {
+    try {
+      txn = await this.program.methods
+        .storeFile(data.name, sha256Hash, size)
+        .accounts({
+          storageConfig: this.storageConfigPDA,
+          storageAccount: key,
+          userInfo: this.userInfo,
+          file: fileAcc,
+          owner: selectedAccount.owner1,
+          uploader: uploader,
+          tokenMint: tokenMint,
+          systemProgram: anchor.web3.SystemProgram.programId,
+        })
+        .transaction();
+      txn.recentBlockhash = (
+        await this.connection.getLatestBlockhash()
+      ).blockhash;
+      txn.feePayer = this.wallet.publicKey;
+      if (!isBrowser) {
+        await txn.partialSign(this.wallet.payer);
+      } else {
+        await this.wallet.signTransaction(txn);
+      }
+      const serializedTxn = txn.serialize({ requireAllSignatures: false });
+      form.append(
+        "transaction",
+        Buffer.from(serializedTxn.toJSON().data).toString("base64")
       );
+    } catch (e) {
+      return Promise.reject(new Error(e));
     }
-    const responseJson = await uploadResponse.json();
-    return Promise.resolve(responseJson);
-  } catch (e) {
-    return Promise.reject(new Error(e));
+    try {
+      const uploadResponse = await fetch(`${SHDW_DRIVE_ENDPOINT}/upload`, {
+        method: "POST",
+        //@ts-ignore
+        body: form,
+      });
+      if (!uploadResponse.ok) {
+        return Promise.reject(
+          new Error(`Server response status code: ${uploadResponse.status} \n
+						Server response status message: ${(await uploadResponse.json()).error}`)
+        );
+      }
+      const responseJson = await uploadResponse.json();
+      return Promise.resolve(responseJson);
+    } catch (e) {
+      return Promise.reject(new Error(e));
+    }
+  } else {
+    try {
+      //   const msg = new TextEncoder().encode(
+      //     `Shadow Drive Signed Message:\nStorage Account: ${key}\nUpload file with hash: ${sha256Hash}`
+      //   );
+      //   const msgSig = await this.wallet.signMessage(msg);
+      //   const encodedMsg = bs58.encode(msgSig);
+      //   form.append("message", encodedMsg);
+      //   form.append("storage_account", key.toString());
+      //   form.append("signer", this.wallet.publicKey.toString());
+
+      const uploadResponse = await fetch(`${SHDW_DRIVE_ENDPOINT}/upload`, {
+        method: "POST",
+        //@ts-ignore
+        body: form,
+      });
+      if (!uploadResponse.ok) {
+        return Promise.reject(
+          new Error(`Server response status code: ${uploadResponse.status} \n 
+				  Server response status message: ${(await uploadResponse.json()).error}`)
+        );
+      }
+      const responseJson = await uploadResponse.json();
+      return Promise.resolve(responseJson);
+    } catch (e) {
+      return Promise.reject(new Error(e));
+    }
   }
 }

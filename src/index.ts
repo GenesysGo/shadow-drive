@@ -13,17 +13,17 @@ import {
   deleteStorageAccount,
   editFile,
   getStorageAcc,
+  getStorageAccs,
   makeStorageImmutable,
   reduceStorage,
   cancelDeleteFile,
   cancelDeleteStorageAccount,
   uploadFile,
   uploadMultipleFiles,
-  getStorageAccs,
   listObjects,
 } from "./methods";
+
 import {
-  AnchorWallet,
   CreateStorageResponse,
   ShadowBatchUploadResponse,
   ShadowDriveResponse,
@@ -35,38 +35,67 @@ import {
 interface ShadowDrive {
   createStorageAccount(
     name: string,
-    size: string
+    size: string,
+    version: string
   ): Promise<CreateStorageResponse>;
-  addStorage(key: web3.PublicKey, size: string): Promise<ShadowDriveResponse>;
-  claimStake(key: web3.PublicKey): Promise<ShadowDriveResponse>;
-  deleteFile(key: web3.PublicKey, url: string): Promise<ShadowDriveResponse>;
+  addStorage(
+    key: web3.PublicKey,
+    size: string,
+    version: string
+  ): Promise<ShadowDriveResponse>;
+  claimStake(
+    key: web3.PublicKey,
+    version: string
+  ): Promise<ShadowDriveResponse>;
+  deleteFile(
+    key: web3.PublicKey,
+    url: string,
+    version: string
+  ): Promise<ShadowDriveResponse>;
   editFile(
     key: web3.PublicKey,
     url: string,
-    data: File | ShadowFile
+    data: File | ShadowFile,
+    version: string
   ): Promise<ShadowUploadResponse>;
-  getStorageAcc?(key: web3.PublicKey): Promise<StorageAccount>;
-  getStorageAccs?(): Promise<StorageAccount[]>;
-  listObjects(key: web3.PublicKey): Promise<string[]>;
-  makeStorageImmutable(key: web3.PublicKey): Promise<ShadowDriveResponse>;
+  getStorageAccount(
+    key: web3.PublicKey,
+    version: string
+  ): Promise<StorageAccount>;
+  getStorageAccounts(version: string): Promise<StorageAccountResponse[]>;
+  listObjects(key: web3.PublicKey, version: string): Promise<string[]>;
+  makeStorageImmutable(
+    key: web3.PublicKey,
+    version: string
+  ): Promise<ShadowDriveResponse>;
   reduceStorage(
     key: web3.PublicKey,
-    size: string
+    size: string,
+    version: string
   ): Promise<ShadowDriveResponse>;
   cancelDeleteFile(
     key: web3.PublicKey,
-    url: string
+    url: string,
+    version: string
   ): Promise<ShadowDriveResponse>;
-  cancelDeleteStorageAccount(key: web3.PublicKey): Promise<ShadowDriveResponse>;
+  cancelDeleteStorageAccount(
+    key: web3.PublicKey,
+    version: string
+  ): Promise<ShadowDriveResponse>;
   uploadFile(
     key: web3.PublicKey,
-    data: File | ShadowFile
+    data: File | ShadowFile,
+    version: string
   ): Promise<ShadowUploadResponse>;
   uploadMultipleFiles(
     key: web3.PublicKey,
-    data: FileList | ShadowFile[]
+    data: FileList | ShadowFile[],
+    version: string
   ): Promise<ShadowBatchUploadResponse[]>;
-  deleteStorageAccount(key: web3.PublicKey): Promise<ShadowDriveResponse>;
+  deleteStorageAccount(
+    key: web3.PublicKey,
+    version: string
+  ): Promise<ShadowDriveResponse>;
 }
 
 export class ShdwDrive implements ShadowDrive {
@@ -91,20 +120,18 @@ export class ShdwDrive implements ShadowDrive {
   listObjects = listObjects;
   makeStorageImmutable = makeStorageImmutable;
   reduceStorage = reduceStorage;
+  /**
+   * @deprecated The method should not be used as of Shadow Drive v1.5
+   */
   cancelDeleteFile = cancelDeleteFile;
   cancelDeleteStorageAccount = cancelDeleteStorageAccount;
   uploadFile = uploadFile;
   uploadMultipleFiles = uploadMultipleFiles;
 
-  constructor(
-    private connection: web3.Connection,
-    private wallet: Wallet | AnchorWallet
-  ) {
+  //Todo - check that the wallet passed in is able to sign messages
+  constructor(private connection: web3.Connection, private wallet: any) {
     this.wallet = wallet;
-    const [program, provider] = getAnchorEnvironmet(
-      wallet as Wallet,
-      connection
-    );
+    const [program, provider] = getAnchorEnvironmet(wallet, connection);
     this.connection = provider.connection;
     this.provider = provider;
     this.program = program;

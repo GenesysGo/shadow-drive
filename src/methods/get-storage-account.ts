@@ -4,15 +4,25 @@ import { StorageAccount } from "../types";
 /**
  * Get one storage account for the current user
  * @param {PublicKey} key - Publickey of a Storage Account
- *
+ * @param {string} version - ShadowDrive version (V1 or V2)
  * @returns {StorageAccount} Storage Account
  *
  */
 export default async function getStorageAcc(
-  key: web3.PublicKey
+  key: web3.PublicKey,
+  version: string
 ): Promise<StorageAccount> {
+  let storageAccount;
   try {
-    const storageAccount = await this.program.account.storageAccount.fetch(key);
+    switch (version) {
+      case "v1":
+        storageAccount = await this.program.account.storageAccountV2.fetch(key);
+        break;
+      case "v2":
+        storageAccount = await this.program.account.storageAccountV2.fetch(key);
+        break;
+    }
+
     return Promise.resolve(storageAccount);
   } catch (e) {
     return Promise.reject(new Error(e));
