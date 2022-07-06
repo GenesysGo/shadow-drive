@@ -17,7 +17,7 @@ export default async function redeemRent(
 ): Promise<ShadowDriveResponse> {
   let selectedAccount;
 
-  selectedAccount = await this.program.account.storageAccountV1.fetch(key);
+  selectedAccount = await this.program.account.storageAccount.fetch(key);
   const [unstakeAccount] = await anchor.web3.PublicKey.findProgramAddress(
     [Buffer.from("unstake-account"), key.toBytes()],
     this.program.programId

@@ -16,7 +16,7 @@ export default async function getStorageAcc(
   try {
     switch (version.toLocaleLowerCase()) {
       case "v1":
-        storageAccount = await this.program.account.storageAccountV2.fetch(key);
+        storageAccount = await this.program.account.storageAccount.fetch(key);
         break;
       case "v2":
         storageAccount = await this.program.account.storageAccountV2.fetch(key);

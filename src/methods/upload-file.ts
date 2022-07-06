@@ -15,7 +15,7 @@ import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
  * @param {anchor.web3.PublicKey} key - Publickey of Storage Account.
  * @param {File | ShadowFile} data - File or ShadowFile object, file extensions should be included in the name property of ShadowFiles.
  * @param {string} version - ShadowDrive version (v1 or v2)
- * @returns {ShadowUploadResponse} - File location and transaction signature.
+ * @returns {ShadowUploadResponse} File location and transaction signature.
  */
 export default async function uploadFile(
   key: anchor.web3.PublicKey,
@@ -30,7 +30,7 @@ export default async function uploadFile(
   let selectedAccount;
   switch (version.toLocaleLowerCase()) {
     case "v1":
-      selectedAccount = await this.program.account.storageAccountV1.fetch(key);
+      selectedAccount = await this.program.account.storageAccount.fetch(key);
       break;
     case "v2":
       selectedAccount = await this.program.account.storageAccountV2.fetch(key);
@@ -57,7 +57,7 @@ export default async function uploadFile(
     });
   }
   const fileNameBytes = new TextEncoder().encode(data.name).length;
-  if (fileNameBytes > 32) {
+  if (fileNameBytes > 32 && version.toLocaleLowerCase() == "v1") {
     fileErrors.push({
       file: data.name,
       error: "File name too long. Reduce to 32 bytes long.",

@@ -19,7 +19,7 @@ import { CreateStorageResponse } from "../types";
  * @param {string} name - What you want your storage account to be named. (Does not have to be unique)
  * @param {string} size - Amount of storage you are requesting to create. Should be in a string like '1KB', '1MB', '1GB'. Only KB, MB, and GB storage delineations are supported currently.
  * @param {string} version - ShadowDrive version(v1 or v2)
- * @returns {CreateStorageResponse} - Created bucket and transaction signature
+ * @returns {CreateStorageResponse} Created bucket and transaction signature
  */
 export default async function createStorageAccount(
   name: string,

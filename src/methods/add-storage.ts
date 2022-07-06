@@ -18,7 +18,7 @@ import { ShadowDriveResponse } from "../types";
  * @param {anchor.web3.PublicKey} key - Public Key of the existing storage to increase size on
  * @param {string} size - Amount of storage you are requesting to add to your storage account. Should be in a string like '1KB', '1MB', '1GB'. Only KB, MB, and GB storage delineations are supported currently.
  * @param {string} version - ShadowDrive version (v1 or v2)
- * @returns {ShadowDriveResponse} - Confirmed transaction ID
+ * @returns {ShadowDriveResponse} Confirmed transaction ID
  */
 export default async function addStorage(
   key: anchor.web3.PublicKey,
@@ -29,7 +29,9 @@ export default async function addStorage(
   let selectedAccount;
   switch (version.toLocaleLowerCase()) {
     case "v1":
-      selectedAccount = await this.program.account.storageAccountV1.fetch(key);
+      console.log(this.program.account);
+      console.log(this.program.storageAccountV1);
+      selectedAccount = await this.program.account.storageAccount.fetch(key);
       break;
     case "v2":
       selectedAccount = await this.program.account.storageAccountV2.fetch(key);

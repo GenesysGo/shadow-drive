@@ -1,5 +1,5 @@
 export type ShadowDriveUserStaking = {
-  version: "0.1.1";
+  version: "1.1.0-alpha";
   name: "shadow_drive_user_staking";
   constants: [
     {
@@ -415,12 +415,65 @@ export type ShadowDriveUserStaking = {
           type: {
             option: "string";
           };
+        }
+      ];
+    },
+    {
+      name: "storeFile";
+      accounts: [
+        {
+          name: "storageConfig";
+          isMut: true;
+          isSigner: false;
         },
         {
-          name: "owner2";
-          type: {
-            option: "publicKey";
-          };
+          name: "storageAccount";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "file";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "userInfo";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "owner";
+          isMut: true;
+          isSigner: true;
+        },
+        {
+          name: "uploader";
+          isMut: false;
+          isSigner: true;
+        },
+        {
+          name: "tokenMint";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "systemProgram";
+          isMut: false;
+          isSigner: false;
+        }
+      ];
+      args: [
+        {
+          name: "filename";
+          type: "string";
+        },
+        {
+          name: "sha256Hash";
+          type: "string";
+        },
+        {
+          name: "size";
+          type: "u64";
         }
       ];
     },
@@ -554,6 +607,27 @@ export type ShadowDriveUserStaking = {
           name: "systemProgram";
           isMut: false;
           isSigner: false;
+        }
+      ];
+      args: [];
+    },
+    {
+      name: "redeemRent";
+      accounts: [
+        {
+          name: "storageAccount";
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: "file";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "owner";
+          isMut: true;
+          isSigner: true;
         }
       ];
       args: [];
@@ -709,6 +783,11 @@ export type ShadowDriveUserStaking = {
           isSigner: true;
         },
         {
+          name: "uploader";
+          isMut: false;
+          isSigner: true;
+        },
+        {
           name: "ownerAta";
           isMut: true;
           isSigner: false;
@@ -773,6 +852,11 @@ export type ShadowDriveUserStaking = {
           name: "ownerAta";
           isMut: true;
           isSigner: false;
+        },
+        {
+          name: "uploader";
+          isMut: false;
+          isSigner: true;
         },
         {
           name: "tokenMint";
@@ -851,7 +935,12 @@ export type ShadowDriveUserStaking = {
           isSigner: false;
         }
       ];
-      args: [];
+      args: [
+        {
+          name: "storageAvailable";
+          type: "u64";
+        }
+      ];
     },
     {
       name: "badCsam2";
@@ -902,7 +991,12 @@ export type ShadowDriveUserStaking = {
           isSigner: false;
         }
       ];
-      args: [];
+      args: [
+        {
+          name: "storageAvailable";
+          type: "u64";
+        }
+      ];
     },
     {
       name: "increaseStorage";
@@ -931,6 +1025,11 @@ export type ShadowDriveUserStaking = {
           name: "stakeAccount";
           isMut: true;
           isSigner: false;
+        },
+        {
+          name: "uploader";
+          isMut: false;
+          isSigner: true;
         },
         {
           name: "tokenMint";
@@ -982,6 +1081,123 @@ export type ShadowDriveUserStaking = {
           name: "stakeAccount";
           isMut: true;
           isSigner: false;
+        },
+        {
+          name: "uploader";
+          isMut: false;
+          isSigner: true;
+        },
+        {
+          name: "tokenMint";
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: "systemProgram";
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: "tokenProgram";
+          isMut: false;
+          isSigner: false;
+        }
+      ];
+      args: [
+        {
+          name: "additionalStorage";
+          type: "u64";
+        }
+      ];
+    },
+    {
+      name: "increaseImmutableStorage";
+      accounts: [
+        {
+          name: "storageConfig";
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: "storageAccount";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "emissionsWallet";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "owner";
+          isMut: true;
+          isSigner: true;
+        },
+        {
+          name: "ownerAta";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "uploader";
+          isMut: false;
+          isSigner: true;
+        },
+        {
+          name: "tokenMint";
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: "systemProgram";
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: "tokenProgram";
+          isMut: false;
+          isSigner: false;
+        }
+      ];
+      args: [
+        {
+          name: "additionalStorage";
+          type: "u64";
+        }
+      ];
+    },
+    {
+      name: "increaseImmutableStorage2";
+      accounts: [
+        {
+          name: "storageConfig";
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: "storageAccount";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "emissionsWallet";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "owner";
+          isMut: true;
+          isSigner: true;
+        },
+        {
+          name: "ownerAta";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "uploader";
+          isMut: false;
+          isSigner: true;
         },
         {
           name: "tokenMint";
@@ -1048,6 +1264,11 @@ export type ShadowDriveUserStaking = {
           name: "tokenMint";
           isMut: false;
           isSigner: false;
+        },
+        {
+          name: "uploader";
+          isMut: false;
+          isSigner: true;
         },
         {
           name: "emissionsWallet";
@@ -1119,6 +1340,11 @@ export type ShadowDriveUserStaking = {
           name: "tokenMint";
           isMut: false;
           isSigner: false;
+        },
+        {
+          name: "uploader";
+          isMut: false;
+          isSigner: true;
         },
         {
           name: "emissionsWallet";
@@ -1443,6 +1669,58 @@ export type ShadowDriveUserStaking = {
         }
       ];
       args: [];
+    },
+    {
+      name: "migrateStep1";
+      accounts: [
+        {
+          name: "storageAccount";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "migration";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "owner";
+          isMut: true;
+          isSigner: true;
+        },
+        {
+          name: "systemProgram";
+          isMut: false;
+          isSigner: false;
+        }
+      ];
+      args: [];
+    },
+    {
+      name: "migrateStep2";
+      accounts: [
+        {
+          name: "storageAccount";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "migration";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "owner";
+          isMut: true;
+          isSigner: true;
+        },
+        {
+          name: "systemProgram";
+          isMut: false;
+          isSigner: false;
+        }
+      ];
+      args: [];
     }
   ];
   accounts: [
@@ -1467,7 +1745,7 @@ export type ShadowDriveUserStaking = {
       };
     },
     {
-      name: "storageAccountV1";
+      name: "storageAccount";
       type: {
         kind: "struct";
         fields: [
@@ -1667,6 +1945,90 @@ export type ShadowDriveUserStaking = {
           }
         ];
       };
+    },
+    {
+      name: "file";
+      type: {
+        kind: "struct";
+        fields: [
+          {
+            name: "immutable";
+            type: "bool";
+          },
+          {
+            name: "toBeDeleted";
+            type: "bool";
+          },
+          {
+            name: "deleteRequestEpoch";
+            type: "u32";
+          },
+          {
+            name: "size";
+            type: "u64";
+          },
+          {
+            name: "sha256Hash";
+            type: {
+              array: ["u8", 32];
+            };
+          },
+          {
+            name: "initCounterSeed";
+            type: "u32";
+          },
+          {
+            name: "storageAccount";
+            type: "publicKey";
+          },
+          {
+            name: "name";
+            type: "string";
+          }
+        ];
+      };
+    },
+    {
+      name: "file";
+      type: {
+        kind: "struct";
+        fields: [
+          {
+            name: "immutable";
+            type: "bool";
+          },
+          {
+            name: "toBeDeleted";
+            type: "bool";
+          },
+          {
+            name: "deleteRequestEpoch";
+            type: "u32";
+          },
+          {
+            name: "size";
+            type: "u64";
+          },
+          {
+            name: "sha256Hash";
+            type: {
+              array: ["u8", 32];
+            };
+          },
+          {
+            name: "initCounterSeed";
+            type: "u32";
+          },
+          {
+            name: "storageAccount";
+            type: "publicKey";
+          },
+          {
+            name: "name";
+            type: "string";
+          }
+        ];
+      };
     }
   ];
   types: [
@@ -1848,12 +2210,17 @@ export type ShadowDriveUserStaking = {
       code: 6031;
       name: "OnlyAdmin1CanChangeAdmins";
       msg: "Only admin1 can change admins";
+    },
+    {
+      code: 6032;
+      name: "OnlyOneOwnerAllowedInV1_5";
+      msg: "(As part of on-chain storage optimizations, only one owner is allowed in Shadow Drive v1.5)";
     }
   ];
 };
 
 export const IDL: ShadowDriveUserStaking = {
-  version: "0.1.1",
+  version: "1.1.0-alpha",
   name: "shadow_drive_user_staking",
   constants: [
     {
@@ -2270,11 +2637,64 @@ export const IDL: ShadowDriveUserStaking = {
             option: "string",
           },
         },
+      ],
+    },
+    {
+      name: "storeFile",
+      accounts: [
         {
-          name: "owner2",
-          type: {
-            option: "publicKey",
-          },
+          name: "storageConfig",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "storageAccount",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "file",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "userInfo",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "owner",
+          isMut: true,
+          isSigner: true,
+        },
+        {
+          name: "uploader",
+          isMut: false,
+          isSigner: true,
+        },
+        {
+          name: "tokenMint",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "systemProgram",
+          isMut: false,
+          isSigner: false,
+        },
+      ],
+      args: [
+        {
+          name: "filename",
+          type: "string",
+        },
+        {
+          name: "sha256Hash",
+          type: "string",
+        },
+        {
+          name: "size",
+          type: "u64",
         },
       ],
     },
@@ -2408,6 +2828,27 @@ export const IDL: ShadowDriveUserStaking = {
           name: "systemProgram",
           isMut: false,
           isSigner: false,
+        },
+      ],
+      args: [],
+    },
+    {
+      name: "redeemRent",
+      accounts: [
+        {
+          name: "storageAccount",
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: "file",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "owner",
+          isMut: true,
+          isSigner: true,
         },
       ],
       args: [],
@@ -2563,6 +3004,11 @@ export const IDL: ShadowDriveUserStaking = {
           isSigner: true,
         },
         {
+          name: "uploader",
+          isMut: false,
+          isSigner: true,
+        },
+        {
           name: "ownerAta",
           isMut: true,
           isSigner: false,
@@ -2627,6 +3073,11 @@ export const IDL: ShadowDriveUserStaking = {
           name: "ownerAta",
           isMut: true,
           isSigner: false,
+        },
+        {
+          name: "uploader",
+          isMut: false,
+          isSigner: true,
         },
         {
           name: "tokenMint",
@@ -2705,7 +3156,12 @@ export const IDL: ShadowDriveUserStaking = {
           isSigner: false,
         },
       ],
-      args: [],
+      args: [
+        {
+          name: "storageAvailable",
+          type: "u64",
+        },
+      ],
     },
     {
       name: "badCsam2",
@@ -2756,7 +3212,12 @@ export const IDL: ShadowDriveUserStaking = {
           isSigner: false,
         },
       ],
-      args: [],
+      args: [
+        {
+          name: "storageAvailable",
+          type: "u64",
+        },
+      ],
     },
     {
       name: "increaseStorage",
@@ -2785,6 +3246,11 @@ export const IDL: ShadowDriveUserStaking = {
           name: "stakeAccount",
           isMut: true,
           isSigner: false,
+        },
+        {
+          name: "uploader",
+          isMut: false,
+          isSigner: true,
         },
         {
           name: "tokenMint",
@@ -2836,6 +3302,123 @@ export const IDL: ShadowDriveUserStaking = {
           name: "stakeAccount",
           isMut: true,
           isSigner: false,
+        },
+        {
+          name: "uploader",
+          isMut: false,
+          isSigner: true,
+        },
+        {
+          name: "tokenMint",
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: "systemProgram",
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: "tokenProgram",
+          isMut: false,
+          isSigner: false,
+        },
+      ],
+      args: [
+        {
+          name: "additionalStorage",
+          type: "u64",
+        },
+      ],
+    },
+    {
+      name: "increaseImmutableStorage",
+      accounts: [
+        {
+          name: "storageConfig",
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: "storageAccount",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "emissionsWallet",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "owner",
+          isMut: true,
+          isSigner: true,
+        },
+        {
+          name: "ownerAta",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "uploader",
+          isMut: false,
+          isSigner: true,
+        },
+        {
+          name: "tokenMint",
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: "systemProgram",
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: "tokenProgram",
+          isMut: false,
+          isSigner: false,
+        },
+      ],
+      args: [
+        {
+          name: "additionalStorage",
+          type: "u64",
+        },
+      ],
+    },
+    {
+      name: "increaseImmutableStorage2",
+      accounts: [
+        {
+          name: "storageConfig",
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: "storageAccount",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "emissionsWallet",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "owner",
+          isMut: true,
+          isSigner: true,
+        },
+        {
+          name: "ownerAta",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "uploader",
+          isMut: false,
+          isSigner: true,
         },
         {
           name: "tokenMint",
@@ -2902,6 +3485,11 @@ export const IDL: ShadowDriveUserStaking = {
           name: "tokenMint",
           isMut: false,
           isSigner: false,
+        },
+        {
+          name: "uploader",
+          isMut: false,
+          isSigner: true,
         },
         {
           name: "emissionsWallet",
@@ -2973,6 +3561,11 @@ export const IDL: ShadowDriveUserStaking = {
           name: "tokenMint",
           isMut: false,
           isSigner: false,
+        },
+        {
+          name: "uploader",
+          isMut: false,
+          isSigner: true,
         },
         {
           name: "emissionsWallet",
@@ -3298,6 +3891,58 @@ export const IDL: ShadowDriveUserStaking = {
       ],
       args: [],
     },
+    {
+      name: "migrateStep1",
+      accounts: [
+        {
+          name: "storageAccount",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "migration",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "owner",
+          isMut: true,
+          isSigner: true,
+        },
+        {
+          name: "systemProgram",
+          isMut: false,
+          isSigner: false,
+        },
+      ],
+      args: [],
+    },
+    {
+      name: "migrateStep2",
+      accounts: [
+        {
+          name: "storageAccount",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "migration",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "owner",
+          isMut: true,
+          isSigner: true,
+        },
+        {
+          name: "systemProgram",
+          isMut: false,
+          isSigner: false,
+        },
+      ],
+      args: [],
+    },
   ],
   accounts: [
     {
@@ -3321,7 +3966,7 @@ export const IDL: ShadowDriveUserStaking = {
       },
     },
     {
-      name: "storageAccountV1",
+      name: "storageAccount",
       type: {
         kind: "struct",
         fields: [
@@ -3522,6 +4167,90 @@ export const IDL: ShadowDriveUserStaking = {
         ],
       },
     },
+    {
+      name: "file",
+      type: {
+        kind: "struct",
+        fields: [
+          {
+            name: "immutable",
+            type: "bool",
+          },
+          {
+            name: "toBeDeleted",
+            type: "bool",
+          },
+          {
+            name: "deleteRequestEpoch",
+            type: "u32",
+          },
+          {
+            name: "size",
+            type: "u64",
+          },
+          {
+            name: "sha256Hash",
+            type: {
+              array: ["u8", 32],
+            },
+          },
+          {
+            name: "initCounterSeed",
+            type: "u32",
+          },
+          {
+            name: "storageAccount",
+            type: "publicKey",
+          },
+          {
+            name: "name",
+            type: "string",
+          },
+        ],
+      },
+    },
+    {
+      name: "file",
+      type: {
+        kind: "struct",
+        fields: [
+          {
+            name: "immutable",
+            type: "bool",
+          },
+          {
+            name: "toBeDeleted",
+            type: "bool",
+          },
+          {
+            name: "deleteRequestEpoch",
+            type: "u32",
+          },
+          {
+            name: "size",
+            type: "u64",
+          },
+          {
+            name: "sha256Hash",
+            type: {
+              array: ["u8", 32],
+            },
+          },
+          {
+            name: "initCounterSeed",
+            type: "u32",
+          },
+          {
+            name: "storageAccount",
+            type: "publicKey",
+          },
+          {
+            name: "name",
+            type: "string",
+          },
+        ],
+      },
+    },
   ],
   types: [
     {
@@ -3702,6 +4431,11 @@ export const IDL: ShadowDriveUserStaking = {
       code: 6031,
       name: "OnlyAdmin1CanChangeAdmins",
       msg: "Only admin1 can change admins",
+    },
+    {
+      code: 6032,
+      name: "OnlyOneOwnerAllowedInV1_5",
+      msg: "(As part of on-chain storage optimizations, only one owner is allowed in Shadow Drive v1.5)",
     },
   ],
 };

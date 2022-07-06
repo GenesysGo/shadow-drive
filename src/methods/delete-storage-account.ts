@@ -17,7 +17,7 @@ export default async function deleteStorageAccount(
   let selectedAccount;
   switch (version.toLocaleLowerCase()) {
     case "v1":
-      selectedAccount = await this.program.account.storageAccountV1.fetch(key);
+      selectedAccount = await this.program.account.storageAccount.fetch(key);
       break;
     case "v2":
       selectedAccount = await this.program.account.storageAccountV2.fetch(key);
