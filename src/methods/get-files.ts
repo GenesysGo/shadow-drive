@@ -16,7 +16,7 @@ import { ShadowDriveResponse } from "../types";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Public Key of the existing storage to increase size on
- * @param {string} version - ShadowDrive version (V1 or V2)
+ * @param {string} version - ShadowDrive version (v1 or v2)
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 export default async function getFiles(
@@ -24,7 +24,7 @@ export default async function getFiles(
   version: string
 ): Promise<ShadowDriveResponse> {
   let selectedAccount;
-  switch (version) {
+  switch (version.toLocaleLowerCase()) {
     case "v1":
       selectedAccount = await this.program.account.storageAccountV1.fetch(key);
       break;
@@ -33,7 +33,7 @@ export default async function getFiles(
       break;
   }
   const fileKeys = [];
-  if (version == "v1") {
+  if (version.toLocaleLowerCase() == "v1") {
     for (let i = 0; i < selectedAccount.initCounter; i++) {
       let [file, fileBump] = await anchor.web3.PublicKey.findProgramAddress(
         [

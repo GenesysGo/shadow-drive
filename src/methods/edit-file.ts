@@ -15,7 +15,7 @@ import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
  * @param {anchor.web3.PublicKey} key - Publickey of Storage Account
  * @param {string} url - URL of existing file
  * @param {File | ShadowFile} data - File or ShadowFile object, file extensions should be included in the name property of ShadowFiles.
- * @param {string} version - ShadowDrive version (V1 or V2)
+ * @param {string} version - ShadowDrive version (v1 or v2)
  * @returns {ShadowUploadResponse} - File location and transaction signature
  */
 
@@ -30,7 +30,7 @@ export default async function editFile(
   let form;
   let file;
   let selectedAccount;
-  switch (version) {
+  switch (version.toLocaleLowerCase()) {
     case "v1":
       selectedAccount = await this.program.account.storageAccountV1.fetch(key);
       break;
@@ -104,7 +104,7 @@ export default async function editFile(
   const sha256Hash = hashSum.digest("hex");
   let size = new anchor.BN(fileBuffer.byteLength);
   let txn;
-  if (version === "v1") {
+  if (version.toLocaleLowerCase() === "v1") {
     try {
       txn = await this.program.methods
         .editFile(sha256Hash, size)

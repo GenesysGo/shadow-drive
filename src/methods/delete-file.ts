@@ -8,7 +8,7 @@ import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
  *
  * @param {anchor.web3.PublicKey} key - Publickey of Storage Account
  * @param {string} url - Shadow Drive URL of the file you are requesting to delete.
- * @param {string} version - ShadowDrive version (V1 or V2)
+ * @param {string} version - ShadowDrive version (v1 or v2)
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 
@@ -18,7 +18,7 @@ export default async function deleteFile(
   version: string
 ): Promise<ShadowDriveResponse> {
   let selectedAccount;
-  switch (version) {
+  switch (version.toLocaleLowerCase()) {
     case "v1":
       selectedAccount = await this.program.account.storageAccountV1.fetch(key);
       break;
@@ -46,7 +46,7 @@ export default async function deleteFile(
     fileDataResponse.file_data["file-account-pubkey"]
   );
   const fileName = url.slice(url.lastIndexOf("/"), url.length);
-  if (version === "v1") {
+  if (version.toLocaleLowerCase() === "v1") {
     try {
       const txn = await this.program.methods
         .requestDeleteFile()

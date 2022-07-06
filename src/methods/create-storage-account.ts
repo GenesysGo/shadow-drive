@@ -18,7 +18,7 @@ import { CreateStorageResponse } from "../types";
  *
  * @param {string} name - What you want your storage account to be named. (Does not have to be unique)
  * @param {string} size - Amount of storage you are requesting to create. Should be in a string like '1KB', '1MB', '1GB'. Only KB, MB, and GB storage delineations are supported currently.
- * @param {string} version - ShadowDrive version (V1 or V2)
+ * @param {string} version - ShadowDrive version(v1 or v2)
  * @returns {CreateStorageResponse} - Created bucket and transaction signature
  */
 export default async function createStorageAccount(
@@ -63,7 +63,7 @@ export default async function createStorageAccount(
   );
   try {
     let txn;
-    switch (version) {
+    switch (version.toLocaleLowerCase()) {
       case "v1":
         txn = await this.program.methods
           .initializeAccount(name, storageRequested)
@@ -112,7 +112,7 @@ export default async function createStorageAccount(
     }
     const serializedTxn = txn.serialize({ requireAllSignatures: false });
     let createStorageResponse;
-    switch (version) {
+    switch (version.toLocaleLowerCase()) {
       case "v1":
         createStorageResponse = await fetch(
           `${SHDW_DRIVE_ENDPOINT}/storage-account`,

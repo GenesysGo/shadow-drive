@@ -14,7 +14,7 @@ import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
  *
  * @param {anchor.web3.PublicKey} key - Publickey of Storage Account.
  * @param {File | ShadowFile} data - File or ShadowFile object, file extensions should be included in the name property of ShadowFiles.
- * @param {string} version - ShadowDrive version (V1 or V2)
+ * @param {string} version - ShadowDrive version (v1 or v2)
  * @returns {ShadowUploadResponse} - File location and transaction signature.
  */
 export default async function uploadFile(
@@ -28,7 +28,7 @@ export default async function uploadFile(
   let file;
 
   let selectedAccount;
-  switch (version) {
+  switch (version.toLocaleLowerCase()) {
     case "v1":
       selectedAccount = await this.program.account.storageAccountV1.fetch(key);
       break;
@@ -110,7 +110,7 @@ export default async function uploadFile(
   } catch (e) {
     return Promise.reject(new Error(e));
   }
-  if (version === "v1") {
+  if (version.toLocaleLowerCase() === "v1") {
     try {
       txn = await this.program.methods
         .storeFile(data.name, sha256Hash, size)
@@ -161,15 +161,6 @@ export default async function uploadFile(
     }
   } else {
     try {
-      //   const msg = new TextEncoder().encode(
-      //     `Shadow Drive Signed Message:\nStorage Account: ${key}\nUpload file with hash: ${sha256Hash}`
-      //   );
-      //   const msgSig = await this.wallet.signMessage(msg);
-      //   const encodedMsg = bs58.encode(msgSig);
-      //   form.append("message", encodedMsg);
-      //   form.append("storage_account", key.toString());
-      //   form.append("signer", this.wallet.publicKey.toString());
-
       const uploadResponse = await fetch(`${SHDW_DRIVE_ENDPOINT}/upload`, {
         method: "POST",
         //@ts-ignore

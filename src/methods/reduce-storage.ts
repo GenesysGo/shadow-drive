@@ -18,7 +18,7 @@ import { ShadowDriveResponse } from "../types";
  *
  * @param {anchor.web3.PublicKey} key - Publickey of a Storage Account
  * @param {string} size - Amount of storage you are requesting to reduce from your storage account. Should be in a string like '1KB', '1MB', '1GB'. Only KB, MB, and GB storage delineations are supported currently.
- * @param {string} version - ShadowDrive version (V1 or V2)
+ * @param {string} version - ShadowDrive version (v1 or v2)
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 export default async function reduceStorage(
@@ -28,7 +28,7 @@ export default async function reduceStorage(
 ): Promise<ShadowDriveResponse> {
   let storageInputAsBytes = humanSizeToBytes(size);
   let selectedAccount;
-  switch (version) {
+  switch (version.toLocaleLowerCase()) {
     case "v1":
       selectedAccount = await this.program.account.storageAccountV1.fetch(key);
       break;
@@ -52,7 +52,7 @@ export default async function reduceStorage(
   const emissionsAta = await findAssociatedTokenAddress(emissions, tokenMint);
   try {
     let txn;
-    switch (version) {
+    switch (version.toLocaleLowerCase()) {
       case "v1":
         txn = await this.program.methods
           .decreaseStorage(new anchor.BN(storageInputAsBytes.toString()))

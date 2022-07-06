@@ -3,7 +3,7 @@ import { StorageAccountResponse } from "../types";
 /**
  *
  * Get all storage accounts for the current user
- * @param {string} version - ShadowDrive version (V1 or V2)
+ * @param {string} version - ShadowDrive version (v1 or v2)
  * @returns {StorageAccountResponse[]} - List of storage accounts
  *
  */
@@ -12,7 +12,7 @@ export default async function getStorageAccs(
 ): Promise<StorageAccountResponse[]> {
   let storageAccounts;
   try {
-    switch (version) {
+    switch (version.toLocaleLowerCase()) {
       case "v1":
         storageAccounts = await this.program.account.storageAccountV1.all([
           {

@@ -24,7 +24,7 @@ interface FileData {
  *
  * @param {anchor.web3.PublicKey} key - Storage account PublicKey to upload the files to.
  * @param {FileList | ShadowFile[]} data[] - Array of Files or ShadowFile objects to be uploaded
- * @param {string} version - ShadowDrive version (V1 or V2)
+ * @param {string} version - ShadowDrive version (v1 or v2)
  * @returns {ShadowBatchUploadResponse[]} - File names, locations and transaction signatures for uploaded files.
  */
 
@@ -34,7 +34,7 @@ export default async function uploadMultipleFiles(
   version: string
 ): Promise<ShadowBatchUploadResponse[]> {
   let selectedAccount;
-  switch (version) {
+  switch (version.toLocaleLowerCase()) {
     case "v1":
       selectedAccount = await this.program.account.storageAccountV1.fetch(key);
       break;

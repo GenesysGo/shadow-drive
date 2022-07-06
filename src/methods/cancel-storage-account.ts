@@ -5,7 +5,7 @@ import { ShadowDriveResponse } from "../types";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Publickey of a Storage Account
- * @param {string} version - ShadowDrive version (V1 or V2)
+ * @param {string} version - ShadowDrive version (v1 or v2)
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 
@@ -14,7 +14,7 @@ export default async function cancelDeleteStorageAccount(
   version: string
 ): Promise<ShadowDriveResponse> {
   let selectedAccount;
-  switch (version) {
+  switch (version.toLocaleLowerCase()) {
     case "v1":
       selectedAccount = await this.program.account.storageAccountV1.fetch(key);
       break;
@@ -25,7 +25,7 @@ export default async function cancelDeleteStorageAccount(
   let stakeAccount = (await getStakeAccount(this.program, key))[0];
   let txn;
   try {
-    switch (version) {
+    switch (version.toLocaleLowerCase()) {
       case "v1":
         txn = await this.program.methods
           .unmarkDeleteAccount()
