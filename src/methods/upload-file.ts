@@ -57,13 +57,6 @@ export default async function uploadFile(
       erorr: "Exceeds the 1GB limit.",
     });
   }
-  const fileNameBytes = new TextEncoder().encode(data.name).length;
-  if (fileNameBytes > 32 && version.toLocaleLowerCase() == "v1") {
-    fileErrors.push({
-      file: data.name,
-      error: "File name too long. Reduce to 32 bytes long.",
-    });
-  }
   /**
    *
    * Users must remember to include the file extension when uploading from Node.

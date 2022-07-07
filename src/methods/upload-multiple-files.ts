@@ -50,13 +50,6 @@ export default async function uploadMultipleFiles(
       const url = encodeURI(
         `https://shdw-drive.genesysgo.net/${key.toString()}/${shdwFile.name}`
       );
-      const fileNameBytes = new TextEncoder().encode(shdwFile.name).length;
-      if (fileNameBytes > 32) {
-        fileErrors.push({
-          file: file,
-          error: "File name too long. Reduce to 32 bytes long.",
-        });
-      }
       let size = new anchor.BN(fileBuffer.byteLength);
       fileData.push({
         name: shdwFile.name,
@@ -78,13 +71,6 @@ export default async function uploadMultipleFiles(
         fileErrors.push({
           file: file,
           erorr: "Exceeds the 1GB limit.",
-        });
-      }
-      const fileNameBytes = new TextEncoder().encode(shdwFile.name).length;
-      if (fileNameBytes > 32) {
-        fileErrors.push({
-          file: file,
-          error: "File name too long. Reduce to 32 bytes long.",
         });
       }
       const url = encodeURI(
