@@ -20,9 +20,12 @@
   ],
   "license": "MIT",
   "scripts": {
+    "clean": "rimraf dist",
+    "prebuild": "yarn clean",
     "build": "tsc",
     "docs": "typedoc --excludePrivate --includeVersion --out ./docs src",
-    "test": "jest --forceExit"
+    "test": "jest --forceExit",
+    "prepublishOnly": "yarn build"
   },
   "devDependencies": {
     "@types/jest": "^27.5.0",
@@ -32,6 +35,7 @@
     "jest": "^28.1.0",
     "jest-config": "^28.1.0",
     "react": "^18.1.0",
+    "rimraf": "^3.0.2",
     "ts-jest": "^28.0.2",
     "ts-jest-resolver": "^2.0.0",
     "typedoc": "^0.22.15",
