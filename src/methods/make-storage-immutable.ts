@@ -1,16 +1,18 @@
 import * as anchor from "@project-serum/anchor";
+import { getStakeAccount, findAssociatedTokenAddress } from "../utils/helpers";
 import {
-  getStakeAccount,
-  findAssociatedTokenAddress,
-  sendAndConfirm,
-} from "../utils/helpers";
-import { emissions, isBrowser, tokenMint, uploader } from "../utils/common";
+  emissions,
+  isBrowser,
+  SHDW_DRIVE_ENDPOINT,
+  tokenMint,
+  uploader,
+} from "../utils/common";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import { ShadowDriveResponse } from "../types";
-
+import fetch from "node-fetch";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Publickey of a Storage Account
@@ -47,15 +49,16 @@ export default async function makeStorageImmutable(
           .accounts({
             storageConfig: this.storageConfigPDA,
             storageAccount: key,
-            owner: selectedAccount.owner1,
-            ownerAta,
             stakeAccount,
-            uploader: uploader,
             emissionsWallet: emissionsAta,
+            owner: selectedAccount.owner1,
+            uploader: uploader,
+            ownerAta,
             tokenMint: tokenMint,
             systemProgram: anchor.web3.SystemProgram.programId,
             tokenProgram: TOKEN_PROGRAM_ID,
             associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+            rent: anchor.web3.SYSVAR_RENT_PUBKEY,
           })
           .transaction();
       case "v2":
@@ -73,6 +76,7 @@ export default async function makeStorageImmutable(
             systemProgram: anchor.web3.SystemProgram.programId,
             tokenProgram: TOKEN_PROGRAM_ID,
             associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+            rent: anchor.web3.SYSVAR_RENT_PUBKEY,
           })
           .transaction();
         break;
@@ -86,15 +90,31 @@ export default async function makeStorageImmutable(
     } else {
       await this.wallet.signTransaction(txn);
     }
-
-    const res = await sendAndConfirm(
-      this.provider.connection,
-      txn.serialize(),
-      { skipPreflight: false },
-      "confirmed",
-      120000
+    const serializedTxn = txn.serialize({ requireAllSignatures: false });
+    const makeImmutableResponse = await fetch(
+      `${SHDW_DRIVE_ENDPOINT}/make-immutable`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          transaction: Buffer.from(serializedTxn.toJSON().data).toString(
+            "base64"
+          ),
+        }),
+      }
     );
-    return Promise.resolve(res);
+    if (!makeImmutableResponse.ok) {
+      return Promise.reject(
+        new Error(`Server response status code: ${
+          makeImmutableResponse.status
+        } \n 
+			Server response status message: ${(await makeImmutableResponse.json()).error}`)
+      );
+    }
+    const responseJson = await makeImmutableResponse.json();
+    return Promise.resolve(responseJson);
   } catch (e) {
     return Promise.reject(new Error(e));
   }
