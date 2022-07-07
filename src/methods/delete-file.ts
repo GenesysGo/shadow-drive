@@ -1,8 +1,7 @@
 import * as anchor from "@project-serum/anchor";
-import { isBrowser, SHDW_DRIVE_ENDPOINT, tokenMint } from "../utils/common";
+import { SHDW_DRIVE_ENDPOINT } from "../utils/common";
 import { ShadowDriveResponse } from "../types";
 import fetch from "cross-fetch";
-import { sendAndConfirm } from "../utils/helpers";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 /**
  *
@@ -46,71 +45,31 @@ export default async function deleteFile(
     fileDataResponse.file_data["file-account-pubkey"]
   );
   const fileName = url.slice(url.lastIndexOf("/"), url.length);
-  if (version.toLocaleLowerCase() === "v1") {
-    try {
-      const txn = await this.program.methods
-        .requestDeleteFile()
-        .accounts({
-          storageConfig: this.storageConfigPDA,
-          storageAccount: key,
-          file: fileAccount,
-          owner: selectedAccount.owner1,
-          tokenMint: tokenMint,
-          systemProgram: anchor.web3.SystemProgram.programId,
-        })
-        .transaction();
-      txn.recentBlockhash = (
-        await this.connection.getLatestBlockhash()
-      ).blockhash;
-      txn.feePayer = this.wallet.publicKey;
-      if (!isBrowser) {
-        await txn.partialSign(this.wallet.payer);
-      } else {
-        await this.wallet.signTransaction(txn);
-      }
-      const res = await sendAndConfirm(
-        this.provider.connection,
-        txn.serialize(),
-        { skipPreflight: false },
-        "confirmed",
-        120000
+  try {
+    let deleteFileResponse;
+    const msg = Buffer.from(
+      `Shadow Drive Signed Message:\nStorage Account: ${key}\Delete File: ${fileName}`
+    );
+    const msgSig = await this.wallet.signMessage(msg);
+    const encodedMsg = bs58.encode(msgSig);
+    deleteFileResponse = await fetch(`${SHDW_DRIVE_ENDPOINT}/delete-file`, {
+      method: "POST",
+      body: JSON.stringify({
+        message: encodedMsg,
+        signer: this.wallet.publicKey,
+        file_name: fileName,
+        storage_account: key,
+      }),
+    });
+    if (!deleteFileResponse.ok) {
+      return Promise.reject(
+        new Error(`Server response status code: ${deleteFileResponse.status} \n 
+					  Server response status message: ${(await deleteFileResponse.json()).error}`)
       );
-      return Promise.resolve(res);
-    } catch (e) {
-      return Promise.reject(new Error(e));
     }
-  } else {
-    try {
-      let deleteFileResponse;
-      const msg = Buffer.from(
-        `Shadow Drive Signed Message:\nStorage Account: ${key}\Delete File: ${fileName}`
-      );
-      const msgSig = await this.wallet.signMessage(msg);
-      const encodedMsg = bs58.encode(msgSig);
-      deleteFileResponse = await fetch(`${SHDW_DRIVE_ENDPOINT}/delete-file-2`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: encodedMsg,
-          signer: this.wallet.publicKey,
-          file_name: fileName,
-          storage_account: key,
-        }),
-      });
-      if (!deleteFileResponse.ok) {
-        return Promise.reject(
-          new Error(`Server response status code: ${
-            deleteFileResponse.status
-          } \n 
-						Server response status message: ${(await deleteFileResponse.json()).error}`)
-        );
-      }
-      const responseJson = await deleteFileResponse.json();
-      return Promise.resolve(responseJson);
-    } catch (e) {
-      return Promise.reject(new Error(e));
-    }
+    const responseJson = await deleteFileResponse.json();
+    return Promise.resolve(responseJson);
+  } catch (e) {
+    return Promise.reject(new Error(e));
   }
 }

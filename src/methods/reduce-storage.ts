@@ -10,10 +10,11 @@ import {
   isBrowser,
   SHDW_DRIVE_ENDPOINT,
   tokenMint,
+  uploader,
 } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ShadowDriveResponse } from "../types";
-
+import fetch from "node-fetch";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Publickey of a Storage Account
@@ -63,6 +64,7 @@ export default async function reduceStorage(
             unstakeAccount,
             owner: selectedAccount.owner1,
             ownerAta,
+            uploader: uploader,
             stakeAccount,
             emissionsWallet: emissionsAta,
             tokenMint: tokenMint,
@@ -82,6 +84,7 @@ export default async function reduceStorage(
             unstakeAccount,
             owner: selectedAccount.owner1,
             ownerAta,
+            uploader: uploader,
             stakeAccount,
             emissionsWallet: emissionsAta,
             tokenMint: tokenMint,
@@ -119,15 +122,14 @@ export default async function reduceStorage(
         }),
       }
     );
+    const res = await reduceStorageResponse.json();
     if (!reduceStorageResponse.ok) {
       return Promise.reject(
-        new Error(`Server response status code: ${
-          reduceStorageResponse.status
-        } \n 
-			Server response status message: ${(await reduceStorageResponse.json()).error}`)
+        new Error(`Server response status code: ${reduceStorageResponse.status} \n 
+			Server response status message: ${res.error}`)
       );
     }
-    const responseJson = await reduceStorageResponse.json();
+    const responseJson = res;
     return Promise.resolve(responseJson);
   } catch (e) {
     return Promise.reject(new Error(e));

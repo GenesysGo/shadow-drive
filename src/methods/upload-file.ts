@@ -10,6 +10,7 @@ import fetch from "cross-fetch";
 import { ShadowFile, ShadowUploadResponse } from "../types";
 import NodeFormData from "form-data";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
+import nacl from "tweetnacl";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Publickey of Storage Account.
@@ -82,12 +83,14 @@ export default async function uploadFile(
       "You have not created a storage account on Shadow Drive yet. Please see the 'create-storage-account' command to get started."
     );
   }
-  const hashSum = crypto.createHash("sha256");
-  hashSum.update(
+  const fileHashSum = crypto.createHash("sha256");
+  const fileNameHashSum = crypto.createHash("sha256");
+  fileHashSum.update(
     Buffer.isBuffer(fileBuffer) ? fileBuffer : Buffer.from(fileBuffer)
   );
-  const sha256Hash = hashSum.digest("hex");
-
+  fileNameHashSum.update(data.name);
+  const fileHash = fileHashSum.digest("hex");
+  const fileNameHash = fileNameHashSum.digest("hex");
   let size = new anchor.BN(fileBuffer.byteLength);
   let fileSeed = selectedAccount.initCounter;
   let [fileAcc, fileBump] = await anchor.web3.PublicKey.findProgramAddress(
@@ -100,10 +103,16 @@ export default async function uploadFile(
   let txn;
   try {
     const msg = new TextEncoder().encode(
-      `Shadow Drive Signed Message:\nStorage Account: ${key}\nUpload file with hash: ${sha256Hash}`
+      `Shadow Drive Signed Message:\nStorage Account: ${key}\nUpload files with hash: ${fileNameHash}`
     );
-    const msgSig = await this.wallet.signMessage(msg);
+    let msgSig: Uint8Array;
+    if (!this.wallet.signMessage) {
+      msgSig = nacl.sign.detached(msg, this.wallet.payer.secretKey);
+    } else {
+      msgSig = await this.wallet.signMessage(msg);
+    }
     const encodedMsg = bs58.encode(msgSig);
+    form.append("fileNames", data.name);
     form.append("message", encodedMsg);
     form.append("storage_account", key.toString());
     form.append("signer", this.wallet.publicKey.toString());
@@ -113,7 +122,7 @@ export default async function uploadFile(
   if (version.toLocaleLowerCase() === "v1") {
     try {
       txn = await this.program.methods
-        .storeFile(data.name, sha256Hash, size)
+        .storeFile(data.name, fileHash, size)
         .accounts({
           storageConfig: this.storageConfigPDA,
           storageAccount: key,

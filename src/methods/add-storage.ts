@@ -13,6 +13,7 @@ import {
 } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ShadowDriveResponse } from "../types";
+import fetch from "node-fetch";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Public Key of the existing storage to increase size on
@@ -29,8 +30,6 @@ export default async function addStorage(
   let selectedAccount;
   switch (version.toLocaleLowerCase()) {
     case "v1":
-      console.log(this.program.account);
-      console.log(this.program.storageAccountV1);
       selectedAccount = await this.program.account.storageAccount.fetch(key);
       break;
     case "v2":
@@ -75,6 +74,7 @@ export default async function addStorage(
             owner: selectedAccount.owner1,
             ownerAta,
             stakeAccount,
+            uploader: uploader,
             tokenMint: tokenMint,
             systemProgram: anchor.web3.SystemProgram.programId,
             tokenProgram: TOKEN_PROGRAM_ID,

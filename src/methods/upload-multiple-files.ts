@@ -1,16 +1,12 @@
 import * as anchor from "@project-serum/anchor";
-import {
-  isBrowser,
-  SHDW_DRIVE_ENDPOINT,
-  tokenMint,
-  uploader,
-} from "../utils/common";
+import { isBrowser, SHDW_DRIVE_ENDPOINT } from "../utils/common";
 import crypto from "crypto";
 import { ShadowBatchUploadResponse, ShadowFile } from "../types";
 import NodeFormData from "form-data";
-import { sleep, sortByProperty, getChunkLength } from "../utils/helpers";
+import { sleep, getChunkLength } from "../utils/helpers";
 import fetch from "cross-fetch";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
+import nacl from "tweetnacl";
 
 interface FileData {
   name: string;
@@ -24,24 +20,13 @@ interface FileData {
  *
  * @param {anchor.web3.PublicKey} key - Storage account PublicKey to upload the files to.
  * @param {FileList | ShadowFile[]} data[] - Array of Files or ShadowFile objects to be uploaded
- * @param {string} version - ShadowDrive version (v1 or v2)
  * @returns {ShadowBatchUploadResponse[]} - File names, locations and transaction signatures for uploaded files.
  */
 
 export default async function uploadMultipleFiles(
   key: anchor.web3.PublicKey,
-  data: FileList | ShadowFile[],
-  version: string
+  data: FileList | ShadowFile[]
 ): Promise<ShadowBatchUploadResponse[]> {
-  let selectedAccount;
-  switch (version.toLocaleLowerCase()) {
-    case "v1":
-      selectedAccount = await this.program.account.storageAccount.fetch(key);
-      break;
-    case "v2":
-      selectedAccount = await this.program.account.storageAccountV2.fetch(key);
-      break;
-  }
   let fileData: Array<FileData> = [];
   const fileErrors: Array<object> = [];
   let existingUploadJSON: ShadowBatchUploadResponse[] = [];
@@ -156,14 +141,19 @@ export default async function uploadMultipleFiles(
 
   const allFileNames = fileData.map((file) => file.name);
   const hashSum = crypto.createHash("sha256");
-  const hashedFileNames = hashSum.update(allFileNames.toString());
+  hashSum.update(allFileNames.toString());
   const fileNamesHashed = hashSum.digest("hex");
   let encodedMsg;
   try {
     const msg = new TextEncoder().encode(
       `Shadow Drive Signed Message:\nStorage Account: ${key}\nUpload files with hash: ${fileNamesHashed}`
     );
-    const msgSig = await this.wallet.signMessage(msg);
+    let msgSig;
+    if (!this.wallet.signMessage) {
+      msgSig = nacl.sign.detached(msg, this.wallet.payer.secretKey);
+    } else {
+      msgSig = await this.wallet.signMessage(msg);
+    }
     encodedMsg = bs58.encode(msgSig);
   } catch (e) {
     console.log("Could not hash file names");

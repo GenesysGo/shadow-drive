@@ -7,24 +7,14 @@ import fetch from "cross-fetch";
  *
  * @param {anchor.web3.PublicKey} key - Publickey of Storage Account
  * @param {string} url - Shadow Drive URL of the file you are requesting to undelete.
- * @param {string} version - ShadowDrive version (v1 or v2)
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 
 export default async function cancelDeleteFile(
   key: anchor.web3.PublicKey,
-  url: string,
-  version: string
+  url: string
 ): Promise<ShadowDriveResponse> {
-  let selectedAccount;
-  switch (version.toLocaleLowerCase()) {
-    case "v1":
-      selectedAccount = await this.program.account.storageAccount.fetch(key);
-      break;
-    case "v2":
-      selectedAccount = await this.program.account.storageAccountV2.fetch(key);
-      break;
-  }
+  const selectedAccount = await this.program.account.storageAccount.fetch(key);
   const fileData = await fetch(`${SHDW_DRIVE_ENDPOINT}/get-object-data`, {
     method: "POST",
     headers: {

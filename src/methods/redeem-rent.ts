@@ -7,7 +7,7 @@ import { ShadowDriveResponse } from "../types";
 /**
  *
  * @param {anchor.web3.PublicKey} key - PublicKey of a Storage Account
- * @param {string} version - ShadowDrive version (v1 or v2)
+ * @param {string} file - ShadowDrive version (v1 or v2)
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 
@@ -32,17 +32,11 @@ export default async function redeemRent(
   );
   try {
     const txn = await this.program.methods
-      .claimStake()
+      .redeemRent()
       .accounts({
-        storageConfig: this.storageConfigPDA,
         storageAccount: key,
-        unstakeInfo: unstakeInfo,
-        unstakeAccount: unstakeAccount,
+        file: file,
         owner: selectedAccount.owner1,
-        ownerAta,
-        tokenMint,
-        systemProgram: anchor.web3.SystemProgram.programId,
-        tokenProgram: TOKEN_PROGRAM_ID,
       })
       .transaction();
     txn.recentBlockhash = (
