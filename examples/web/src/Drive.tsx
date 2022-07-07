@@ -115,7 +115,7 @@ export default function Drive() {
 		})();
 	}, [wallet?.publicKey])
 	const refreshAccounts = async () => {
-		const accounts = await drive?.getStorageAccounts('v1');
+		const accounts = await drive?.getStorageAccounts('v2');
 		setAccs(accounts!);
 	}
 	useEffect(() => {
