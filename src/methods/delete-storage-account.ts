@@ -6,25 +6,50 @@ import { sendAndConfirm } from "../utils/helpers";
 /**
  *
  * @param {anchor.web3.PublicKey} key - PublicKey of a StorageAccount
- *
+ *	@param {string} version - ShadowDrive (v1 or v2)
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 
 export default async function deleteStorageAccount(
-  key: anchor.web3.PublicKey
+  key: anchor.web3.PublicKey,
+  version: string
 ): Promise<ShadowDriveResponse> {
-  const selectedAccount = await this.program.account.storageAccount.fetch(key);
+  let selectedAccount;
+  switch (version.toLocaleLowerCase()) {
+    case "v1":
+      selectedAccount = await this.program.account.storageAccount.fetch(key);
+      break;
+    case "v2":
+      selectedAccount = await this.program.account.storageAccountV2.fetch(key);
+      break;
+  }
   try {
-    const txn = await this.program.methods
-      .requestDeleteAccount()
-      .accounts({
-        storageConfig: this.storageConfigPDA,
-        storageAccount: key,
-        owner: selectedAccount.owner1,
-        tokenMint: tokenMint,
-        systemProgram: anchor.web3.SystemProgram.programId,
-      })
-      .transaction();
+    let txn;
+    switch (version.toLocaleLowerCase()) {
+      case "v1":
+        txn = await this.program.methods
+          .requestDeleteAccount()
+          .accounts({
+            storageConfig: this.storageConfigPDA,
+            storageAccount: key,
+            owner: selectedAccount.owner1,
+            tokenMint: tokenMint,
+            systemProgram: anchor.web3.SystemProgram.programId,
+          })
+          .transaction();
+      case "v2":
+        txn = await this.program.methods
+          .requestDeleteAccount2()
+          .accounts({
+            storageConfig: this.storageConfigPDA,
+            storageAccount: key,
+            owner: selectedAccount.owner1,
+            tokenMint: tokenMint,
+            systemProgram: anchor.web3.SystemProgram.programId,
+          })
+          .transaction();
+        break;
+    }
     txn.recentBlockhash = (
       await this.connection.getLatestBlockhash()
     ).blockhash;
