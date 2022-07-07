@@ -1,19 +1,18 @@
 import * as anchor from "@project-serum/anchor";
 import { findAssociatedTokenAddress, sendAndConfirm } from "../utils/helpers";
 import { isBrowser, tokenMint } from "../utils/common";
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ShadowDriveResponse } from "../types";
 
 /**
  *
  * @param {anchor.web3.PublicKey} key - PublicKey of a Storage Account
- * @param {string} file - ShadowDrive version (v1 or v2)
+ * @param {anchor.web3.PublicKey} fileAccount - PublicKey of the file account to close
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 
 export default async function redeemRent(
   key: anchor.web3.PublicKey,
-  file: string
+  fileAccount: anchor.web3.PublicKey
 ): Promise<ShadowDriveResponse> {
   let selectedAccount;
 
@@ -35,7 +34,7 @@ export default async function redeemRent(
       .redeemRent()
       .accounts({
         storageAccount: key,
-        file: file,
+        file: fileAccount,
         owner: selectedAccount.owner1,
       })
       .transaction();

@@ -3,7 +3,7 @@ import { SHDW_DRIVE_ENDPOINT } from "../utils/common";
 import { StorageAccountInfo } from "../types";
 import fetch from "node-fetch";
 /**
- * Get one storage account for the current user
+ * Get storage account details
  * @param {PublicKey} key - Publickey of a Storage Account
  * @returns {StorageAccountInfo} Storage Account
  *

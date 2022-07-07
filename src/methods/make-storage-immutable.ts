@@ -4,7 +4,7 @@ import {
   findAssociatedTokenAddress,
   sendAndConfirm,
 } from "../utils/helpers";
-import { emissions, isBrowser, tokenMint } from "../utils/common";
+import { emissions, isBrowser, tokenMint, uploader } from "../utils/common";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
@@ -50,6 +50,7 @@ export default async function makeStorageImmutable(
             owner: selectedAccount.owner1,
             ownerAta,
             stakeAccount,
+            uploader: uploader,
             emissionsWallet: emissionsAta,
             tokenMint: tokenMint,
             systemProgram: anchor.web3.SystemProgram.programId,
@@ -66,6 +67,7 @@ export default async function makeStorageImmutable(
             owner: selectedAccount.owner1,
             ownerAta,
             stakeAccount,
+            uploader: uploader,
             emissionsWallet: emissionsAta,
             tokenMint: tokenMint,
             systemProgram: anchor.web3.SystemProgram.programId,

@@ -21,6 +21,8 @@ import {
   uploadFile,
   uploadMultipleFiles,
   listObjects,
+  redeemRent,
+  migrate,
 } from "./methods";
 
 import {
@@ -31,12 +33,14 @@ import {
   ShadowUploadResponse,
   StorageAccount,
   StorageAccountResponse,
+  StorageAccountInfo,
 } from "./types";
 interface ShadowDrive {
   createStorageAccount(
     name: string,
     size: string,
-    version: string
+    version: string,
+    owner2: web3.PublicKey
   ): Promise<CreateStorageResponse>;
   addStorage(
     key: web3.PublicKey,
@@ -58,10 +62,7 @@ interface ShadowDrive {
     data: File | ShadowFile,
     version: string
   ): Promise<ShadowUploadResponse>;
-  getStorageAccount(
-    key: web3.PublicKey,
-    version: string
-  ): Promise<StorageAccount>;
+  getStorageAccount(key: web3.PublicKey): Promise<StorageAccountInfo>;
   getStorageAccounts(version: string): Promise<StorageAccountResponse[]>;
   listObjects(key: web3.PublicKey, version: string): Promise<string[]>;
   makeStorageImmutable(
@@ -75,8 +76,7 @@ interface ShadowDrive {
   ): Promise<ShadowDriveResponse>;
   cancelDeleteFile(
     key: web3.PublicKey,
-    url: string,
-    version: string
+    url: string
   ): Promise<ShadowDriveResponse>;
   cancelDeleteStorageAccount(
     key: web3.PublicKey,
@@ -89,13 +89,17 @@ interface ShadowDrive {
   ): Promise<ShadowUploadResponse>;
   uploadMultipleFiles(
     key: web3.PublicKey,
-    data: FileList | ShadowFile[],
-    version: string
+    data: FileList | ShadowFile[]
   ): Promise<ShadowBatchUploadResponse[]>;
   deleteStorageAccount(
     key: web3.PublicKey,
     version: string
   ): Promise<ShadowDriveResponse>;
+  redeemRent(
+    key: web3.PublicKey,
+    fileAccount: web3.PublicKey
+  ): Promise<ShadowDriveResponse>;
+  migrate(key: web3.PublicKey): Promise<ShadowDriveResponse>;
 }
 
 export class ShdwDrive implements ShadowDrive {
@@ -127,6 +131,8 @@ export class ShdwDrive implements ShadowDrive {
   cancelDeleteStorageAccount = cancelDeleteStorageAccount;
   uploadFile = uploadFile;
   uploadMultipleFiles = uploadMultipleFiles;
+  redeemRent = redeemRent;
+  migrate = migrate;
 
   //Todo - check that the wallet passed in is able to sign messages
   constructor(private connection: web3.Connection, private wallet: any) {
@@ -136,15 +142,13 @@ export class ShdwDrive implements ShadowDrive {
     this.provider = provider;
     this.program = program;
   }
-  public async init() {
-    this.storageConfigPDA = (await getStorageConfigPDA(this.program))[0];
-    if (this.wallet) {
-      const user = (await getUserInfo(this.program, this.wallet.publicKey))[0];
-      if (user) {
-        this.userInfo = user;
-      }
-      return this;
+  public async init(): Promise<ShdwDrive> {
+    if (!this.wallet && !this.wallet.publicKey) {
+      return;
     }
+    this.storageConfigPDA = (await getStorageConfigPDA(this.program))[0];
+    this.userInfo = (await getUserInfo(this.program, this.wallet.publicKey))[0];
+    return this;
   }
 }
 
@@ -156,4 +160,5 @@ export {
   StorageAccount,
   StorageAccountResponse,
   ShadowBatchUploadResponse,
+  StorageAccountInfo,
 };

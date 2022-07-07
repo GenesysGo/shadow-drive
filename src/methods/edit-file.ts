@@ -1,10 +1,5 @@
 import * as anchor from "@project-serum/anchor";
-import {
-  isBrowser,
-  SHDW_DRIVE_ENDPOINT,
-  tokenMint,
-  uploader,
-} from "../utils/common";
+import { isBrowser, SHDW_DRIVE_ENDPOINT } from "../utils/common";
 import crypto from "crypto";
 import { ShadowFile, ShadowUploadResponse } from "../types";
 import fetch from "cross-fetch";
@@ -56,13 +51,6 @@ export default async function editFile(
     fileErrors.push({
       file: file,
       erorr: "Exceeds the 1GB limit.",
-    });
-  }
-  const fileNameBytes = new TextEncoder().encode(data.name).length;
-  if (fileNameBytes > 32) {
-    fileErrors.push({
-      file: file,
-      error: "File name too long. Reduce to 32 bytes long.",
     });
   }
   if (fileErrors.length) {

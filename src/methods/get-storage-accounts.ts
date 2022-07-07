@@ -14,7 +14,7 @@ export default async function getStorageAccs(
   try {
     switch (version.toLocaleLowerCase()) {
       case "v1":
-        storageAccounts = await this.program.account.storageAccountV1.all([
+        storageAccounts = await this.program.account.storageAccount.all([
           {
             memcmp: {
               bytes: this.wallet.publicKey,

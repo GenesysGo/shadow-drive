@@ -3,7 +3,6 @@ import {
   humanSizeToBytes,
   getStakeAccount,
   findAssociatedTokenAddress,
-  sendAndConfirm,
 } from "../utils/helpers";
 import {
   emissions,
