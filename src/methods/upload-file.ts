@@ -112,72 +112,21 @@ export default async function uploadFile(
   } catch (e) {
     return Promise.reject(new Error(e));
   }
-  if (version.toLocaleLowerCase() === "v1") {
-    try {
-      txn = await this.program.methods
-        .storeFile(data.name, fileHash, size)
-        .accounts({
-          storageConfig: this.storageConfigPDA,
-          storageAccount: key,
-          userInfo: this.userInfo,
-          file: fileAcc,
-          owner: selectedAccount.owner1,
-          uploader: uploader,
-          tokenMint: tokenMint,
-          systemProgram: anchor.web3.SystemProgram.programId,
-        })
-        .transaction();
-      txn.recentBlockhash = (
-        await this.connection.getLatestBlockhash()
-      ).blockhash;
-      txn.feePayer = this.wallet.publicKey;
-      if (!isBrowser) {
-        await txn.partialSign(this.wallet.payer);
-      } else {
-        await this.wallet.signTransaction(txn);
-      }
-      const serializedTxn = txn.serialize({ requireAllSignatures: false });
-      form.append(
-        "transaction",
-        Buffer.from(serializedTxn.toJSON().data).toString("base64")
-      );
-    } catch (e) {
-      return Promise.reject(new Error(e));
-    }
-    try {
-      const uploadResponse = await fetch(`${SHDW_DRIVE_ENDPOINT}/upload`, {
-        method: "POST",
-        //@ts-ignore
-        body: form,
-      });
-      if (!uploadResponse.ok) {
-        return Promise.reject(
-          new Error(`Server response status code: ${uploadResponse.status} \n
-						Server response status message: ${(await uploadResponse.json()).error}`)
-        );
-      }
-      const responseJson = await uploadResponse.json();
-      return Promise.resolve(responseJson);
-    } catch (e) {
-      return Promise.reject(new Error(e));
-    }
-  } else {
-    try {
-      const uploadResponse = await fetch(`${SHDW_DRIVE_ENDPOINT}/upload`, {
-        method: "POST",
-        //@ts-ignore
-        body: form,
-      });
-      if (!uploadResponse.ok) {
-        return Promise.reject(
-          new Error(`Server response status code: ${uploadResponse.status} \n 
+  try {
+    const uploadResponse = await fetch(`${SHDW_DRIVE_ENDPOINT}/upload`, {
+      method: "POST",
+      //@ts-ignore
+      body: form,
+    });
+    if (!uploadResponse.ok) {
+      return Promise.reject(
+        new Error(`Server response status code: ${uploadResponse.status} \n 
 				  Server response status message: ${(await uploadResponse.json()).error}`)
-        );
-      }
-      const responseJson = await uploadResponse.json();
-      return Promise.resolve(responseJson);
-    } catch (e) {
-      return Promise.reject(new Error(e));
+      );
     }
+    const responseJson = await uploadResponse.json();
+    return Promise.resolve(responseJson);
+  } catch (e) {
+    return Promise.reject(new Error(e));
   }
 }
