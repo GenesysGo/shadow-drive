@@ -1,7 +1,7 @@
 import * as anchor from "@project-serum/anchor";
 import { isBrowser, SHDW_DRIVE_ENDPOINT } from "../utils/common";
 import crypto from "crypto";
-import { ShadowBatchUploadResponse, ShadowFile } from "../types";
+import { ShadowBatchUploadResponse, ShadowFile, ListObjectsResponse } from "../types";
 import NodeFormData from "form-data";
 import { sleep, getChunkLength } from "../utils/helpers";
 import fetch from "cross-fetch";
@@ -110,9 +110,23 @@ export default async function uploadMultipleFiles(
               }`)
     );
   }
-  const allObjects = await allObjectsRequest.json();
-  let existingFiles: any = [];
-  fileData = fileData.filter((item: any) => {
+
+  /*
+    Note: Currently if there are no objects stored in an account the API will throw a 500 http error.
+
+    Providing a false negative status and preventing to upload multiple files on new accounts.
+
+    The best way to solve this would be to directly return an empty keys array from the API.
+
+    For now we'll need to handle this from here by initializing the objects ourselves.
+  */
+  let allObjects: ListObjectsResponse = { keys: [] };
+  let existingFiles: ShadowBatchUploadResponse[] = [];
+
+  // Only if successful, we assign the objects coming from the response.
+  if (allObjectsRequest.status === 200) allObjects = await allObjectsRequest.json() as ListObjectsResponse;
+
+  fileData = fileData.filter((item: FileData) => {
     if (!allObjects.keys.includes(item.name)) {
       return true;
     } else {
@@ -216,7 +230,7 @@ export default async function uploadMultipleFiles(
     let updatedStorageAccount: any;
 
     if (existingFiles.length > 0) {
-      existingUploadJSON.push(existingFiles);
+      existingUploadJSON.push(...existingFiles);
     }
     while (!continueToNextBatch) {
       try {

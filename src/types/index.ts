@@ -20,10 +20,15 @@ export type UploadError = {
   storage_account: string;
   error: string;
 };
+
 export type ShadowBatchUploadResponse = {
   fileName: string;
   status: string;
   location: string;
+};
+
+export type ListObjectsResponse = {
+  keys: string[];
 };
 
 export type StorageAccountResponse = {
