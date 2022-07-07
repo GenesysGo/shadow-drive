@@ -5,21 +5,37 @@ import {
   findAssociatedTokenAddress,
   sendAndConfirm,
 } from "../utils/helpers";
-import { isBrowser, tokenMint } from "../utils/common";
+import {
+  isBrowser,
+  SHDW_DRIVE_ENDPOINT,
+  tokenMint,
+  uploader,
+} from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ShadowDriveResponse } from "../types";
+import fetch from "node-fetch";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Public Key of the existing storage to increase size on
  * @param {string} size - Amount of storage you are requesting to add to your storage account. Should be in a string like '1KB', '1MB', '1GB'. Only KB, MB, and GB storage delineations are supported currently.
- * @returns {ShadowDriveResponse} - Confirmed transaction ID
+ * @param {string} version - ShadowDrive version (v1 or v2)
+ * @returns {ShadowDriveResponse} Confirmed transaction ID
  */
-
 export default async function addStorage(
   key: anchor.web3.PublicKey,
-  size: string
+  size: string,
+  version: string
 ): Promise<ShadowDriveResponse> {
   let storageInputAsBytes = humanSizeToBytes(size);
+  let selectedAccount;
+  switch (version.toLocaleLowerCase()) {
+    case "v1":
+      selectedAccount = await this.program.account.storageAccount.fetch(key);
+      break;
+    case "v2":
+      selectedAccount = await this.program.account.storageAccountV2.fetch(key);
+      break;
+  }
   if (storageInputAsBytes === false) {
     return Promise.reject(
       new Error(
@@ -40,7 +56,6 @@ export default async function addStorage(
       )
     );
   }
-  const selectedAccount = await this.program.account.storageAccount.fetch(key);
   const ownerAta = await findAssociatedTokenAddress(
     selectedAccount.owner1,
     tokenMint
@@ -48,19 +63,41 @@ export default async function addStorage(
   let stakeAccount = (await getStakeAccount(this.program, key))[0];
 
   try {
-    const txn = await this.program.methods
-      .increaseStorage(new anchor.BN(storageInputAsBytes.toString()))
-      .accounts({
-        storageConfig: this.storageConfigPDA,
-        storageAccount: key,
-        owner: selectedAccount.owner1,
-        ownerAta,
-        stakeAccount,
-        tokenMint: tokenMint,
-        systemProgram: anchor.web3.SystemProgram.programId,
-        tokenProgram: TOKEN_PROGRAM_ID,
-      })
-      .transaction();
+    let txn;
+    switch (version.toLocaleLowerCase()) {
+      case "v1":
+        txn = await this.program.methods
+          .increaseStorage(new anchor.BN(storageInputAsBytes.toString()))
+          .accounts({
+            storageConfig: this.storageConfigPDA,
+            storageAccount: key,
+            owner: selectedAccount.owner1,
+            ownerAta,
+            stakeAccount,
+            uploader: uploader,
+            tokenMint: tokenMint,
+            systemProgram: anchor.web3.SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+          })
+          .transaction();
+        break;
+      case "v2":
+        txn = await this.program.methods
+          .increaseStorage2(new anchor.BN(storageInputAsBytes))
+          .accounts({
+            storageConfig: this.storageConfigPDA,
+            storageAccount: key,
+            owner: selectedAccount.owner1,
+            ownerAta,
+            stakeAccount,
+            uploader: uploader,
+            tokenMint: tokenMint,
+            systemProgram: anchor.web3.SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+          })
+          .transaction();
+        break;
+    }
     txn.recentBlockhash = (
       await this.connection.getLatestBlockhash()
     ).blockhash;
@@ -70,14 +107,32 @@ export default async function addStorage(
     } else {
       await this.wallet.signTransaction(txn);
     }
-    const res = await sendAndConfirm(
-      this.provider.connection,
-      txn.serialize(),
-      { skipPreflight: false },
-      "confirmed",
-      120000
+    const serializedTxn = txn.serialize({ requireAllSignatures: false });
+
+    const addStorageResponse = await fetch(
+      `${SHDW_DRIVE_ENDPOINT}/add-storage`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          transaction: Buffer.from(serializedTxn.toJSON().data).toString(
+            "base64"
+          ),
+          storage_account: key,
+          amount_to_add: storageInputAsBytes,
+        }),
+      }
     );
-    return Promise.resolve(res);
+    if (!addStorageResponse.ok) {
+      return Promise.reject(
+        new Error(`Server response status code: ${addStorageResponse.status} \n 
+		  Server response status message: ${(await addStorageResponse.json()).error}`)
+      );
+    }
+    const responseJson = await addStorageResponse.json();
+    return Promise.resolve(responseJson);
   } catch (e) {
     return Promise.reject(new Error(e));
   }

@@ -11,26 +11,45 @@ export type ShadowDriveResponse = {
 };
 
 export type ShadowUploadResponse = {
-  finalized_location: string;
-  transaction_signature: string;
+  finalized_locations: Array<string>;
+  message: string;
+  upload_errors: Array<UploadError>;
+};
+export type UploadError = {
+  file: string;
+  storage_account: string;
+  error: string;
 };
 
 export type ShadowBatchUploadResponse = {
   fileName: string;
   status: string;
   location: string;
-  transaction_signature?: string;
 };
 
 export type ListObjectsResponse = {
-  keys: string[]
-}
+  keys: string[];
+};
 
 export type StorageAccountResponse = {
   publicKey: anchor.web3.PublicKey;
   account: StorageAccount;
 };
 
+export type StorageAccountInfo = {
+  storage_account: PublicKey;
+  reserved_bytes: number;
+  current_usage: number;
+  immutable: boolean;
+  to_be_deleted: boolean;
+  delet_request_epoch: number;
+  owner1: PublicKey;
+  account_counter_seed: number;
+  creation_time: number;
+  creation_epoch: number;
+  last_fee_epoch: number;
+  identifier: string;
+};
 export type StorageAccount = {
   isStatic: boolean;
   initCounter: number;
@@ -56,9 +75,3 @@ export type ShadowFile = {
   name?: string;
   file: Buffer;
 };
-
-export interface AnchorWallet {
-    publicKey: PublicKey;
-    signTransaction(transaction: Transaction): Promise<Transaction>;
-    signAllTransactions(transactions: Transaction[]): Promise<Transaction[]>;
-}

@@ -13,7 +13,8 @@ import cancelDeleteFile from "./cancel-delete-file";
 import cancelDeleteStorageAccount from "./cancel-storage-account";
 import uploadFile from "./upload-file";
 import uploadMultipleFiles from "./upload-multiple-files";
-
+import redeemRent from "./redeem-rent";
+import migrate from "./migrate";
 export {
   addStorage,
   claimStake,
@@ -30,4 +31,6 @@ export {
   cancelDeleteStorageAccount,
   uploadFile,
   uploadMultipleFiles,
+  redeemRent,
+  migrate,
 };
