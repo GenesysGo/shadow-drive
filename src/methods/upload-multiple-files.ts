@@ -1,15 +1,12 @@
 import * as anchor from "@project-serum/anchor";
-import {
-  isBrowser,
-  SHDW_DRIVE_ENDPOINT,
-  tokenMint,
-  uploader,
-} from "../utils/common";
+import { isBrowser, SHDW_DRIVE_ENDPOINT } from "../utils/common";
 import crypto from "crypto";
-import { ShadowBatchUploadResponse, ShadowFile } from "../types";
+import { ShadowBatchUploadResponse, ShadowFile, ListObjectsResponse } from "../types";
 import NodeFormData from "form-data";
-import { sleep, sortByProperty, getChunkLength } from "../utils/helpers";
+import { sleep, getChunkLength } from "../utils/helpers";
 import fetch from "cross-fetch";
+import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
+import nacl from "tweetnacl";
 
 interface FileData {
   name: string;
@@ -23,7 +20,6 @@ interface FileData {
  *
  * @param {anchor.web3.PublicKey} key - Storage account PublicKey to upload the files to.
  * @param {FileList | ShadowFile[]} data[] - Array of Files or ShadowFile objects to be uploaded
- *
  * @returns {ShadowBatchUploadResponse[]} - File names, locations and transaction signatures for uploaded files.
  */
 
@@ -31,7 +27,6 @@ export default async function uploadMultipleFiles(
   key: anchor.web3.PublicKey,
   data: FileList | ShadowFile[]
 ): Promise<ShadowBatchUploadResponse[]> {
-  const selectedAccount = await this.program.account.storageAccount.fetch(key);
   let fileData: Array<FileData> = [];
   const fileErrors: Array<object> = [];
   let existingUploadJSON: ShadowBatchUploadResponse[] = [];
@@ -55,13 +50,6 @@ export default async function uploadMultipleFiles(
       const url = encodeURI(
         `https://shdw-drive.genesysgo.net/${key.toString()}/${shdwFile.name}`
       );
-      const fileNameBytes = new TextEncoder().encode(shdwFile.name).length;
-      if (fileNameBytes > 32) {
-        fileErrors.push({
-          file: file,
-          error: "File name too long. Reduce to 32 bytes long.",
-        });
-      }
       let size = new anchor.BN(fileBuffer.byteLength);
       fileData.push({
         name: shdwFile.name,
@@ -78,27 +66,20 @@ export default async function uploadMultipleFiles(
       let file = shdwFile;
       let form = new FormData();
       form.append("file", file, shdwFile.name);
-      let arrayBuff = await file.arrayBuffer();
-      if (arrayBuff.byteLength > 1_073_741_824 * 1) {
+      let fileBuffer = Buffer.from(new Uint8Array(await file.arrayBuffer()));
+      if (fileBuffer.byteLength > 1_073_741_824 * 1) {
         fileErrors.push({
           file: file,
           erorr: "Exceeds the 1GB limit.",
         });
       }
-      const fileNameBytes = new TextEncoder().encode(shdwFile.name).length;
-      if (fileNameBytes > 32) {
-        fileErrors.push({
-          file: file,
-          error: "File name too long. Reduce to 32 bytes long.",
-        });
-      }
       const url = encodeURI(
         `https://shdw-drive.genesysgo.net/${key.toString()}/${shdwFile.name}`
       );
-      let size = new anchor.BN(arrayBuff.byteLength);
+      let size = new anchor.BN(fileBuffer.byteLength);
       fileData.push({
         name: shdwFile.name,
-        buffer: Buffer.from(arrayBuff),
+        buffer: fileBuffer,
         file: file,
         form: form,
         size: size,
@@ -129,9 +110,23 @@ export default async function uploadMultipleFiles(
               }`)
     );
   }
-  const allObjects = await allObjectsRequest.json();
-  let existingFiles: any = [];
-  fileData = fileData.filter((item: any) => {
+
+  /*
+    Note: Currently if there are no objects stored in an account the API will throw a 500 http error.
+
+    Providing a false negative status and preventing to upload multiple files on new accounts.
+
+    The best way to solve this would be to directly return an empty keys array from the API.
+
+    For now we'll need to handle this from here by initializing the objects ourselves.
+  */
+  let allObjects: ListObjectsResponse = { keys: [] };
+  let existingFiles: ShadowBatchUploadResponse[] = [];
+
+  // Only if successful, we assign the objects coming from the response.
+  if (allObjectsRequest.status === 200) allObjects = await allObjectsRequest.json() as ListObjectsResponse;
+
+  fileData = fileData.filter((item: FileData) => {
     if (!allObjects.keys.includes(item.name)) {
       return true;
     } else {
@@ -143,6 +138,27 @@ export default async function uploadMultipleFiles(
       return false;
     }
   });
+
+  const allFileNames = fileData.map((file) => file.name);
+  const hashSum = crypto.createHash("sha256");
+  hashSum.update(allFileNames.toString());
+  const fileNamesHashed = hashSum.digest("hex");
+  let encodedMsg;
+  try {
+    const msg = new TextEncoder().encode(
+      `Shadow Drive Signed Message:\nStorage Account: ${key}\nUpload files with hash: ${fileNamesHashed}`
+    );
+    let msgSig;
+    if (!this.wallet.signMessage) {
+      msgSig = nacl.sign.detached(msg, this.wallet.payer.secretKey);
+    } else {
+      msgSig = await this.wallet.signMessage(msg);
+    }
+    encodedMsg = bs58.encode(msgSig);
+  } catch (e) {
+    console.log("Could not hash file names");
+  }
+
   let chunks = [];
   let indivChunk: Array<number> = [];
   for (let chunkIdx = 0; chunkIdx < fileData.length; chunkIdx++) {
@@ -182,8 +198,6 @@ export default async function uploadMultipleFiles(
       }
     }
   }
-  let previousSeed = selectedAccount.initCounter;
-  let newFileSeedToSet = selectedAccount.initCounter;
 
   for (let i = 0; i < chunks.length; i++) {
     let indivChunk = chunks[i];
@@ -191,25 +205,11 @@ export default async function uploadMultipleFiles(
     let fileNames = [];
     let sha256Hashs = [];
     let sizes = [];
-    let fileAccounts = [];
-    let fileSeeds = [];
     for (let j = 0; j <= indivChunk.length - 1; j++) {
       let index = indivChunk[j];
       const { name, buffer, file, form, size, url } = fileData[index];
-      let fileSeed = new anchor.BN(newFileSeedToSet);
-
-      let [fileAccount, fileBump] =
-        await anchor.web3.PublicKey.findProgramAddress(
-          [
-            key.toBytes(),
-            new anchor.BN(fileSeed).toTwos(64).toArrayLike(Buffer, "le", 4),
-          ],
-          this.program.programId
-        );
       fileNames.push(name);
       sizes.push(size);
-      fileAccounts.push({ fileAccount, seed: fileSeed });
-      fileSeeds.push(fileSeed);
       let data = buffer;
       const hashSum = crypto.createHash("sha256");
       hashSum.update(data);
@@ -224,86 +224,16 @@ export default async function uploadMultipleFiles(
         size,
         url,
       });
-      previousSeed = fileSeed.toNumber();
-      newFileSeedToSet = fileSeed.toNumber() + 1;
     }
-    let sortedFileAccounts = fileAccounts.sort(sortByProperty("seed"));
     let continueToNextBatch = false;
     let currentRetries = 0;
-    let accountReadyForNextTransaction = false;
     let updatedStorageAccount: any;
-    while (!accountReadyForNextTransaction) {
-      updatedStorageAccount = await this.program.account.storageAccount.fetch(
-        key
-      );
-      console.log(
-        "Expected next file seed on chain to be:",
-        sortedFileAccounts[0].seed.toNumber()
-      );
-      console.log(
-        "Actual next file seed on chain:",
-        updatedStorageAccount.initCounter
-      );
-      if (
-        updatedStorageAccount.initCounter ==
-        sortedFileAccounts[0].seed.toNumber()
-      ) {
-        console.log("Chain has up to date info. Moving onto the next batch.");
-        accountReadyForNextTransaction = true;
-      } else {
-        console.log(
-          "Chain does not have up to date info. Waiting 1s to check again."
-        );
-      }
-      await sleep(1000);
-    }
+
     if (existingFiles.length > 0) {
-      existingUploadJSON.push(existingFiles);
+      existingUploadJSON.push(...existingFiles);
     }
     while (!continueToNextBatch) {
       try {
-        const txn = await this.program.methods
-          .storeFile(fileNames[0], sha256Hashs[0], sizes[0])
-          .accounts({
-            storageConfig: this.storageConfigPDA,
-            storageAccount: key,
-            userInfo: this.userInfo,
-            owner: selectedAccount.owner1,
-            uploader: uploader,
-            tokenMint: tokenMint,
-            systemProgram: anchor.web3.SystemProgram.programId,
-            file: sortedFileAccounts[0].fileAccount,
-          })
-          .transaction();
-
-        for (let fileIx = 1; fileIx < fileNames.length; fileIx++) {
-          const ixn = await this.program.methods
-            .storeFile(fileNames[fileIx], sha256Hashs[fileIx], sizes[fileIx])
-            .accounts({
-              storageConfig: this.storageConfigPDA,
-              storageAccount: key,
-              userInfo: this.userInfo,
-              owner: selectedAccount.owner1,
-              uploader: uploader,
-              tokenMint: tokenMint,
-              systemProgram: anchor.web3.SystemProgram.programId,
-              file: sortedFileAccounts[fileIx].fileAccount,
-            })
-            .instruction();
-          txn.add(ixn);
-        }
-        txn.recentBlockhash = (
-          await this.connection.getLatestBlockhash()
-        ).blockhash;
-        txn.feePayer = this.wallet.publicKey;
-        if (!isBrowser) {
-          await txn.partialSign(this.wallet.payer);
-        } else {
-          await this.wallet.signTransaction(txn);
-        }
-        const serializedTxn = txn.serialize({
-          requireAllSignatures: false,
-        });
         let fd;
         if (!isBrowser) {
           fd = new NodeFormData();
@@ -319,11 +249,16 @@ export default async function uploadMultipleFiles(
           }
           fd.append("file", file, actualFiles[j].name);
         }
-        fd.append(
-          "transaction",
-          Buffer.from(serializedTxn.toJSON().data).toString("base64")
-        );
-        const request = await fetch(`${SHDW_DRIVE_ENDPOINT}/upload-batch`, {
+
+        fd.append("message", encodedMsg);
+        fd.append("storage_account", key.toString());
+        fd.append("signer", this.wallet.publicKey.toString());
+        fd.append("fileNames", allFileNames.toString());
+        // fd.append(
+        //   "transaction",
+        //   Buffer.from(serializedTxn.toJSON().data).toString("base64")
+        // );
+        const request = await fetch(`${SHDW_DRIVE_ENDPOINT}/upload`, {
           method: "POST",
           //@ts-ignore
           body: fd,
@@ -342,29 +277,22 @@ export default async function uploadMultipleFiles(
             currentRetries += 1;
             console.log(`Transaction Retry #${currentRetries}`);
           } else {
-            newFileSeedToSet = updatedStorageAccount!.initCounter;
             fileNames.map((name, idx) => {
               existingUploadJSON.push({
                 fileName: name,
                 status: `Not uploaded: ${error}`,
                 location: null,
-                transaction_signature: null
               });
             });
             continueToNextBatch = true;
-            // await sleep(750);
           }
         } else {
           const responseJson = await request.json();
-          console.log(
-            `Solana transaction signature: ${responseJson.transaction_signature}`
-          );
           fileNames.map((name, idx) => {
             existingUploadJSON.push({
               fileName: name,
               status: "Uploaded.",
               location: actualFiles[idx].url,
-              transaction_signature: responseJson.transaction_signature
             });
           });
           continueToNextBatch = true;
@@ -375,11 +303,9 @@ export default async function uploadMultipleFiles(
             fileName: name,
             status: `Not uploaded: ${e}`,
             location: null,
-            transaction_signature: null
           });
         });
         continueToNextBatch = true;
-        newFileSeedToSet = updatedStorageAccount!.initCounter;
         console.log(e);
       }
     }

@@ -7,13 +7,23 @@ import { ShadowDriveResponse } from "../types";
 /**
  *
  * @param {anchor.web3.PublicKey} key - PublicKey of a Storage Account
+ * @param {string} version - ShadowDrive version (v1 or v2)
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 
 export default async function claimStake(
-  key: anchor.web3.PublicKey
+  key: anchor.web3.PublicKey,
+  version: string
 ): Promise<ShadowDriveResponse> {
-  const selectedAccount = await this.program.account.storageAccount.fetch(key);
+  let selectedAccount;
+  switch (version.toLocaleLowerCase()) {
+    case "v1":
+      selectedAccount = await this.program.account.storageAccount.fetch(key);
+      break;
+    case "v2":
+      selectedAccount = await this.program.account.storageAccountV2.fetch(key);
+      break;
+  }
   const [unstakeAccount] = await anchor.web3.PublicKey.findProgramAddress(
     [Buffer.from("unstake-account"), key.toBytes()],
     this.program.programId
@@ -26,21 +36,42 @@ export default async function claimStake(
     selectedAccount.owner1,
     tokenMint
   );
+  let txn;
   try {
-    const txn = await this.program.methods
-      .claimStake()
-      .accounts({
-        storageConfig: this.storageConfigPDA,
-        storageAccount: key,
-        unstakeInfo: unstakeInfo,
-        unstakeAccount: unstakeAccount,
-        owner: selectedAccount.owner1,
-        ownerAta,
-        tokenMint,
-        systemProgram: anchor.web3.SystemProgram.programId,
-        tokenProgram: TOKEN_PROGRAM_ID,
-      })
-      .transaction();
+    switch (version.toLocaleLowerCase()) {
+      case "v1":
+        txn = await this.program.methods
+          .claimStake()
+          .accounts({
+            storageConfig: this.storageConfigPDA,
+            storageAccount: key,
+            unstakeInfo: unstakeInfo,
+            unstakeAccount: unstakeAccount,
+            owner: selectedAccount.owner1,
+            ownerAta,
+            tokenMint,
+            systemProgram: anchor.web3.SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+          })
+          .transaction();
+        break;
+      case "v2":
+        txn = await this.program.methods
+          .claimStake2()
+          .accounts({
+            storageConfig: this.storageConfigPDA,
+            storageAccount: key,
+            unstakeInfo: unstakeInfo,
+            unstakeAccount: unstakeAccount,
+            owner: selectedAccount.owner1,
+            ownerAta,
+            tokenMint,
+            systemProgram: anchor.web3.SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+          })
+          .transaction();
+        break;
+    }
     txn.recentBlockhash = (
       await this.connection.getLatestBlockhash()
     ).blockhash;
