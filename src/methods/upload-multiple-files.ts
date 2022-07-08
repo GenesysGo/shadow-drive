@@ -156,7 +156,7 @@ export default async function uploadMultipleFiles(
     }
     encodedMsg = bs58.encode(msgSig.signature);
   } catch (e) {
-    console.log("Could not hash file names");
+    console.log("Could not hash file names",e);
   }
 
   let chunks = [];
