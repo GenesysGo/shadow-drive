@@ -107,6 +107,7 @@ export default async function editFile(
     form.append("message", encodedMsg);
     form.append("signer", this.wallet.publicKey.toString());
     form.append("storage_account", key.toString());
+    form.append("url", url);
     const uploadResponse = await fetch(`${SHDW_DRIVE_ENDPOINT}/edit`, {
       method: "POST",
       //@ts-ignore
