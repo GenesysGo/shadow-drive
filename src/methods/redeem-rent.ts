@@ -17,18 +17,6 @@ export default async function redeemRent(
   let selectedAccount;
 
   selectedAccount = await this.program.account.storageAccount.fetch(key);
-  const [unstakeAccount] = await anchor.web3.PublicKey.findProgramAddress(
-    [Buffer.from("unstake-account"), key.toBytes()],
-    this.program.programId
-  );
-  const [unstakeInfo] = await anchor.web3.PublicKey.findProgramAddress(
-    [Buffer.from("unstake-info"), key.toBytes()],
-    this.program.programId
-  );
-  const ownerAta = await findAssociatedTokenAddress(
-    selectedAccount.owner1,
-    tokenMint
-  );
   try {
     const txn = await this.program.methods
       .redeemRent()
