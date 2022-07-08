@@ -259,7 +259,7 @@ export default async function uploadMultipleFiles(
           if (!response.ok) {
             const error = (await response.json()).error;
             return items.map((item) => ({
-              fileName: item.fileName,
+              fileName: item.name,
               status: `Not uploaded: ${error}`,
               location: null,
             }));
@@ -274,7 +274,7 @@ export default async function uploadMultipleFiles(
               }));
             }
             return items.map((item) => ({
-              fileName: item.fileName,
+              fileName: item.name,
               status: "Uploaded.",
               location: item.url,
             }));
