@@ -150,11 +150,11 @@ export default async function uploadMultipleFiles(
     );
     let msgSig;
     if (!this.wallet.signMessage) {
-      msgSig = nacl.sign.detached(msg, this.wallet.payer.secretKey);
+      msgSig = nacl.sign.detached(Buffer.from(msg, "utf-8"), this.wallet.payer.secretKey);
     } else {
-      msgSig = await this.wallet.signMessage(msg);
+      msgSig = await this.wallet.signMessage(Buffer.from(msg, "utf-8"));
     }
-    encodedMsg = bs58.encode(msgSig);
+    encodedMsg = bs58.encode(msgSig.signature);
   } catch (e) {
     console.log("Could not hash file names");
   }
