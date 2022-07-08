@@ -7,10 +7,11 @@ import {
   ListObjectsResponse,
 } from "../types";
 import NodeFormData from "form-data";
-import { sleep, getChunkLength } from "../utils/helpers";
+import { getChunkLength } from "../utils/helpers";
 import fetch from "cross-fetch";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import nacl from "tweetnacl";
+import { from, map, mergeMap, toArray } from "rxjs";
 
 interface FileData {
   name: string;
@@ -29,7 +30,8 @@ interface FileData {
 
 export default async function uploadMultipleFiles(
   key: anchor.web3.PublicKey,
-  data: FileList | ShadowFile[]
+  data: FileList | ShadowFile[],
+  concurrent = 3
 ): Promise<ShadowBatchUploadResponse[]> {
   let fileData: Array<FileData> = [];
   const fileErrors: Array<object> = [];
@@ -148,7 +150,7 @@ export default async function uploadMultipleFiles(
   const hashSum = crypto.createHash("sha256");
   hashSum.update(allFileNames.toString());
   const fileNamesHashed = hashSum.digest("hex");
-  let encodedMsg;
+  let encodedMsg: string;
   try {
     const msg = new TextEncoder().encode(
       `Shadow Drive Signed Message:\nStorage Account: ${key}\nUpload files with hash: ${fileNamesHashed}`
@@ -165,7 +167,7 @@ export default async function uploadMultipleFiles(
     return Promise.reject(new Error(e));
   }
 
-  let chunks = [];
+  let chunks: number[][] = [];
   let indivChunk: Array<number> = [];
   for (let chunkIdx = 0; chunkIdx < fileData.length; chunkIdx++) {
     if (indivChunk.length === 0) {
@@ -204,118 +206,84 @@ export default async function uploadMultipleFiles(
       }
     }
   }
+  const appendFileToItem = (item: any) => {
+    const { name, size, buffer, ...props } = item;
+    let data = buffer;
+    const hashSum = crypto.createHash("sha256");
+    hashSum.update(data);
+    const sha256Hash = hashSum.digest("hex");
+    return {
+      sha256Hash,
+      name,
+      size,
+      buffer,
+      ...props,
+    };
+  };
 
-  for (let i = 0; i < chunks.length; i++) {
-    let indivChunk = chunks[i];
-    let actualFiles: any = [];
-    let fileNames = [];
-    let sha256Hashs = [];
-    let sizes = [];
-    for (let j = 0; j <= indivChunk.length - 1; j++) {
-      let index = indivChunk[j];
-      const { name, buffer, file, form, size, url } = fileData[index];
-      fileNames.push(name);
-      sizes.push(size);
-      let data = buffer;
-      const hashSum = crypto.createHash("sha256");
-      hashSum.update(data);
-      const sha256Hash = hashSum.digest("hex");
-      sha256Hashs.push(sha256Hash);
-      actualFiles.push({
-        name,
-        data,
-        file,
-        form,
-        sha256Hash,
-        size,
-        url,
-      });
-    }
-    let continueToNextBatch = false;
-    let currentRetries = 0;
-    let updatedStorageAccount: any;
-
-    if (existingFiles.length > 0) {
-      existingUploadJSON.push(...existingFiles);
-    }
-    while (!continueToNextBatch) {
-      try {
-        let fd;
-        if (!isBrowser) {
-          fd = new NodeFormData();
-        } else {
-          fd = new FormData();
-        }
-        for (let j = 0; j < actualFiles.length; j++) {
-          let file;
+  return new Promise((resolve) => {
+    from(chunks)
+      .pipe(
+        map((indivChunk: number[]) => {
+          return indivChunk.map((index: number) =>
+            appendFileToItem(fileData[index])
+          );
+        }),
+        mergeMap(async (items) => {
+          let fd;
           if (!isBrowser) {
-            file = actualFiles[j].file;
+            fd = new NodeFormData();
           } else {
-            file = actualFiles[j].file as File;
+            fd = new FormData();
           }
-          fd.append("file", file, actualFiles[j].name);
-        }
+          for (const item of items) {
+            let file;
+            if (!isBrowser) {
+              file = item.file;
+            } else {
+              file = item.file as File;
+            }
+            fd.append("file", file, item.name);
+          }
 
-        fd.append("message", encodedMsg);
-        fd.append("storage_account", key.toString());
-        fd.append("signer", this.wallet.publicKey.toString());
-        fd.append("fileNames", allFileNames.toString());
-        // fd.append(
-        //   "transaction",
-        //   Buffer.from(serializedTxn.toJSON().data).toString("base64")
-        // );
-        const request = await fetch(`${SHDW_DRIVE_ENDPOINT}/upload`, {
-          method: "POST",
-          //@ts-ignore
-          body: fd,
-        });
-        if (!request.ok) {
-          const error = (await request.json()).error;
-          console.log(`Server response status code: ${request.status}`);
-          console.log(`Server response status message: ${error}`);
-          if (
-            error.toLowerCase().includes("timed out") ||
-            error.toLowerCase().includes("blockhash") ||
-            error.toLowerCase().includes("unauthorized signer") ||
-            error.toLowerCase().includes("node is behind") ||
-            error.toLowerCase().includes("was not confirmed in")
-          ) {
-            currentRetries += 1;
-            console.log(`Transaction Retry #${currentRetries}`);
+          fd.append("message", encodedMsg);
+          fd.append("storage_account", key.toString());
+          fd.append("signer", this.wallet.publicKey.toString());
+          fd.append("fileNames", allFileNames.toString());
+          const response = await fetch(`${SHDW_DRIVE_ENDPOINT}/upload`, {
+            method: "POST",
+            //@ts-ignore
+            body: fd,
+          });
+
+          if (!response.ok) {
+            const error = (await response.json()).error;
+            return items.map((item) => ({
+              fileName: item.name,
+              status: `Not uploaded: ${error}`,
+              location: null,
+            }));
           } else {
-            fileNames.map((name, idx) => {
-              existingUploadJSON.push({
-                fileName: name,
-                status: `Not uploaded: ${error}`,
-                location: null,
-              });
-            });
-            continueToNextBatch = true;
-          }
-        } else {
-          const responseJson = await request.json();
-          fileNames.map((name, idx) => {
-            existingUploadJSON.push({
-              fileName: name,
+            const responseJson = await response.json();
+            if (responseJson.upload_errors.length) {
+              // TODO add type here
+              return responseJson.upload_errors.map((error: any) => ({
+                fileName: error.file,
+                status: `Not uploaded: ${error.error}`,
+                location: null as string,
+              }));
+            }
+            return items.map((item) => ({
+              fileName: item.name,
               status: "Uploaded.",
-              location: actualFiles[idx].url,
-            });
-          });
-          continueToNextBatch = true;
-        }
-      } catch (e) {
-        fileNames.map((name, idx) => {
-          existingUploadJSON.push({
-            fileName: name,
-            status: `Not uploaded: ${e}`,
-            location: null,
-          });
-        });
-        continueToNextBatch = true;
-        console.log(e);
-      }
-    }
-    await sleep(500);
-  }
-  return Promise.resolve(existingUploadJSON);
+              location: item.url,
+            }));
+          }
+        }, concurrent),
+        // zip them up into a flat array once all are done to get full result list
+        toArray(),
+        map((res) => res.flat())
+      )
+      .subscribe((res) => resolve(res));
+  });
 }
