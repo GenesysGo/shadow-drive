@@ -1,7 +1,11 @@
 import * as anchor from "@project-serum/anchor";
 import { isBrowser, SHDW_DRIVE_ENDPOINT } from "../utils/common";
 import crypto from "crypto";
-import { ShadowBatchUploadResponse, ShadowFile, ListObjectsResponse } from "../types";
+import {
+  ShadowBatchUploadResponse,
+  ShadowFile,
+  ListObjectsResponse,
+} from "../types";
 import NodeFormData from "form-data";
 import { sleep, getChunkLength } from "../utils/helpers";
 import fetch from "cross-fetch";
@@ -124,7 +128,8 @@ export default async function uploadMultipleFiles(
   let existingFiles: ShadowBatchUploadResponse[] = [];
 
   // Only if successful, we assign the objects coming from the response.
-  if (allObjectsRequest.status === 200) allObjects = await allObjectsRequest.json() as ListObjectsResponse;
+  if (allObjectsRequest.status === 200)
+    allObjects = (await allObjectsRequest.json()) as ListObjectsResponse;
 
   fileData = fileData.filter((item: FileData) => {
     if (!allObjects.keys.includes(item.name)) {
@@ -148,7 +153,7 @@ export default async function uploadMultipleFiles(
     const msg = new TextEncoder().encode(
       `Shadow Drive Signed Message:\nStorage Account: ${key}\nUpload files with hash: ${fileNamesHashed}`
     );
-    let msgSig;
+    let msgSig: Uint8Array;
     if (!this.wallet.signMessage) {
       msgSig = nacl.sign.detached(msg, this.wallet.payer.secretKey);
     } else {
@@ -156,7 +161,8 @@ export default async function uploadMultipleFiles(
     }
     encodedMsg = bs58.encode(msgSig);
   } catch (e) {
-    console.log("Could not hash file names");
+    console.log("Could not hash file names", e);
+    return Promise.reject(new Error(e));
   }
 
   let chunks = [];
