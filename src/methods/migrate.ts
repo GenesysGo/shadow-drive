@@ -1,6 +1,6 @@
 import * as anchor from "@project-serum/anchor";
-import { findAssociatedTokenAddress, sendAndConfirm } from "../utils/helpers";
-import { isBrowser, tokenMint } from "../utils/common";
+import { sendAndConfirm } from "../utils/helpers";
+import { isBrowser } from "../utils/common";
 import { ShadowDriveResponse } from "../types";
 
 /**
