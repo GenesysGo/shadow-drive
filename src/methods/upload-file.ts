@@ -28,16 +28,6 @@ export default async function uploadFile(
   let form;
   let file;
 
-  let selectedAccount;
-  switch (version.toLocaleLowerCase()) {
-    case "v1":
-      selectedAccount = await this.program.account.storageAccount.fetch(key);
-      break;
-    case "v2":
-      selectedAccount = await this.program.account.storageAccountV2.fetch(key);
-      break;
-  }
-
   if (!isBrowser) {
     data = data as ShadowFile;
     form = new NodeFormData();
@@ -84,16 +74,6 @@ export default async function uploadFile(
   fileNameHashSum.update(data.name);
   const fileHash = fileHashSum.digest("hex");
   const fileNameHash = fileNameHashSum.digest("hex");
-  let size = new anchor.BN(fileBuffer.byteLength);
-  let fileSeed = selectedAccount.initCounter;
-  let [fileAcc, fileBump] = await anchor.web3.PublicKey.findProgramAddress(
-    [
-      key.toBytes(),
-      new anchor.BN(fileSeed).toTwos(64).toArrayLike(Buffer, "le", 4),
-    ],
-    this.program.programId
-  );
-  let txn;
   try {
     const msg = new TextEncoder().encode(
       `Shadow Drive Signed Message:\nStorage Account: ${key}\nUpload files with hash: ${fileNameHash}`
