@@ -3,6 +3,7 @@ import { SHDW_DRIVE_ENDPOINT } from "../utils/common";
 import { ShadowDriveResponse } from "../types";
 import fetch from "cross-fetch";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
+import nacl from "tweetnacl";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Publickey of Storage Account
@@ -41,24 +42,27 @@ export default async function deleteFile(
   if (!fileOwnerOnChain.equals(this.wallet.publicKey)) {
     return Promise.reject(new Error("Permission denied: Not file owner"));
   }
-  const fileAccount = new anchor.web3.PublicKey(
-    fileDataResponse.file_data["file-account-pubkey"]
-  );
-  const fileName = url.slice(url.lastIndexOf("/"), url.length);
   try {
     let deleteFileResponse;
     const msg = Buffer.from(
-      `Shadow Drive Signed Message:\nStorage Account: ${key}\Delete File: ${fileName}`
+      `Shadow Drive Signed Message:\nStorageAccount: ${key}\nFile to delete: ${url}`
     );
-    const msgSig = await this.wallet.signMessage(msg);
+    let msgSig: Uint8Array;
+    if (!this.wallet.signMessage) {
+      msgSig = nacl.sign.detached(msg, this.wallet.payer.secretKey);
+    } else {
+      msgSig = await this.wallet.signMessage(msg);
+    }
     const encodedMsg = bs58.encode(msgSig);
     deleteFileResponse = await fetch(`${SHDW_DRIVE_ENDPOINT}/delete-file`, {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
-        message: encodedMsg,
         signer: this.wallet.publicKey,
-        file_name: fileName,
-        storage_account: key,
+        message: encodedMsg,
+        location: url,
       }),
     });
     if (!deleteFileResponse.ok) {

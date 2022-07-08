@@ -1,7 +1,10 @@
 import * as anchor from "@project-serum/anchor";
 import {
   CreateStorageResponse,
+  //   FileAccount,
+  ShadowBatchUploadResponse,
   ShadowDriveResponse,
+  ShadowFile,
   ShadowUploadResponse,
   ShdwDrive,
   StorageAccountInfo,
@@ -29,7 +32,7 @@ describe("shadow-drive v2 sdk testing", () => {
   beforeAll(async () => {
     //Must be on official devnet endpoint for SOL airdrops to work
     connection = new anchor.web3.Connection(
-      "https:/api.devnet.solana.com/",
+      "https://api.devnet.solana.com/",
       "max"
     );
   });
@@ -83,7 +86,7 @@ describe("shadow-drive v2 sdk testing", () => {
     uploadResponse = await drive.uploadFile(accountKey, file, "v2");
     expect.objectContaining<ShadowUploadResponse>(uploadResponse);
   });
-  it("edits file on shadowDrive", async () => {
+  it("edits file on shadow drive", async () => {
     let file = {
       name: "hey.txt",
       file: fs.readFileSync(path.join(__dirname, "/test-files/hey-edit.txt")),
@@ -96,6 +99,31 @@ describe("shadow-drive v2 sdk testing", () => {
       "v2"
     );
     expect.objectContaining<ShadowUploadResponse>(editRes);
+  });
+  it("deletes file on shadow drive", async () => {
+    const delRes = await drive.deleteFile(
+      accountKey,
+      uploadResponse.finalized_locations[0],
+      "v2"
+    );
+    expect.objectContaining<ShadowDriveResponse>(delRes);
+  });
+  it("uploads multiple files to shadow drive", async () => {
+    let fileArray: ShadowFile[] = [];
+    fileArray.push({
+      name: "1.txt",
+      file: fs.readFileSync(path.join(__dirname, "/test-files/1.txt")),
+    });
+    fileArray.push({
+      name: "2.txt",
+      file: fs.readFileSync(path.join(__dirname, "/test-files/2.txt")),
+    });
+
+    const multiResponse = await drive.uploadMultipleFiles(
+      accountKey,
+      fileArray
+    );
+    expect.objectContaining<ShadowBatchUploadResponse[]>(multiResponse);
   });
   it("gets storage account infos", async () => {
     const account = await drive.getStorageAccount(accountKey);
@@ -115,7 +143,7 @@ describe("shadow-drive v2 sdk testing", () => {
     const immutRes = await drive.makeStorageImmutable(newAccount, "v2");
     expect.objectContaining<ShadowDriveResponse>(immutRes);
   });
-  it("creates a v1 shadow drive storage account and migrates to v2", async () => {
+  it("migrates a shadow drive v1 account to v2", async () => {
     const res = await drive?.createStorageAccount(
       "migrate-account",
       "100MB",
@@ -203,6 +231,14 @@ describe("shadow-drive v1 sdk testing", () => {
     );
     expect.objectContaining<ShadowUploadResponse>(editRes);
   });
+  //   it("retrieves all file-accounts for a v1 storage account", async () => {
+  //     const fileAccounts = await drive.getFileAccounts(
+  //       new anchor.web3.PublicKey(accountKey),
+  //       "v1"
+  //     );
+  //     console.log(fileAccounts);
+  //     expect.objectContaining<FileAccount[]>(fileAccounts);
+  //   });
   it("deletes a shadow drive storage account", async () => {
     const delRes = await drive.deleteStorageAccount(accountKey, "v1");
     expect.objectContaining<ShadowDriveResponse>(delRes);
