@@ -150,9 +150,9 @@ export default async function uploadMultipleFiles(
     );
     let msgSig;
     if (!this.wallet.signMessage) {
-      msgSig = nacl.sign.detached(Buffer.from(msg, "utf-8"), this.wallet.payer.secretKey);
+      msgSig = nacl.sign.detached(Buffer.from(msg), this.wallet.payer.secretKey);
     } else {
-      msgSig = await this.wallet.signMessage(Buffer.from(msg, "utf-8"));
+      msgSig = await this.wallet.signMessage(Buffer.from(msg));
     }
     encodedMsg = bs58.encode(msgSig.signature);
   } catch (e) {
