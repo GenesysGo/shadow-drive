@@ -75,3 +75,14 @@ export type ShadowFile = {
   name?: string;
   file: Buffer;
 };
+
+export type FileAccount = {
+  immutable: boolean;
+  toBeDeleted: boolean;
+  deleteRequestEpoch: number;
+  size: number;
+  sha256Hash: number;
+  initCounterSeed: number;
+  storageAccount: anchor.web3.PublicKey;
+  name: string;
+};

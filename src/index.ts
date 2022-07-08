@@ -23,6 +23,7 @@ import {
   listObjects,
   redeemRent,
   migrate,
+  getFileAccounts,
 } from "./methods";
 
 import {
@@ -35,6 +36,7 @@ import {
   StorageAccountResponse,
   ListObjectsResponse,
   StorageAccountInfo,
+  FileAccount,
 } from "./types";
 interface ShadowDrive {
   createStorageAccount(
@@ -103,6 +105,7 @@ interface ShadowDrive {
     fileAccount: web3.PublicKey
   ): Promise<ShadowDriveResponse>;
   migrate(key: web3.PublicKey): Promise<ShadowDriveResponse>;
+  getFileAccounts(key: web3.PublicKey, version: string): Promise<FileAccount[]>;
 }
 
 export class ShdwDrive implements ShadowDrive {
@@ -136,6 +139,7 @@ export class ShdwDrive implements ShadowDrive {
   uploadMultipleFiles = uploadMultipleFiles;
   redeemRent = redeemRent;
   migrate = migrate;
+  getFileAccounts = getFileAccounts;
 
   //Todo - check that the wallet passed in is able to sign messages
   constructor(private connection: web3.Connection, private wallet: any) {
@@ -165,4 +169,5 @@ export {
   ShadowBatchUploadResponse,
   ListObjectsResponse,
   StorageAccountInfo,
+  FileAccount,
 };

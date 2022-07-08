@@ -15,6 +15,7 @@ import uploadFile from "./upload-file";
 import uploadMultipleFiles from "./upload-multiple-files";
 import redeemRent from "./redeem-rent";
 import migrate from "./migrate";
+import getFileAccounts from "./get-file-accounts";
 export {
   addStorage,
   claimStake,
@@ -33,4 +34,5 @@ export {
   uploadMultipleFiles,
   redeemRent,
   migrate,
+  getFileAccounts,
 };
