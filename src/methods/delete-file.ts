@@ -1,6 +1,6 @@
 import * as anchor from "@project-serum/anchor";
 import { SHDW_DRIVE_ENDPOINT } from "../utils/common";
-import { ShadowDriveResponse } from "../types";
+import { ShadowDriveVersion, ShadowDriveResponse } from "../types";
 import fetch from "cross-fetch";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import nacl from "tweetnacl";
@@ -8,14 +8,14 @@ import nacl from "tweetnacl";
  *
  * @param {anchor.web3.PublicKey} key - Publickey of Storage Account
  * @param {string} url - Shadow Drive URL of the file you are requesting to delete.
- * @param {string} version - ShadowDrive version (v1 or v2)
+ * @param {ShadowDriveVersion} version - ShadowDrive version (v1 or v2)
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 
 export default async function deleteFile(
   key: anchor.web3.PublicKey,
   url: string,
-  version: string
+  version: ShadowDriveVersion
 ): Promise<ShadowDriveResponse> {
   let selectedAccount;
   switch (version.toLocaleLowerCase()) {
@@ -67,7 +67,7 @@ export default async function deleteFile(
     });
     if (!deleteFileResponse.ok) {
       return Promise.reject(
-        new Error(`Server response status code: ${deleteFileResponse.status} \n 
+        new Error(`Server response status code: ${deleteFileResponse.status} \n
 					  Server response status message: ${(await deleteFileResponse.json()).error}`)
       );
     }

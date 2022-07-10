@@ -1,14 +1,14 @@
-import { StorageAccountResponse } from "../types";
+import { ShadowDriveVersion, StorageAccountResponse } from "../types";
 
 /**
  *
  * Get all storage accounts for the current user
- * @param {string} version - ShadowDrive version (v1 or v2)
+ * @param {ShadowDriveVersion} version - ShadowDrive version (v1 or v2)
  * @returns {StorageAccountResponse[]} - List of storage accounts
  *
  */
 export default async function getStorageAccs(
-  version: string
+  version: ShadowDriveVersion
 ): Promise<StorageAccountResponse[]> {
   let storageAccounts;
   try {

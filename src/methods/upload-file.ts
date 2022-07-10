@@ -7,7 +7,7 @@ import {
 } from "../utils/common";
 import crypto from "crypto";
 import fetch from "cross-fetch";
-import { ShadowFile, ShadowUploadResponse } from "../types";
+import { ShadowDriveVersion, ShadowFile, ShadowUploadResponse } from "../types";
 import NodeFormData from "form-data";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import nacl from "tweetnacl";
@@ -15,13 +15,13 @@ import nacl from "tweetnacl";
  *
  * @param {anchor.web3.PublicKey} key - Publickey of Storage Account.
  * @param {File | ShadowFile} data - File or ShadowFile object, file extensions should be included in the name property of ShadowFiles.
- * @param {string} version - ShadowDrive version (v1 or v2)
+ * @param {ShadowDriveVersion} version - ShadowDrive version (v1 or v2)
  * @returns {ShadowUploadResponse} File location and transaction signature.
  */
 export default async function uploadFile(
   key: anchor.web3.PublicKey,
   data: File | ShadowFile,
-  version: string
+  version: ShadowDriveVersion
 ): Promise<ShadowUploadResponse> {
   let fileErrors = [];
   let fileBuffer: Buffer;
@@ -100,7 +100,7 @@ export default async function uploadFile(
     });
     if (!uploadResponse.ok) {
       return Promise.reject(
-        new Error(`Server response status code: ${uploadResponse.status} \n 
+        new Error(`Server response status code: ${uploadResponse.status} \n
 				  Server response status message: ${(await uploadResponse.json()).error}`)
       );
     }
