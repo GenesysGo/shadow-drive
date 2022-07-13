@@ -13,19 +13,19 @@ import {
 } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import fetch from "cross-fetch";
-import { CreateStorageResponse } from "../types";
+import { ShadowDriveVersion, CreateStorageResponse } from "../types";
 /**
  *
  * @param {string} name - What you want your storage account to be named. (Does not have to be unique)
  * @param {string} size - Amount of storage you are requesting to create. Should be in a string like '1KB', '1MB', '1GB'. Only KB, MB, and GB storage delineations are supported currently.
- * @param {string} version - ShadowDrive version(v1 or v2)
+ * @param {ShadowDriveVersion} version - ShadowDrive version(v1 or v2)
  * @param {anchor.web3.PublicKey} owner2 - Optional secondary owner for the storage account.
  * @returns {CreateStorageResponse} Created bucket and transaction signature
  */
 export default async function createStorageAccount(
   name: string,
   size: string,
-  version: string,
+  version: ShadowDriveVersion,
   owner2?: anchor.web3.PublicKey
 ): Promise<CreateStorageResponse> {
   let storageInputAsBytes = humanSizeToBytes(size);
@@ -131,7 +131,7 @@ export default async function createStorageAccount(
       return Promise.reject(
         new Error(`Server response status code: ${
           createStorageResponse.status
-        } \n 
+        } \n
 		Server response status message: ${(await createStorageResponse.json()).error}`)
       );
     }

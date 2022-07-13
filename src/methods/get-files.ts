@@ -12,16 +12,16 @@ import {
   uploader,
 } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { ShadowDriveResponse } from "../types";
+import { ShadowDriveVersion, ShadowDriveResponse } from "../types";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Public Key of the existing storage to increase size on
- * @param {string} version - ShadowDrive version (v1 or v2)
+ * @param {ShadowDriveVersion} version - ShadowDrive version (v1 or v2)
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 export default async function getFiles(
   key: anchor.web3.PublicKey,
-  version: string
+  version: ShadowDriveVersion
 ): Promise<ShadowDriveResponse> {
   let selectedAccount;
   switch (version.toLocaleLowerCase()) {

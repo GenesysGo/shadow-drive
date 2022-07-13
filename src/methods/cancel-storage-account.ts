@@ -1,17 +1,17 @@
 import * as anchor from "@project-serum/anchor";
 import { getStakeAccount, sendAndConfirm } from "../utils/helpers";
 import { isBrowser, tokenMint } from "../utils/common";
-import { ShadowDriveResponse } from "../types";
+import { ShadowDriveVersion, ShadowDriveResponse } from "../types";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Publickey of a Storage Account
- * @param {string} version - ShadowDrive version (v1 or v2)
+ * @param {ShadowDriveVersion} version - ShadowDrive version (v1 or v2)
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 
 export default async function cancelDeleteStorageAccount(
   key: anchor.web3.PublicKey,
-  version: string
+  version: ShadowDriveVersion
 ): Promise<ShadowDriveResponse> {
   let selectedAccount;
   switch (version.toLocaleLowerCase()) {

@@ -26,6 +26,7 @@ import {
 } from "./methods";
 
 import {
+  ShadowDriveVersion,
   CreateStorageResponse,
   ShadowBatchUploadResponse,
   ShadowDriveResponse,
@@ -40,42 +41,42 @@ interface ShadowDrive {
   createStorageAccount(
     name: string,
     size: string,
-    version: string,
+    version: ShadowDriveVersion,
     owner2: web3.PublicKey
   ): Promise<CreateStorageResponse>;
   addStorage(
     key: web3.PublicKey,
     size: string,
-    version: string
+    version: ShadowDriveVersion
   ): Promise<ShadowDriveResponse>;
   claimStake(
     key: web3.PublicKey,
-    version: string
+    version: ShadowDriveVersion
   ): Promise<ShadowDriveResponse>;
   deleteFile(
     key: web3.PublicKey,
     url: string,
-    version: string
+    version: ShadowDriveVersion
   ): Promise<ShadowDriveResponse>;
   editFile(
     key: web3.PublicKey,
     url: string,
     data: File | ShadowFile,
-    version: string
+    version: ShadowDriveVersion
   ): Promise<ShadowUploadResponse>;
   getStorageAcc?(key: web3.PublicKey): Promise<StorageAccount>;
   getStorageAccs?(): Promise<StorageAccount[]>;
   listObjects(key: web3.PublicKey): Promise<ListObjectsResponse>;
   makeStorageImmutable(
     key: web3.PublicKey,
-    version: string
+    version: ShadowDriveVersion
   ): Promise<ShadowDriveResponse>;
   getStorageAccount(key: web3.PublicKey): Promise<StorageAccountInfo>;
-  getStorageAccounts(version: string): Promise<StorageAccountResponse[]>;
+  getStorageAccounts(version: ShadowDriveVersion): Promise<StorageAccountResponse[]>;
   reduceStorage(
     key: web3.PublicKey,
     size: string,
-    version: string
+    version: ShadowDriveVersion
   ): Promise<ShadowDriveResponse>;
   cancelDeleteFile(
     key: web3.PublicKey,
@@ -83,12 +84,12 @@ interface ShadowDrive {
   ): Promise<ShadowDriveResponse>;
   cancelDeleteStorageAccount(
     key: web3.PublicKey,
-    version: string
+    version: ShadowDriveVersion
   ): Promise<ShadowDriveResponse>;
   uploadFile(
     key: web3.PublicKey,
     data: File | ShadowFile,
-    version: string
+    version: ShadowDriveVersion
   ): Promise<ShadowUploadResponse>;
   uploadMultipleFiles(
     key: web3.PublicKey,
@@ -97,7 +98,7 @@ interface ShadowDrive {
   ): Promise<ShadowBatchUploadResponse[]>;
   deleteStorageAccount(
     key: web3.PublicKey,
-    version: string
+    version: ShadowDriveVersion
   ): Promise<ShadowDriveResponse>;
   redeemRent(
     key: web3.PublicKey,
@@ -157,6 +158,7 @@ export class ShdwDrive implements ShadowDrive {
 }
 
 export {
+  ShadowDriveVersion,
   CreateStorageResponse,
   ShadowDriveResponse,
   ShadowUploadResponse,

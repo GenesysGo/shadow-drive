@@ -11,17 +11,17 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { ShadowDriveResponse } from "../types";
+import { ShadowDriveVersion, ShadowDriveResponse } from "../types";
 import fetch from "node-fetch";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Publickey of a Storage Account
- * @param {string} version - ShadowDrive version (v1 or v2)
+ * @param {ShadowDriveVersion} version - ShadowDrive version (v1 or v2)
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 export default async function makeStorageImmutable(
   key: anchor.web3.PublicKey,
-  version: string
+  version: ShadowDriveVersion
 ): Promise<ShadowDriveResponse> {
   let selectedAccount;
   try {
@@ -109,7 +109,7 @@ export default async function makeStorageImmutable(
       return Promise.reject(
         new Error(`Server response status code: ${
           makeImmutableResponse.status
-        } \n 
+        } \n
 			Server response status message: ${(await makeImmutableResponse.json()).error}`)
       );
     }
