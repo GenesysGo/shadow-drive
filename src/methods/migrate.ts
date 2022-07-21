@@ -38,7 +38,7 @@ export default async function migrate(
       await this.wallet.signTransaction(tx);
     }
     await sendAndConfirm(
-      this.provider.connection,
+      this.connection,
       tx.serialize(),
       { skipPreflight: false },
       "max",
@@ -67,7 +67,7 @@ export default async function migrate(
       await this.wallet.signTransaction(tx2);
     }
     res = await sendAndConfirm(
-      this.provider.connection,
+      this.connection,
       tx2.serialize(),
       { skipPreflight: true },
       "confirmed",

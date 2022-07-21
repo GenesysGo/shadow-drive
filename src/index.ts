@@ -1,4 +1,4 @@
-import { Program, Wallet, Provider, web3 } from "@project-serum/anchor";
+import { Program, Wallet, web3 } from "@project-serum/anchor";
 import {
   getStorageConfigPDA,
   getUserInfo,
@@ -72,7 +72,9 @@ interface ShadowDrive {
     version: ShadowDriveVersion
   ): Promise<ShadowDriveResponse>;
   getStorageAccount(key: web3.PublicKey): Promise<StorageAccountInfo>;
-  getStorageAccounts(version: ShadowDriveVersion): Promise<StorageAccountResponse[]>;
+  getStorageAccounts(
+    version: ShadowDriveVersion
+  ): Promise<StorageAccountResponse[]>;
   reduceStorage(
     key: web3.PublicKey,
     size: string,
@@ -108,10 +110,9 @@ interface ShadowDrive {
 }
 
 export class ShdwDrive implements ShadowDrive {
-  private provider: Provider;
   private program: Program<ShadowDriveUserStaking>;
-  private storageConfigPDA: web3.PublicKey;
-  private userInfo: web3.PublicKey;
+  public storageConfigPDA: web3.PublicKey;
+  public userInfo: web3.PublicKey;
   /**
    *
    * Todo - Typescript does not currently support splitting up class definition into multiple files. These methods
@@ -138,13 +139,15 @@ export class ShdwDrive implements ShadowDrive {
   uploadMultipleFiles = uploadMultipleFiles;
   redeemRent = redeemRent;
   migrate = migrate;
-
-  //Todo - check that the wallet passed in is able to sign messages
+  /**
+   *
+   * @param connection {web3.Connection} connection - initialized web3 connection object
+   * @param wallet - Web3 wallet
+   */
   constructor(private connection: web3.Connection, private wallet: any) {
     this.wallet = wallet;
+    this.connection = connection;
     const [program, provider] = getAnchorEnvironmet(wallet, connection);
-    this.connection = provider.connection;
-    this.provider = provider;
     this.program = program;
   }
   public async init(): Promise<ShdwDrive> {
