@@ -41,7 +41,7 @@ export default async function migrate(
       this.provider.connection,
       tx.serialize(),
       { skipPreflight: false },
-      "confirmed",
+      "max",
       120000
     );
   } catch (err) {
@@ -69,7 +69,7 @@ export default async function migrate(
     res = await sendAndConfirm(
       this.provider.connection,
       tx2.serialize(),
-      { skipPreflight: false },
+      { skipPreflight: true },
       "confirmed",
       120000
     );
