@@ -58,7 +58,7 @@ export default async function cancelDeleteFile(
       await this.wallet.signTransaction(txn);
     }
     const res = await sendAndConfirm(
-      this.provider.connection,
+      this.connection,
       txn.serialize(),
       { skipPreflight: false },
       "confirmed",

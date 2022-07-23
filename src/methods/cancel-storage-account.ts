@@ -64,7 +64,7 @@ export default async function cancelDeleteStorageAccount(
     }
 
     const res = await sendAndConfirm(
-      this.provider.connection,
+      this.connection,
       txn.serialize(),
       { skipPreflight: false },
       "confirmed",
