@@ -10,6 +10,7 @@ import {
   SHDW_DRIVE_ENDPOINT,
   tokenMint,
   uploader,
+  emissions,
 } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ShadowDriveVersion, ShadowDriveResponse } from "../types";
@@ -63,39 +64,80 @@ export default async function addStorage(
   let stakeAccount = (await getStakeAccount(this.program, key))[0];
 
   try {
+    const emissionsAta = await findAssociatedTokenAddress(emissions, tokenMint);
     let txn;
     switch (version.toLocaleLowerCase()) {
       case "v1":
-        txn = await this.program.methods
-          .increaseStorage(new anchor.BN(storageInputAsBytes.toString()))
-          .accounts({
-            storageConfig: this.storageConfigPDA,
-            storageAccount: key,
-            owner: selectedAccount.owner1,
-            ownerAta,
-            stakeAccount,
-            uploader: uploader,
-            tokenMint: tokenMint,
-            systemProgram: anchor.web3.SystemProgram.programId,
-            tokenProgram: TOKEN_PROGRAM_ID,
-          })
-          .transaction();
+        switch (selectedAccount.immutable) {
+          case true:
+            txn = await this.program.methods
+              .increaseImmutableStorage(new anchor.BN(storageInputAsBytes))
+              .accounts({
+                storageConfig: this.storageConfigPDA,
+                storageAccount: key,
+                owner: selectedAccount.owner1,
+                ownerAta,
+                uploader: uploader,
+                emissionsWallet: emissionsAta,
+                tokenMint: tokenMint,
+                systemProgram: anchor.web3.SystemProgram.programId,
+                tokenProgram: TOKEN_PROGRAM_ID,
+              })
+              .transaction();
+            break;
+          case false:
+            txn = await this.program.methods
+              .increaseStorage(new anchor.BN(storageInputAsBytes))
+              .accounts({
+                storageConfig: this.storageConfigPDA,
+                storageAccount: key,
+                owner: selectedAccount.owner1,
+                ownerAta,
+                stakeAccount,
+                uploader: uploader,
+                tokenMint: tokenMint,
+                systemProgram: anchor.web3.SystemProgram.programId,
+                tokenProgram: TOKEN_PROGRAM_ID,
+              })
+              .transaction();
+            break;
+        }
         break;
       case "v2":
-        txn = await this.program.methods
-          .increaseStorage2(new anchor.BN(storageInputAsBytes))
-          .accounts({
-            storageConfig: this.storageConfigPDA,
-            storageAccount: key,
-            owner: selectedAccount.owner1,
-            ownerAta,
-            stakeAccount,
-            uploader: uploader,
-            tokenMint: tokenMint,
-            systemProgram: anchor.web3.SystemProgram.programId,
-            tokenProgram: TOKEN_PROGRAM_ID,
-          })
-          .transaction();
+        switch (selectedAccount.immutable) {
+          case true:
+            txn = await this.program.methods
+              .increaseImmutableStorage2(new anchor.BN(storageInputAsBytes))
+              .accounts({
+                storageConfig: this.storageConfigPDA,
+                storageAccount: key,
+                owner: selectedAccount.owner1,
+                ownerAta,
+                uploader: uploader,
+                emissionsWallet: emissionsAta,
+                tokenMint: tokenMint,
+                systemProgram: anchor.web3.SystemProgram.programId,
+                tokenProgram: TOKEN_PROGRAM_ID,
+              })
+              .transaction();
+            break;
+          case false:
+            txn = await this.program.methods
+              .increaseStorage2(new anchor.BN(storageInputAsBytes))
+              .accounts({
+                storageConfig: this.storageConfigPDA,
+                storageAccount: key,
+                owner: selectedAccount.owner1,
+                ownerAta,
+                stakeAccount,
+                uploader: uploader,
+                tokenMint: tokenMint,
+                systemProgram: anchor.web3.SystemProgram.programId,
+                tokenProgram: TOKEN_PROGRAM_ID,
+              })
+              .transaction();
+            break;
+        }
         break;
     }
     txn.recentBlockhash = (
