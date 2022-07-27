@@ -155,6 +155,10 @@ export class ShdwDrive implements ShadowDrive {
     this.userInfo = (await getUserInfo(this.program, this.wallet.publicKey))[0];
     return this;
   }
+
+  public getStorageConfig() {
+    return this.program.account.storageAccount.fetch(this.storageConfigPDA);
+  }
 }
 
 export {
