@@ -25,13 +25,16 @@ interface FileData {
  *
  * @param {anchor.web3.PublicKey} key - Storage account PublicKey to upload the files to.
  * @param {FileList | ShadowFile[]} data[] - Array of Files or ShadowFile objects to be uploaded
+ * @param {Number} concurrent - Number of files to concurrently upload. Default: 3
+ * @param {Function} callback - Callback function for every batch of files uploaded. A number will be passed into the callback like `callback(num)` indicating the number of files that were processed in that specific batch.
  * @returns {ShadowBatchUploadResponse[]} - File names, locations and transaction signatures for uploaded files.
  */
 
 export default async function uploadMultipleFiles(
   key: anchor.web3.PublicKey,
   data: FileList | ShadowFile[],
-  concurrent = 3
+  concurrent = 3,
+  callback?: Function
 ): Promise<ShadowBatchUploadResponse[]> {
   let fileData: Array<FileData> = [];
   const fileErrors: Array<object> = [];
@@ -272,6 +275,9 @@ export default async function uploadMultipleFiles(
                 status: `Not uploaded: ${error.error}`,
                 location: null as string,
               }));
+            }
+            if (typeof callback == "function") {
+              callback(items.length);
             }
             return items.map((item) => ({
               fileName: item.name,

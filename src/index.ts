@@ -96,7 +96,8 @@ interface ShadowDrive {
   uploadMultipleFiles(
     key: web3.PublicKey,
     data: FileList | ShadowFile[],
-    concurrent?: number
+    concurrent?: number,
+    callback?: Function
   ): Promise<ShadowBatchUploadResponse[]>;
   deleteStorageAccount(
     key: web3.PublicKey,
