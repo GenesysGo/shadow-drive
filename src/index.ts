@@ -109,17 +109,16 @@ interface ShadowDrive {
   ): Promise<ShadowDriveResponse>;
   migrate(key: web3.PublicKey): Promise<ShadowDriveResponse>;
 }
-
+/**
+ *
+ * Todo - Typescript does not currently support splitting up class definition into multiple files. These methods
+ * are therefore added as properties to the ShdwDrive class. Can move all method definitions into this file to resolve.
+ *
+ */
 export class ShdwDrive implements ShadowDrive {
   private program: Program<ShadowDriveUserStaking>;
   public storageConfigPDA: web3.PublicKey;
   public userInfo: web3.PublicKey;
-  /**
-   *
-   * Todo - Typescript does not currently support splitting up class definition into multiple files. These methods
-   * are therefore added as properties to the ShdwDrive class. Can move all method definitions into this file to resolve.
-   *
-   */
   createStorageAccount = createStorageAccount;
   addStorage = addStorage;
   claimStake = claimStake;
