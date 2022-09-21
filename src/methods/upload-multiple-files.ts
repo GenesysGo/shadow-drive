@@ -298,7 +298,9 @@ export default async function uploadMultipleFiles(
     });
   } else {
     return new Promise((resolve) => {
-      callback(existingFiles.length);
+      if (typeof callback == "function") {
+        callback(existingFiles.length);
+      }
       resolve(existingFiles);
     });
   }
