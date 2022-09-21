@@ -1,6 +1,6 @@
 {
   "name": "@shadow-drive/sdk",
-  "version": "3.0.7",
+  "version": "3.0.8",
   "description": "Interfaces for GenesysGo ShadowDrive",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
