@@ -37,6 +37,8 @@ import {
   ListObjectsResponse,
   StorageAccountInfo,
 } from "./types";
+import { PathLike } from "fs";
+import uploadMultipartFile from "./methods/upload-multipart";
 interface ShadowDrive {
   createStorageAccount(
     name: string,
@@ -99,6 +101,11 @@ interface ShadowDrive {
     concurrent?: number,
     callback?: Function
   ): Promise<ShadowBatchUploadResponse[]>;
+  uploadMultipartFile(
+    key: web3.PublicKey,
+    fileName: PathLike,
+    callback?: Function
+  ): Promise<void>;
   deleteStorageAccount(
     key: web3.PublicKey,
     version: ShadowDriveVersion
@@ -137,6 +144,7 @@ export class ShdwDrive implements ShadowDrive {
   cancelDeleteStorageAccount = cancelDeleteStorageAccount;
   uploadFile = uploadFile;
   uploadMultipleFiles = uploadMultipleFiles;
+  uploadMultipartFile = uploadMultipartFile;
   redeemRent = redeemRent;
   migrate = migrate;
   /**
