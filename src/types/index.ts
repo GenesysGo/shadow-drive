@@ -51,6 +51,7 @@ export type StorageAccountInfo = {
   creation_epoch: number;
   last_fee_epoch: number;
   identifier: string;
+  version: `${Uppercase<ShadowDriveVersion>}`;
 };
 export type StorageAccount = {
   isStatic: boolean;
