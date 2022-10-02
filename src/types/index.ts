@@ -17,6 +17,7 @@ export type ShadowUploadResponse = {
   message: string;
   upload_errors: Array<UploadError>;
 };
+
 export type UploadError = {
   file: string;
   storage_account: string;
@@ -44,7 +45,7 @@ export type StorageAccountInfo = {
   current_usage: number;
   immutable: boolean;
   to_be_deleted: boolean;
-  delet_request_epoch: number;
+  delete_request_epoch: number;
   owner1: PublicKey;
   account_counter_seed: number;
   creation_time: number;
@@ -53,6 +54,7 @@ export type StorageAccountInfo = {
   identifier: string;
   version: `${Uppercase<ShadowDriveVersion>}`;
 };
+
 export type StorageAccount = {
   isStatic: boolean;
   initCounter: number;
