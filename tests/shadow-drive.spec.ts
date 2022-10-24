@@ -6,6 +6,7 @@ import {
   ShadowDriveResponse,
   ShadowFile,
   ShadowUploadResponse,
+  ShadowEditResponse,
   ShdwDrive,
   StorageAccountInfo,
 } from "../src";
@@ -98,7 +99,7 @@ describe("shadow-drive v2 sdk testing", () => {
       file,
       "v2"
     );
-    expect.objectContaining<ShadowUploadResponse>(editRes);
+    expect.objectContaining<ShadowEditResponse>(editRes);
   });
   it("deletes file on shadow drive", async () => {
     const delRes = await drive.deleteFile(
@@ -229,7 +230,7 @@ describe("shadow-drive v1 sdk testing", () => {
       file,
       "v1"
     );
-    expect.objectContaining<ShadowUploadResponse>(editRes);
+    expect.objectContaining<ShadowEditResponse>(editRes);
   });
   //   it("retrieves all file-accounts for a v1 storage account", async () => {
   //     const fileAccounts = await drive.getFileAccounts(

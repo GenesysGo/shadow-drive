@@ -17,6 +17,11 @@ export type ShadowUploadResponse = {
   message: string;
   upload_errors: Array<UploadError>;
 };
+
+export type ShadowEditResponse = {
+  finalized_location: string;
+};
+
 export type UploadError = {
   file: string;
   storage_account: string;
