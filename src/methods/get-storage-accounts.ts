@@ -12,12 +12,14 @@ export default async function getStorageAccs(
 ): Promise<StorageAccountResponse[]> {
   let storageAccounts;
   try {
+    const walletPubKey = this.wallet.publicKey?.toBase58() ?? this.wallet.publicKey;
+    
     switch (version.toLocaleLowerCase()) {
       case "v1":
         storageAccounts = await this.program.account.storageAccount.all([
           {
             memcmp: {
-              bytes: this.wallet.publicKey,
+              bytes: walletPubKey,
               offset: 39,
             },
           },
@@ -27,7 +29,7 @@ export default async function getStorageAccs(
         storageAccounts = await this.program.account.storageAccountV2.all([
           {
             memcmp: {
-              bytes: this.wallet.publicKey,
+              bytes: walletPubKey,
               offset: 22,
             },
           },
