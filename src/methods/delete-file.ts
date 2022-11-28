@@ -32,7 +32,7 @@ export default async function deleteFile(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      location: url,
+      location: decodeURI(url),
     }),
   });
   const fileDataResponse = await fileData.json();
