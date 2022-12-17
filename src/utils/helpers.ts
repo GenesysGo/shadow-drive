@@ -115,7 +115,7 @@ export function humanSizeToBytes(input: string): number | boolean {
       break;
   }
 
-  return inputNumber * chunk_size;
+  return Math.ceil(inputNumber * chunk_size);
 }
 
 export function bytesToHuman(bytes: any, si = false, dp = 1) {

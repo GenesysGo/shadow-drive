@@ -234,60 +234,63 @@ export default async function uploadMultipleFiles(
               appendFileToItem(fileData[index])
             );
           }),
-          mergeMap(async (items) => {
-            let fd;
-            if (!isBrowser) {
-              fd = new NodeFormData();
-            } else {
-              fd = new FormData();
-            }
-            for (const item of items) {
-              let file;
+          mergeMap(
+            async (items) => {
+              let fd;
               if (!isBrowser) {
-                file = item.file;
+                fd = new NodeFormData();
               } else {
-                file = item.file as File;
+                fd = new FormData();
               }
-              fd.append("file", file, item.name);
-            }
+              for (const item of items) {
+                let file;
+                if (!isBrowser) {
+                  file = item.file;
+                } else {
+                  file = item.file as File;
+                }
+                fd.append("file", file, item.name);
+              }
 
-            fd.append("message", encodedMsg);
-            fd.append("storage_account", key.toString());
-            fd.append("signer", this.wallet.publicKey.toString());
-            fd.append("fileNames", allFileNames.toString());
-            const response = await fetch(`${SHDW_DRIVE_ENDPOINT}/upload`, {
-              method: "POST",
-              //@ts-ignore
-              body: fd,
-            });
+              fd.append("message", encodedMsg);
+              fd.append("storage_account", key.toString());
+              fd.append("signer", this.wallet.publicKey.toString());
+              fd.append("fileNames", allFileNames.toString());
+              const response = await fetch(`${SHDW_DRIVE_ENDPOINT}/upload`, {
+                method: "POST",
+                //@ts-ignore
+                body: fd,
+              });
 
-            if (!response.ok) {
-              const error = (await response.json()).error;
-              return items.map((item) => ({
-                fileName: item.name,
-                status: `Not uploaded: ${error}`,
-                location: null,
-              }));
-            } else {
-              const responseJson = await response.json();
-              if (responseJson.upload_errors.length) {
-                // TODO add type here
-                return responseJson.upload_errors.map((error: any) => ({
-                  fileName: error.file,
-                  status: `Not uploaded: ${error.error}`,
-                  location: null as string,
+              if (!response.ok) {
+                const error = (await response.json()).error;
+                return items.map((item) => ({
+                  fileName: item.name,
+                  status: `Not uploaded: ${error}`,
+                  location: null,
+                }));
+              } else {
+                const responseJson = await response.json();
+                if (responseJson.upload_errors.length) {
+                  // TODO add type here
+                  return responseJson.upload_errors.map((error: any) => ({
+                    fileName: error.file,
+                    status: `Not uploaded: ${error.error}`,
+                    location: null as string,
+                  }));
+                }
+                if (typeof callback == "function") {
+                  callback(items.length);
+                }
+                return items.map((item) => ({
+                  fileName: item.name,
+                  status: "Uploaded.",
+                  location: item.url,
                 }));
               }
-              if (typeof callback == "function") {
-                callback(items.length);
-              }
-              return items.map((item) => ({
-                fileName: item.name,
-                status: "Uploaded.",
-                location: item.url,
-              }));
-            }
-          }, concurrent),
+            },
+            fileData.length > 1 ? concurrent : 1
+          ),
           // zip them up into a flat array once all are done to get full result list
           toArray(),
           map((res) => res.flat())

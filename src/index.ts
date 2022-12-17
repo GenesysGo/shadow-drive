@@ -32,6 +32,7 @@ import {
   ShadowDriveResponse,
   ShadowFile,
   ShadowUploadResponse,
+  ShadowEditResponse,
   StorageAccount,
   StorageAccountResponse,
   ListObjectsResponse,
@@ -65,7 +66,7 @@ interface ShadowDrive {
     url: string,
     data: File | ShadowFile,
     version: ShadowDriveVersion
-  ): Promise<ShadowUploadResponse>;
+  ): Promise<ShadowEditResponse>;
   getStorageAcc?(key: web3.PublicKey): Promise<StorageAccount>;
   getStorageAccs?(): Promise<StorageAccount[]>;
   listObjects(key: web3.PublicKey): Promise<ListObjectsResponse>;
@@ -173,6 +174,7 @@ export {
   CreateStorageResponse,
   ShadowDriveResponse,
   ShadowUploadResponse,
+  ShadowEditResponse,
   ShadowFile,
   StorageAccount,
   StorageAccountResponse,

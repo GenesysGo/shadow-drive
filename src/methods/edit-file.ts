@@ -1,7 +1,7 @@
 import * as anchor from "@project-serum/anchor";
 import { isBrowser, SHDW_DRIVE_ENDPOINT } from "../utils/common";
 import crypto from "crypto";
-import { ShadowDriveVersion, ShadowFile, ShadowUploadResponse } from "../types";
+import { ShadowDriveVersion, ShadowFile, ShadowEditResponse } from "../types";
 import fetch from "cross-fetch";
 import NodeFormData from "form-data";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
@@ -12,7 +12,7 @@ import nacl from "tweetnacl";
  * @param {string} url - URL of existing file
  * @param {File | ShadowFile} data - File or ShadowFile object, file extensions should be included in the name property of ShadowFiles.
  * @param {ShadowDriveVersion} version - ShadowDrive version (v1 or v2)
- * @returns {ShadowUploadResponse} - File location and transaction signature
+ * @returns {ShadowEditResponse} - File location
  */
 
 export default async function editFile(
@@ -20,7 +20,7 @@ export default async function editFile(
   url: string,
   data: File | ShadowFile,
   version: ShadowDriveVersion
-): Promise<ShadowUploadResponse> {
+): Promise<ShadowEditResponse> {
   let fileErrors = [];
   let fileBuffer: Buffer | ArrayBuffer;
   let form;
@@ -119,7 +119,7 @@ export default async function editFile(
 				  Server response status message: ${(await uploadResponse.json()).error}`)
       );
     }
-    const responseJson = await uploadResponse.json();
+    const responseJson: ShadowEditResponse = await uploadResponse.json();
     return Promise.resolve(responseJson);
   } catch (e) {
     return Promise.reject(new Error(e));
