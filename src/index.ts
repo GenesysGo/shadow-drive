@@ -21,6 +21,7 @@ import {
   uploadFile,
   uploadMultipleFiles,
   listObjects,
+  listObjectsAndSizes,
   redeemRent,
   migrate,
 } from "./methods";
@@ -36,6 +37,7 @@ import {
   StorageAccount,
   StorageAccountResponse,
   ListObjectsResponse,
+  ListObjectsAndSizesResponse,
   StorageAccountInfo,
 } from "./types";
 interface ShadowDrive {
@@ -68,6 +70,9 @@ interface ShadowDrive {
   getStorageAcc?(key: web3.PublicKey): Promise<StorageAccount>;
   getStorageAccs?(): Promise<StorageAccount[]>;
   listObjects(key: web3.PublicKey): Promise<ListObjectsResponse>;
+  listObjectsAndSizes(
+    key: web3.PublicKey
+  ): Promise<ListObjectsAndSizesResponse>;
   makeStorageImmutable(
     key: web3.PublicKey,
     version: ShadowDriveVersion
@@ -129,6 +134,7 @@ export class ShdwDrive implements ShadowDrive {
   getStorageAccount = getStorageAcc;
   getStorageAccounts = getStorageAccs;
   listObjects = listObjects;
+  listObjectsAndSizes = listObjectsAndSizes;
   makeStorageImmutable = makeStorageImmutable;
   reduceStorage = reduceStorage;
   /**
