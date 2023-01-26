@@ -20,3 +20,5 @@ export const emissions = new web3.PublicKey(
   "SHDWRWMZ6kmRG9CvKFSD7kVcnUqXMtd3SaMrLvWscbj"
 );
 export const SHDW_DRIVE_ENDPOINT = "https://shadow-storage.genesysgo.net";
+
+export const FILE_CHUNK_SIZE = 10_000_000;
