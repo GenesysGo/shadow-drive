@@ -83,7 +83,7 @@ Make sure to set your wallet adapter or connection <code>commitment</code> confi
 
 ```JS
 const connection = new solanaWeb3.Connection(
-    "https://ssc-dao.genesysgo.net/",
+    "https://api.mainnet-beta.solana.com/",
 	"max"
   );
 ```
