@@ -1,7 +1,6 @@
 import * as anchor from "@project-serum/anchor";
-import { findAssociatedTokenAddress, sendAndConfirm } from "../utils/helpers";
-import { isBrowser, tokenMint } from "../utils/common";
-import { ShadowDriveResponse } from "../types";
+import { sendAndConfirm } from "../utils/helpers";
+import { isBrowser } from "../utils/common";
 
 /**
  *
@@ -11,7 +10,7 @@ import { ShadowDriveResponse } from "../types";
 
 export default async function migrate(
   key: anchor.web3.PublicKey
-): Promise<ShadowDriveResponse> {
+): Promise<{ txid: string }> {
   const selectedAccount = await this.program.account.storageAccount.fetch(key);
 
   let [migration, migrationBump] =

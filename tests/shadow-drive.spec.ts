@@ -84,7 +84,7 @@ describe("shadow-drive v2 sdk testing", () => {
       name: "hey.txt",
       file: fs.readFileSync(path.join(__dirname, "/test-files/hey.txt")),
     };
-    uploadResponse = await drive.uploadFile(accountKey, file, "v2");
+    uploadResponse = await drive.uploadFile(accountKey, file);
     expect.objectContaining<ShadowUploadResponse>(uploadResponse);
   });
   it("edits file on shadow drive", async () => {
@@ -215,7 +215,7 @@ describe("shadow-drive v1 sdk testing", () => {
       name: "hey.txt",
       file: fs.readFileSync(path.join(__dirname, "/test-files/hey.txt")),
     };
-    uploadResponse = await drive.uploadFile(accountKey, file, "v1");
+    uploadResponse = await drive.uploadFile(accountKey, file);
     expect.objectContaining<ShadowUploadResponse>(uploadResponse);
   });
   it("edits file on shadowDrive", async () => {
