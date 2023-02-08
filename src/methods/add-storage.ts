@@ -19,7 +19,7 @@ import fetch from "node-fetch";
  * @param {anchor.web3.PublicKey} key - Public Key of the existing storage to increase size on
  * @param {string} size - Amount of storage you are requesting to add to your storage account. Should be in a string like '1KB', '1MB', '1GB'. Only KB, MB, and GB storage delineations are supported currently.
  * @param {ShadowDriveVersion} version - ShadowDrive version (v1 or v2)
- * @returns {ShadowMessageResponse} Confirmed transaction ID
+ * @returns {ShadowDriveResponse} Confirmed transaction ID
  */
 export default async function addStorage(
   key: anchor.web3.PublicKey,
