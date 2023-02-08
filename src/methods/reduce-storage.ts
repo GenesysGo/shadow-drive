@@ -99,10 +99,11 @@ export default async function reduceStorage(
       await this.connection.getLatestBlockhash()
     ).blockhash;
     txn.feePayer = this.wallet.publicKey;
+    let signedTx;
     if (!isBrowser) {
-      await txn.partialSign(this.wallet.payer);
+      signedTx = await txn.partialSign(this.wallet.payer);
     } else {
-      await this.wallet.signTransaction(txn);
+      signedTx = await this.wallet.signTransaction(txn);
     }
     const serializedTxn = txn.serialize({ requireAllSignatures: false });
     const reduceStorageResponse = await fetch(

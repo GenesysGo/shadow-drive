@@ -32,14 +32,15 @@ export default async function migrate(
 
     tx.recentBlockhash = (await this.connection.getLatestBlockhash()).blockhash;
     tx.feePayer = this.wallet.publicKey;
+    let signedTx;
     if (!isBrowser) {
-      await tx.partialSign(this.wallet.payer);
+      signedTx = await tx.partialSign(this.wallet.payer);
     } else {
-      await this.wallet.signTransaction(tx);
+      signedTx = await this.wallet.signTransaction(tx);
     }
     await sendAndConfirm(
       this.connection,
-      tx.serialize(),
+      signedTx.serialize(),
       { skipPreflight: false },
       "max",
       120000
@@ -61,14 +62,15 @@ export default async function migrate(
       await this.connection.getLatestBlockhash()
     ).blockhash;
     tx2.feePayer = this.wallet.publicKey;
+    let signedTx;
     if (!isBrowser) {
-      await tx2.partialSign(this.wallet.payer);
+      signedTx = await tx2.partialSign(this.wallet.payer);
     } else {
-      await this.wallet.signTransaction(tx2);
+      signedTx = await this.wallet.signTransaction(tx2);
     }
     res = await sendAndConfirm(
       this.connection,
-      tx2.serialize(),
+      signedTx.serialize(),
       { skipPreflight: true },
       "confirmed",
       120000
