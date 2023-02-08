@@ -19,7 +19,7 @@ export const App: FC = () => {
 };
 
 const Context: FC<{ children: ReactNode }> = ({ children }) => {
-	const network = 'https://ssc-dao.genesysgo.net/';
+	const network = 'https://us-west-1.genesysgo.net/{YOUR_ACCOUNT_UUID_HERE}';
 	const wallets = useMemo(
 		() => [
 			new PhantomWalletAdapter(),
@@ -31,7 +31,12 @@ const Context: FC<{ children: ReactNode }> = ({ children }) => {
 	);
 
 	return (
-		<ConnectionProvider endpoint={network} config={{ commitment: 'max' }}>
+		<ConnectionProvider endpoint={network} config={{
+			commitment: 'max', httpHeaders: {
+				Authorization:
+					"Bearer {GENESYSGO AUTHENTICATION TOKEN HERE}",
+			}
+		}}>
 			<WalletProvider wallets={wallets} autoConnect>
 				<WalletModalProvider>{children}</WalletModalProvider>
 			</WalletProvider>

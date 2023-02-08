@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ShdwDrive, StorageAccountResponse } from "@shadow-drive/sdk";
+import { ShdwDrive, StorageAccountResponse, ShadowDriveVersion } from "@shadow-drive/sdk";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import * as anchor from "@project-serum/anchor";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
@@ -46,11 +46,11 @@ export default function Drive() {
 	const [displayFiles, setDisplayFiles] = useState<any>();
 	const [radioValue, setRadioValue] = useState<PublicKey | String>();
 	const [uploadLocs, setUploadLocs] = useState<any>();
-	const [accName, setAccName] = useState<string | undefined>();
-	const [accSize, setAccSize] = useState<string | undefined>();
+	const [accName, setAccName] = useState<string>('');
+	const [accSize, setAccSize] = useState<string>('1GB');
 	const [loading, setLoading] = useState<boolean>();
 	const [tx, setTx] = useState<String>();
-	const [version, setVersion] = useState<string>();
+	const [version, setVersion] = useState<ShadowDriveVersion>('v2');
 	const submitForm = async () => {
 		if (!acc?.publicKey || !fileList) return;
 		try {
@@ -108,12 +108,12 @@ export default function Drive() {
 	}
 	useEffect(() => {
 		(async () => {
-			if (wallet?.publicKey) {
+			if (wallet) {
 				const drive = await new ShdwDrive(connection, wallet).init();
 				await setDrive(drive);
 			}
 		})();
-	}, [wallet?.publicKey])
+	}, [wallet.connected])
 	const refreshAccounts = async () => {
 		const accounts = await drive?.getStorageAccounts('v2');
 		setAccs(accounts!);
@@ -190,7 +190,7 @@ export default function Drive() {
 									sx={{
 										color: 'white',
 									}}
-									onChange={(e) => { setVersion(e.target.value) }}
+									onChange={(e) => { setVersion(e.target.value as ShadowDriveVersion) }}
 								>
 									<MenuItem value={'v1'}>v1</MenuItem>
 									<MenuItem value={'v2'}>v2</MenuItem>
@@ -222,7 +222,7 @@ export default function Drive() {
 							>
 								{accs.map((acc, index) => {
 									return (
-										<FormControlLabel value={acc.publicKey} control={<Radio />} checked={radioValue == acc.publicKey} label={acc.account.identifier + ' - ' + bytesToHuman(new anchor.BN(acc.account.storage).toNumber()) + ' drive'} onClick={(e) => { setAcc(acc) }} />
+										<FormControlLabel key={index} value={acc.publicKey} control={<Radio />} checked={radioValue == acc.publicKey} label={acc.account.identifier + ' - ' + bytesToHuman(new anchor.BN(acc.account.storage).toNumber()) + ' drive'} onClick={(e) => { setAcc(acc) }} />
 									)
 								})}
 							</RadioGroup></FormControl>
