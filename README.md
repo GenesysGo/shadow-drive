@@ -83,7 +83,12 @@ Make sure to set your wallet adapter or connection <code>commitment</code> confi
 
 ```JS
 const connection = new solanaWeb3.Connection(
-    "https://api.mainnet-beta.solana.com/",
-	"max"
-  );
+    "https://{region}.genesysgo.net/{YOUR_ACCOUNT_UUID_HERE}",
+	{
+		commitment: "max", 
+		httpHeaders: {
+			Authorization:
+			"Bearer {GENESYSGO AUTHENTICATION TOKEN HERE}",
+		}
+	});
 ```
