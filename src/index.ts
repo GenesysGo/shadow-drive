@@ -53,7 +53,7 @@ interface ShadowDrive {
   claimStake(
     key: web3.PublicKey,
     version: ShadowDriveVersion
-  ): Promise<ShadowDriveResponse>;
+  ): Promise<{ txid: string }>;
   deleteFile(
     key: web3.PublicKey,
     url: string,
@@ -81,14 +81,11 @@ interface ShadowDrive {
     size: string,
     version: ShadowDriveVersion
   ): Promise<ShadowDriveResponse>;
-  cancelDeleteFile(
-    key: web3.PublicKey,
-    url: string
-  ): Promise<ShadowDriveResponse>;
+  cancelDeleteFile(key: web3.PublicKey, url: string): Promise<{ txid: string }>;
   cancelDeleteStorageAccount(
     key: web3.PublicKey,
     version: ShadowDriveVersion
-  ): Promise<ShadowDriveResponse>;
+  ): Promise<{ txid: string }>;
   uploadFile(
     key: web3.PublicKey,
     data: File | ShadowFile,
@@ -103,12 +100,12 @@ interface ShadowDrive {
   deleteStorageAccount(
     key: web3.PublicKey,
     version: ShadowDriveVersion
-  ): Promise<ShadowDriveResponse>;
+  ): Promise<{ txid: string }>;
   redeemRent(
     key: web3.PublicKey,
     fileAccount: web3.PublicKey
-  ): Promise<ShadowDriveResponse>;
-  migrate(key: web3.PublicKey): Promise<ShadowDriveResponse>;
+  ): Promise<{ txid: string }>;
+  migrate(key: web3.PublicKey): Promise<{ txid: string }>;
 }
 /**
  *
