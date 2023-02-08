@@ -9,7 +9,7 @@ export type CreateStorageResponse = {
 };
 
 export type ShadowDriveResponse = {
-  txid: string;
+  message: string;
   transaction_signature?: string;
 };
 
