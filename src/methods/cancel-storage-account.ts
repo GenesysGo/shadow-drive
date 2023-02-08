@@ -57,15 +57,16 @@ export default async function cancelDeleteStorageAccount(
       await this.connection.getLatestBlockhash()
     ).blockhash;
     txn.feePayer = this.wallet.publicKey;
+    let signedTx;
     if (!isBrowser) {
-      await txn.partialSign(this.wallet.payer);
+      signedTx = await txn.partialSign(this.wallet.payer);
     } else {
-      await this.wallet.signTransaction(txn);
+      signedTx = await this.wallet.signTransaction(txn);
     }
 
     const res = await sendAndConfirm(
       this.connection,
-      txn.serialize(),
+      signedTx.serialize(),
       { skipPreflight: false },
       "confirmed",
       120000

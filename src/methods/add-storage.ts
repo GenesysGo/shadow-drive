@@ -144,12 +144,13 @@ export default async function addStorage(
       await this.connection.getLatestBlockhash()
     ).blockhash;
     txn.feePayer = this.wallet.publicKey;
+    let signedTx;
     if (!isBrowser) {
-      await txn.partialSign(this.wallet.payer);
+      signedTx = await txn.partialSign(this.wallet.payer);
     } else {
-      await this.wallet.signTransaction(txn);
+      signedTx = await this.wallet.signTransaction(txn);
     }
-    const serializedTxn = txn.serialize({ requireAllSignatures: false });
+    const serializedTxn = signedTx.serialize({ requireAllSignatures: false });
 
     const addStorageResponse = await fetch(
       `${SHDW_DRIVE_ENDPOINT}/add-storage`,
