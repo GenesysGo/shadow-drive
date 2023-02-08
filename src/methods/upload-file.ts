@@ -1,13 +1,8 @@
 import * as anchor from "@project-serum/anchor";
-import {
-  isBrowser,
-  SHDW_DRIVE_ENDPOINT,
-  tokenMint,
-  uploader,
-} from "../utils/common";
+import { isBrowser, SHDW_DRIVE_ENDPOINT } from "../utils/common";
 import crypto from "crypto";
 import fetch from "cross-fetch";
-import { ShadowDriveVersion, ShadowFile, ShadowUploadResponse } from "../types";
+import { ShadowFile, ShadowUploadResponse } from "../types";
 import NodeFormData from "form-data";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import nacl from "tweetnacl";
@@ -15,13 +10,11 @@ import nacl from "tweetnacl";
  *
  * @param {anchor.web3.PublicKey} key - Publickey of Storage Account.
  * @param {File | ShadowFile} data - File or ShadowFile object, file extensions should be included in the name property of ShadowFiles.
- * @param {ShadowDriveVersion} version - ShadowDrive version (v1 or v2)
  * @returns {ShadowUploadResponse} File location and transaction signature.
  */
 export default async function uploadFile(
   key: anchor.web3.PublicKey,
-  data: File | ShadowFile,
-  version: ShadowDriveVersion
+  data: File | ShadowFile
 ): Promise<ShadowUploadResponse> {
   let fileErrors = [];
   let fileBuffer: Buffer;

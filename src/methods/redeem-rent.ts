@@ -1,19 +1,18 @@
 import * as anchor from "@project-serum/anchor";
 import { findAssociatedTokenAddress, sendAndConfirm } from "../utils/helpers";
 import { isBrowser, tokenMint } from "../utils/common";
-import { ShadowDriveResponse } from "../types";
 
 /**
  *
  * @param {anchor.web3.PublicKey} key - PublicKey of a Storage Account
  * @param {anchor.web3.PublicKey} fileAccount - PublicKey of the file account to close
- * @returns {ShadowDriveResponse} - Confirmed transaction ID
+ * @returns {{ txid: string }} - Confirmed transaction ID
  */
 
 export default async function redeemRent(
   key: anchor.web3.PublicKey,
   fileAccount: anchor.web3.PublicKey
-): Promise<ShadowDriveResponse> {
+): Promise<{ txid: string }> {
   let selectedAccount;
 
   selectedAccount = await this.program.account.storageAccount.fetch(key);

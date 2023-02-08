@@ -2,19 +2,19 @@ import * as anchor from "@project-serum/anchor";
 import { findAssociatedTokenAddress, sendAndConfirm } from "../utils/helpers";
 import { isBrowser, tokenMint } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { ShadowDriveVersion, ShadowDriveResponse } from "../types";
+import { ShadowDriveVersion } from "../types";
 
 /**
  *
  * @param {anchor.web3.PublicKey} key - PublicKey of a Storage Account
  * @param {ShadowDriveVersion} version - ShadowDrive version (v1 or v2)
- * @returns {ShadowDriveResponse} - Confirmed transaction ID
+ * @returns {{ txid: string }} - Confirmed transaction ID
  */
 
 export default async function claimStake(
   key: anchor.web3.PublicKey,
   version: ShadowDriveVersion
-): Promise<ShadowDriveResponse> {
+): Promise<{ txid: string }> {
   let selectedAccount;
   switch (version.toLocaleLowerCase()) {
     case "v1":
