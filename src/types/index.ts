@@ -1,7 +1,7 @@
 import * as anchor from "@project-serum/anchor";
 import { PublicKey, Transaction } from "@solana/web3.js";
 
-export type ShadowDriveVersion = 'v1' | 'v2'
+export type ShadowDriveVersion = "v1" | "v2";
 
 export type CreateStorageResponse = {
   shdw_bucket: string;
@@ -10,6 +10,7 @@ export type CreateStorageResponse = {
 
 export type ShadowDriveResponse = {
   txid: string;
+  transaction_signature?: string;
 };
 
 export type ShadowUploadResponse = {
