@@ -54,12 +54,7 @@ export default async function deleteStorageAccount(
       await this.connection.getLatestBlockhash()
     ).blockhash;
     txn.feePayer = this.wallet.publicKey;
-    let signedTx;
-    if (!isBrowser) {
-      signedTx = await txn.partialSign(this.wallet.payer);
-    } else {
-      signedTx = await this.wallet.signTransaction(txn);
-    }
+    const signedTx = await this.wallet.signTransaction(txn);
     const res = await sendAndConfirm(
       this.connection,
       signedTx.serialize(),
