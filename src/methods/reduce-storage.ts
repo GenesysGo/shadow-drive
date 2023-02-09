@@ -105,7 +105,7 @@ export default async function reduceStorage(
     } else {
       signedTx = await this.wallet.signTransaction(txn);
     }
-    const serializedTxn = txn.serialize({ requireAllSignatures: false });
+    const serializedTxn = signedTx.serialize({ requireAllSignatures: false });
     const reduceStorageResponse = await fetch(
       `${SHDW_DRIVE_ENDPOINT}/reduce-storage`,
       {

@@ -109,7 +109,7 @@ export default async function createStorageAccount(
     txn.feePayer = this.wallet.publicKey;
     let signedTx;
     if (!isBrowser) {
-      await txn.partialSign(this.wallet.payer);
+      signedTx = await txn.partialSign(this.wallet.payer);
     } else {
       signedTx = await this.wallet.signTransaction(txn);
     }
