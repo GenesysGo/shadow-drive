@@ -108,12 +108,14 @@ export default async function createStorageAccount(
     ).blockhash;
     txn.feePayer = this.wallet.publicKey;
     let signedTx;
+    let serializedTxn;
     if (!isBrowser) {
       await txn.partialSign(this.wallet.payer);
+      serializedTxn = txn.serialize({ requireAllSignatures: false });
     } else {
       signedTx = await this.wallet.signTransaction(txn);
+      serializedTxn = signedTx.serialize({ requireAllSignatures: false });
     }
-    const serializedTxn = signedTx.serialize({ requireAllSignatures: false });
     const createStorageResponse = await fetch(
       `${SHDW_DRIVE_ENDPOINT}/storage-account`,
       {

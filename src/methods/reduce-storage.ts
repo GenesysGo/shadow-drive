@@ -100,12 +100,14 @@ export default async function reduceStorage(
     ).blockhash;
     txn.feePayer = this.wallet.publicKey;
     let signedTx;
+    let serializedTxn;
     if (!isBrowser) {
-      signedTx = await txn.partialSign(this.wallet.payer);
+      await txn.partialSign(this.wallet.payer);
+      serializedTxn = txn.serialize({ requireAllSignatures: false });
     } else {
       signedTx = await this.wallet.signTransaction(txn);
+      serializedTxn = signedTx.serialize({ requireAllSignatures: false });
     }
-    const serializedTxn = txn.serialize({ requireAllSignatures: false });
     const reduceStorageResponse = await fetch(
       `${SHDW_DRIVE_ENDPOINT}/reduce-storage`,
       {

@@ -33,8 +33,14 @@ describe("shadow-drive v2 sdk testing", () => {
   beforeAll(async () => {
     //Must be on official devnet endpoint for SOL airdrops to work
     connection = new anchor.web3.Connection(
-      "https://api.devnet.solana.com/",
-      "max"
+      "https://us-west-1.genesysgo.net/fcb96303-29df-46de-897e-04f45e044e04",
+      {
+        commitment: "max",
+        httpHeaders: {
+          Authorization:
+            "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InBvcnRhbF9hdXRoIn0.eyJwcm94aWVzIjpbIlNWMSJdLCJ1dWlkIjoiZmNiOTYzMDMtMjlkZi00NmRlLTg5N2UtMDRmNDVlMDQ0ZTA0IiwidGllciI6MiwiaWF0IjoxNjc1OTczNTYyLCJleHAiOjE2NzYwNTk5NjJ9.GQkEj6ye7qoCb2bqg_LYINuZtXyUdx7RStzo3pnwxSdwdjwCe9XdPzAqDbSnshMETkNDpA54M6cr1Pc74s3GK_Rd7oxyyWZcD4bawxDuu7xwK68yj62E2LHLg1BKGKOeHgroVwfceKbVk5eyfHjY46PhdW5C8LspnKdmH0d2ulRM74HLFItY7i3im7H9cBeYtoYr-sRyqyuQXP5EqB9k5dN5rUpkKZchlbL2u-YNHwkc_Y2AYNtCX_cy_hcsbZp3U44BSczObSGTrlKstBpzjTMkvMmbzZPHyXFIaYBY1PombeJW6n61RUFaV6EAE_Kuc-Xy7NHeh9QKB3fJ-Q391-1WyS6Bo-2bXGpR618usccuozmkjnuSKD6urWyzsBwQdsFfoONKvrfNi0pVbEGJN9mptj7FTBiFcyoc28d1uCcK8QWGKFa_bcs88ka7ppsL4n91s6NrGAKlVbkdV3YpQ3l2S-cYHAxxqM0B2YYj0dkZkf5dAZYr0gXjo1nlZBf8_vQ51vLReqS4AqM3wO6M5p7E_pyS99Hx4fvg_CcWLjwLswt5mHGwK_IfC4MoAO8qpJvLl9wbAX4iDE7jVso9k18wfr2Glmo3fnH75sTEAAvz1QqoEs7UNIuR7iePaENZ4n_3QRo0XZ_j1HeiToMxM6zqeHNKSWl_YBHrTP-E1sc",
+        },
+      }
     );
   });
   it("funds a new wallet for tests", async () => {
@@ -132,7 +138,7 @@ describe("shadow-drive v2 sdk testing", () => {
   });
   it("deletes a shadow drive storage account", async () => {
     const delRes = await drive.deleteStorageAccount(accountKey, "v2");
-    expect.objectContaining<ShadowDriveResponse>(delRes);
+    expect.objectContaining<{ txid: string }>(delRes);
   });
   it("creates a shadow drive storage account and marks immutable", async () => {
     const res = await drive?.createStorageAccount(
@@ -153,7 +159,7 @@ describe("shadow-drive v2 sdk testing", () => {
     const migrateRes = await drive.migrate(
       new anchor.web3.PublicKey(res.shdw_bucket)
     );
-    expect.objectContaining<ShadowDriveResponse>(migrateRes);
+    expect.objectContaining<{ txid: string }>(migrateRes);
   });
 });
 describe("shadow-drive v1 sdk testing", () => {
@@ -242,6 +248,6 @@ describe("shadow-drive v1 sdk testing", () => {
   //   });
   it("deletes a shadow drive storage account", async () => {
     const delRes = await drive.deleteStorageAccount(accountKey, "v1");
-    expect.objectContaining<ShadowDriveResponse>(delRes);
+    expect.objectContaining<{ txid: string }>(delRes);
   });
 });
