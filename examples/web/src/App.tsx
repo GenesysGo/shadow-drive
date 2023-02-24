@@ -32,7 +32,7 @@ const Context: FC<{ children: ReactNode }> = ({ children }) => {
 
 	return (
 		<ConnectionProvider endpoint={network} config={{
-			commitment: 'max', httpHeaders: {
+			commitment: 'processed', httpHeaders: {
 				Authorization:
 					"Bearer {GENESYSGO AUTHENTICATION TOKEN HERE}",
 			}
