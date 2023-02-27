@@ -50,7 +50,7 @@ export default function Drive() {
 ```js
 import { ShdwDrive } from "@shadow-drive/sdk";
 import * as web3 from "@solana/web3.js";
-const connection = new web3.Connection("{rpc-url}", "processed");
+const connection = new web3.Connection("{rpc-url}", "confirmed");
 const drive = await new ShdwDrive(connection, wallet).init();
 ```
 
