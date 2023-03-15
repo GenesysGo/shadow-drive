@@ -18,7 +18,7 @@
   "files": [
     "dist/**/*"
   ],
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "clean": "rimraf dist",
     "prebuild": "yarn clean",
