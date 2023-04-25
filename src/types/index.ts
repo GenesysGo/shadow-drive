@@ -1,5 +1,5 @@
 import * as anchor from "@project-serum/anchor";
-import { PublicKey, Transaction } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 
 export type ShadowDriveVersion = "v1" | "v2";
 
@@ -37,6 +37,16 @@ export type ShadowBatchUploadResponse = {
 
 export type ListObjectsResponse = {
   keys: string[];
+};
+
+export type ListObjectFileDetails = {
+  file_name: string;
+  size: number | bigint;
+  last_modified: string | Date;
+};
+
+export type ListObjectsAndSizesResponse = {
+  files: ListObjectFileDetails[];
 };
 
 export type StorageAccountResponse = {
