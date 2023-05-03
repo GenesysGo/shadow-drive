@@ -3,6 +3,7 @@ import {
   humanSizeToBytes,
   getStakeAccount,
   findAssociatedTokenAddress,
+  getBucketSize,
 } from "../utils/helpers";
 import {
   emissions,
@@ -51,11 +52,15 @@ export default async function reduceStorage(
   let stakeAccount = (await getStakeAccount(this.program, key))[0];
   const emissionsAta = await findAssociatedTokenAddress(emissions, tokenMint);
   try {
+    const storageUsed = await getBucketSize(key.toString());
     let txn;
     switch (version.toLocaleLowerCase()) {
       case "v1":
         txn = await this.program.methods
-          .decreaseStorage(new anchor.BN(storageInputAsBytes.toString()))
+          .decreaseStorage(
+            new anchor.BN(storageInputAsBytes.toString()),
+            new anchor.BN(storageUsed)
+          )
           .accounts({
             storageConfig: this.storageConfigPDA,
             storageAccount: key,
@@ -75,7 +80,10 @@ export default async function reduceStorage(
         break;
       case "v2":
         txn = await this.program.methods
-          .decreaseStorage2(new anchor.BN(storageInputAsBytes.toString()))
+          .decreaseStorage2(
+            new anchor.BN(storageInputAsBytes.toString()),
+            new anchor.BN(storageUsed)
+          )
           .accounts({
             storageConfig: this.storageConfigPDA,
             storageAccount: key,
