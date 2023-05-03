@@ -44,7 +44,6 @@ export default async function makeStorageImmutable(
       tokenMint
     );
     const storageUsed = await getBucketSize(key.toString());
-    console.log(storageUsed);
     const emissionsAta = await findAssociatedTokenAddress(emissions, tokenMint);
     let stakeAccount = (await getStakeAccount(this.program, key))[0];
     let txn;

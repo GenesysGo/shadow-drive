@@ -35,7 +35,6 @@ export async function getBucketSize(storageAccount: string): Promise<number> {
     `${SHDW_DRIVE_ENDPOINT}/bucket-size?storageAccount=${storageAccount}`
   );
   const { storageUsed } = await bucketData.json();
-  console.log(storageUsed);
   return storageUsed;
 }
 // This helper function finds the ATA given a wallet + mint address
