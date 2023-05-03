@@ -23,6 +23,8 @@ import {
   listObjects,
   redeemRent,
   migrate,
+  topUp,
+  refreshStake,
 } from "./methods";
 
 import {
@@ -106,6 +108,11 @@ interface ShadowDrive {
     fileAccount: web3.PublicKey
   ): Promise<{ txid: string }>;
   migrate(key: web3.PublicKey): Promise<{ txid: string }>;
+  topUp(key: web3.PublicKey, amount: number): Promise<{ txid: string }>;
+  refreshStake(
+    key: web3.PublicKey,
+    version: ShadowDriveVersion
+  ): Promise<{ txid: string }>;
 }
 /**
  *
@@ -128,6 +135,8 @@ export class ShdwDrive implements ShadowDrive {
   listObjects = listObjects;
   makeStorageImmutable = makeStorageImmutable;
   reduceStorage = reduceStorage;
+  topUp = topUp;
+  refreshStake = refreshStake;
   /**
    * @deprecated The method should not be used as of Shadow Drive v1.5
    */
