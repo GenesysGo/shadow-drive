@@ -110,6 +110,7 @@ export default async function makeStorageImmutable(
           transaction: Buffer.from(serializedTxn.toJSON().data).toString(
             "base64"
           ),
+          storageUsed: storageUsed,
         }),
       }
     );

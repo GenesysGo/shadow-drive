@@ -129,6 +129,7 @@ export default async function reduceStorage(
           ),
           storage_account: key,
           amount_to_reduce: storageInputAsBytes,
+          storageUsed: storageUsed,
         }),
       }
     );
