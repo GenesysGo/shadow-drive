@@ -32,17 +32,40 @@ export default async function refreshStake(
     this.wallet.publicKey,
     tokenMint
   );
+  let txn;
   try {
-    let txn = await this.program.methods.refreshStake().accounts({
-      storageConfig: this.storageConfigPDA,
-      storageAccount: key,
-      owner: selectedAccount.owner1,
-      ownerAta: ownerAta,
-      stakeAccount: stakeAccount,
-      tokenMint: tokenMint,
-      systemProgram: anchor.web3.SystemProgram.programId,
-      tokenProgram: TOKEN_PROGRAM_ID,
-    });
+    switch (version.toLocaleLowerCase()) {
+      case "v1":
+        txn = await this.program.methods
+          .refreshStake()
+          .accounts({
+            storageConfig: this.storageConfigPDA,
+            storageAccount: key,
+            owner: selectedAccount.owner1,
+            ownerAta: ownerAta,
+            stakeAccount: stakeAccount,
+            tokenMint: tokenMint,
+            systemProgram: anchor.web3.SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+          })
+          .transaction();
+        break;
+      case "v2":
+        txn = await this.program.methods
+          .refreshStake2()
+          .accounts({
+            storageConfig: this.storageConfigPDA,
+            storageAccount: key,
+            owner: selectedAccount.owner1,
+            ownerAta: ownerAta,
+            stakeAccount: stakeAccount,
+            tokenMint: tokenMint,
+            systemProgram: anchor.web3.SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+          })
+          .transaction();
+        break;
+    }
     txn.recentBlockhash = (
       await this.connection.getLatestBlockhash()
     ).blockhash;
