@@ -2,7 +2,7 @@ import * as anchor from "@project-serum/anchor";
 import {
   getStakeAccount,
   findAssociatedTokenAddress,
-  getBucketSize,
+  getStorageAccountSize,
 } from "../utils/helpers";
 import {
   emissions,
@@ -43,7 +43,7 @@ export default async function makeStorageImmutable(
       selectedAccount.owner1,
       tokenMint
     );
-    const storageUsed = await getBucketSize(key.toString());
+    const storageUsed = await getStorageAccountSize(key.toString());
     const emissionsAta = await findAssociatedTokenAddress(emissions, tokenMint);
     let stakeAccount = (await getStakeAccount(this.program, key))[0];
     let txn;

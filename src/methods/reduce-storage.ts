@@ -3,7 +3,7 @@ import {
   humanSizeToBytes,
   getStakeAccount,
   findAssociatedTokenAddress,
-  getBucketSize,
+  getStorageAccountSize,
 } from "../utils/helpers";
 import {
   emissions,
@@ -52,7 +52,7 @@ export default async function reduceStorage(
   let stakeAccount = (await getStakeAccount(this.program, key))[0];
   const emissionsAta = await findAssociatedTokenAddress(emissions, tokenMint);
   try {
-    const storageUsed = await getBucketSize(key.toString());
+    const storageUsed = await getStorageAccountSize(key.toString());
     let txn;
     switch (version.toLocaleLowerCase()) {
       case "v1":

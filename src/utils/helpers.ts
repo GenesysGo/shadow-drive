@@ -30,9 +30,11 @@ export function getAnchorEnvironmet(
 
   return [program, provider];
 }
-export async function getBucketSize(storageAccount: string): Promise<number> {
+export async function getStorageAccountSize(
+  storageAccount: string
+): Promise<number> {
   const bucketData = await fetch(
-    `${SHDW_DRIVE_ENDPOINT}/bucket-size?storageAccount=${storageAccount}`
+    `${SHDW_DRIVE_ENDPOINT}/storage-account-size?storageAccount=${storageAccount}`
   );
   const { storage_used } = await bucketData.json();
   return storage_used;
