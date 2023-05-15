@@ -14,7 +14,7 @@ import { ShadowDriveVersion } from "../types";
  *
  *  @returns {txid: string} - confirmed transaction id
  */
-export default async function addStorage(
+export default async function refreshStake(
   key: anchor.web3.PublicKey,
   version: ShadowDriveVersion
 ): Promise<{ txid: string }> {
