@@ -22,14 +22,10 @@ export default async function topUp(
     this.wallet.publicKey,
     tokenMint
   );
-  const stakeAccountAta = await findAssociatedTokenAddress(
-    stakeAccount,
-    tokenMint
-  );
   const tx = new anchor.web3.Transaction().add(
     createTransferInstruction(
       ownerAta,
-      stakeAccountAta,
+      stakeAccount,
       this.wallet.publicKey,
       new anchor.BN(amount).toNumber(),
       undefined,
