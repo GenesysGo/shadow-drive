@@ -1,5 +1,5 @@
 export type ShadowDriveUserStaking = {
-  version: "1.2.0";
+  version: "2.0.0";
   name: "shadow_drive_user_staking";
   constants: [
     {
@@ -181,6 +181,12 @@ export type ShadowDriveUserStaking = {
         },
         {
           name: "newMinAcctSize";
+          type: {
+            option: "u64";
+          };
+        },
+        {
+          name: "newShadesPerGbEpoch";
           type: {
             option: "u64";
           };
@@ -851,7 +857,7 @@ export type ShadowDriveUserStaking = {
         },
         {
           name: "tokenMint";
-          isMut: false;
+          isMut: true;
           isSigner: false;
           docs: ["Token mint account"];
         },
@@ -945,7 +951,7 @@ export type ShadowDriveUserStaking = {
         },
         {
           name: "tokenMint";
-          isMut: false;
+          isMut: true;
           isSigner: false;
           docs: ["Token mint account"];
         },
@@ -1032,7 +1038,7 @@ export type ShadowDriveUserStaking = {
         },
         {
           name: "tokenMint";
-          isMut: false;
+          isMut: true;
           isSigner: false;
           docs: ["Token mint account"];
         },
@@ -1131,7 +1137,7 @@ export type ShadowDriveUserStaking = {
         },
         {
           name: "tokenMint";
-          isMut: false;
+          isMut: true;
           isSigner: false;
           docs: ["Token mint account"];
         },
@@ -1686,7 +1692,7 @@ export type ShadowDriveUserStaking = {
         },
         {
           name: "tokenMint";
-          isMut: false;
+          isMut: true;
           isSigner: false;
           docs: ["Token mint account"];
         },
@@ -1791,7 +1797,7 @@ export type ShadowDriveUserStaking = {
         },
         {
           name: "tokenMint";
-          isMut: false;
+          isMut: true;
           isSigner: false;
           docs: ["Token mint account"];
         },
@@ -2041,7 +2047,7 @@ export type ShadowDriveUserStaking = {
         },
         {
           name: "tokenMint";
-          isMut: false;
+          isMut: true;
           isSigner: false;
           docs: ["Token mint account"];
         },
@@ -2115,7 +2121,7 @@ export type ShadowDriveUserStaking = {
         },
         {
           name: "tokenMint";
-          isMut: false;
+          isMut: true;
           isSigner: false;
           docs: ["Token mint account"];
         },
@@ -2749,6 +2755,23 @@ export type ShadowDriveUserStaking = {
       };
     }
   ];
+  events: [
+    {
+      name: "StakeRefreshed";
+      fields: [
+        {
+          name: "refreshed";
+          type: "bool";
+          index: false;
+        },
+        {
+          name: "account";
+          type: "publicKey";
+          index: false;
+        }
+      ];
+    }
+  ];
   errors: [
     {
       code: 6000;
@@ -2919,7 +2942,7 @@ export type ShadowDriveUserStaking = {
 };
 
 export const IDL: ShadowDriveUserStaking = {
-  version: "1.2.0",
+  version: "2.0.0",
   name: "shadow_drive_user_staking",
   constants: [
     {
@@ -3101,6 +3124,12 @@ export const IDL: ShadowDriveUserStaking = {
         },
         {
           name: "newMinAcctSize",
+          type: {
+            option: "u64",
+          },
+        },
+        {
+          name: "newShadesPerGbEpoch",
           type: {
             option: "u64",
           },
@@ -3771,7 +3800,7 @@ export const IDL: ShadowDriveUserStaking = {
         },
         {
           name: "tokenMint",
-          isMut: false,
+          isMut: true,
           isSigner: false,
           docs: ["Token mint account"],
         },
@@ -3865,7 +3894,7 @@ export const IDL: ShadowDriveUserStaking = {
         },
         {
           name: "tokenMint",
-          isMut: false,
+          isMut: true,
           isSigner: false,
           docs: ["Token mint account"],
         },
@@ -3952,7 +3981,7 @@ export const IDL: ShadowDriveUserStaking = {
         },
         {
           name: "tokenMint",
-          isMut: false,
+          isMut: true,
           isSigner: false,
           docs: ["Token mint account"],
         },
@@ -4051,7 +4080,7 @@ export const IDL: ShadowDriveUserStaking = {
         },
         {
           name: "tokenMint",
-          isMut: false,
+          isMut: true,
           isSigner: false,
           docs: ["Token mint account"],
         },
@@ -4606,7 +4635,7 @@ export const IDL: ShadowDriveUserStaking = {
         },
         {
           name: "tokenMint",
-          isMut: false,
+          isMut: true,
           isSigner: false,
           docs: ["Token mint account"],
         },
@@ -4711,7 +4740,7 @@ export const IDL: ShadowDriveUserStaking = {
         },
         {
           name: "tokenMint",
-          isMut: false,
+          isMut: true,
           isSigner: false,
           docs: ["Token mint account"],
         },
@@ -4961,7 +4990,7 @@ export const IDL: ShadowDriveUserStaking = {
         },
         {
           name: "tokenMint",
-          isMut: false,
+          isMut: true,
           isSigner: false,
           docs: ["Token mint account"],
         },
@@ -5035,7 +5064,7 @@ export const IDL: ShadowDriveUserStaking = {
         },
         {
           name: "tokenMint",
-          isMut: false,
+          isMut: true,
           isSigner: false,
           docs: ["Token mint account"],
         },
@@ -5667,6 +5696,23 @@ export const IDL: ShadowDriveUserStaking = {
           },
         ],
       },
+    },
+  ],
+  events: [
+    {
+      name: "StakeRefreshed",
+      fields: [
+        {
+          name: "refreshed",
+          type: "bool",
+          index: false,
+        },
+        {
+          name: "account",
+          type: "publicKey",
+          index: false,
+        },
+      ],
     },
   ],
   errors: [

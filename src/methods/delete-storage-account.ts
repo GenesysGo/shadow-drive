@@ -1,4 +1,4 @@
-import * as anchor from "@project-serum/anchor";
+import * as anchor from "@coral-xyz/anchor";
 import { isBrowser, tokenMint } from "../utils/common";
 import { ShadowDriveVersion } from "../types";
 import { sendAndConfirm } from "../utils/helpers";
