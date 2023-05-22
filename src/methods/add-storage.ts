@@ -3,6 +3,7 @@ import {
   humanSizeToBytes,
   getStakeAccount,
   findAssociatedTokenAddress,
+  getStorageAccountSize,
 } from "../utils/helpers";
 import {
   isBrowser,
@@ -63,6 +64,7 @@ export default async function addStorage(
   let stakeAccount = (await getStakeAccount(this.program, key))[0];
 
   try {
+    const storageUsed = await getStorageAccountSize(key.toString());
     const emissionsAta = await findAssociatedTokenAddress(emissions, tokenMint);
     let txn;
     switch (version.toLocaleLowerCase()) {
@@ -165,6 +167,7 @@ export default async function addStorage(
           ),
           storage_account: key,
           amount_to_add: storageInputAsBytes,
+          storageUsed: storageUsed,
         }),
       }
     );
