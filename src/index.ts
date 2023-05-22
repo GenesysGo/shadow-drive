@@ -1,4 +1,4 @@
-import { Program, Wallet, web3 } from "@project-serum/anchor";
+import { Program, Wallet, web3 } from "@coral-xyz/anchor";
 import {
   getStorageConfigPDA,
   getUserInfo,
