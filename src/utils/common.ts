@@ -1,4 +1,4 @@
-import { web3 } from "@project-serum/anchor";
+import { web3 } from "@coral-xyz/anchor";
 /**
  * Returns true if being run inside a web browser,
  * false if in a Node process

@@ -23,7 +23,7 @@ yarn add @shadow-drive/sdk
 
 ```tsx
 import React, { useEffect } from "react";
-import * as anchor from "@project-serum/anchor";
+import * as anchor from "@coral-xyz/anchor";
 import { ShdwDrive } from "@shadow-drive/sdk";
 import {
     AnchorWallet,

@@ -1,8 +1,8 @@
-import * as anchor from "@project-serum/anchor";
+import * as anchor from "@coral-xyz/anchor";
 import { SHDW_DRIVE_ENDPOINT } from "../utils/common";
 import { ShadowDriveVersion, ShadowDriveResponse } from "../types";
 import fetch from "cross-fetch";
-import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
+import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 import nacl from "tweetnacl";
 /**
  *

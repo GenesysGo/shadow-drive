@@ -1,5 +1,9 @@
-import * as anchor from "@project-serum/anchor";
-import { getStakeAccount, findAssociatedTokenAddress } from "../utils/helpers";
+import * as anchor from "@coral-xyz/anchor";
+import {
+  getStakeAccount,
+  findAssociatedTokenAddress,
+  getStorageAccountSize,
+} from "../utils/helpers";
 import {
   emissions,
   isBrowser,
@@ -39,13 +43,14 @@ export default async function makeStorageImmutable(
       selectedAccount.owner1,
       tokenMint
     );
+    const storageUsed = await getStorageAccountSize(key.toString());
     const emissionsAta = await findAssociatedTokenAddress(emissions, tokenMint);
     let stakeAccount = (await getStakeAccount(this.program, key))[0];
     let txn;
     switch (version.toLocaleLowerCase()) {
       case "v1":
         txn = await this.program.methods
-          .makeAccountImmutable()
+          .makeAccountImmutable(new anchor.BN(storageUsed))
           .accounts({
             storageConfig: this.storageConfigPDA,
             storageAccount: key,
@@ -63,7 +68,7 @@ export default async function makeStorageImmutable(
           .transaction();
       case "v2":
         txn = await this.program.methods
-          .makeAccountImmutable2()
+          .makeAccountImmutable2(new anchor.BN(storageUsed))
           .accounts({
             storageConfig: this.storageConfigPDA,
             storageAccount: key,
@@ -105,6 +110,7 @@ export default async function makeStorageImmutable(
           transaction: Buffer.from(serializedTxn.toJSON().data).toString(
             "base64"
           ),
+          storageUsed: storageUsed,
         }),
       }
     );

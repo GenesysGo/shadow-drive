@@ -1,16 +1,20 @@
 import * as anchor from "@coral-xyz/anchor";
-import { isBrowser, tokenMint } from "../utils/common";
+import {
+  getStakeAccount,
+  findAssociatedTokenAddress,
+  sendAndConfirm,
+} from "../utils/helpers";
+import { tokenMint } from "../utils/common";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ShadowDriveVersion } from "../types";
-import { sendAndConfirm } from "../utils/helpers";
-
 /**
  *
- * @param {anchor.web3.PublicKey} key - PublicKey of a StorageAccount
- *	@param {ShadowDriveVersion} version - ShadowDrive (v1 or v2)
- * @returns {{ txid: string }} - Confirmed transaction ID
+ * @param {anchor.web3.PublicKey} key - Public Key of the existing storage to increase size on
+ * @param {ShadowDriveVersion} version - ShadowDrive version (v1 or v2)
+ *
+ *  @returns {txid: string} - confirmed transaction id
  */
-
-export default async function deleteStorageAccount(
+export default async function refreshStake(
   key: anchor.web3.PublicKey,
   version: ShadowDriveVersion
 ): Promise<{ txid: string }> {
@@ -23,29 +27,41 @@ export default async function deleteStorageAccount(
       selectedAccount = await this.program.account.storageAccountV2.fetch(key);
       break;
   }
+  const stakeAccount = (await getStakeAccount(this.program, key))[0];
+  const ownerAta = await findAssociatedTokenAddress(
+    this.wallet.publicKey,
+    tokenMint
+  );
+  let txn;
   try {
-    let txn;
     switch (version.toLocaleLowerCase()) {
       case "v1":
         txn = await this.program.methods
-          .requestDeleteAccount()
+          .refreshStake()
           .accounts({
             storageConfig: this.storageConfigPDA,
             storageAccount: key,
             owner: selectedAccount.owner1,
+            ownerAta: ownerAta,
+            stakeAccount: stakeAccount,
             tokenMint: tokenMint,
             systemProgram: anchor.web3.SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
           })
           .transaction();
+        break;
       case "v2":
         txn = await this.program.methods
-          .requestDeleteAccount2()
+          .refreshStake2()
           .accounts({
             storageConfig: this.storageConfigPDA,
             storageAccount: key,
             owner: selectedAccount.owner1,
+            ownerAta: ownerAta,
+            stakeAccount: stakeAccount,
             tokenMint: tokenMint,
             systemProgram: anchor.web3.SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
           })
           .transaction();
         break;
@@ -55,6 +71,7 @@ export default async function deleteStorageAccount(
     ).blockhash;
     txn.feePayer = this.wallet.publicKey;
     const signedTx = await this.wallet.signTransaction(txn);
+
     const res = await sendAndConfirm(
       this.connection,
       signedTx.serialize(),
@@ -64,6 +81,6 @@ export default async function deleteStorageAccount(
     );
     return Promise.resolve(res);
   } catch (e) {
-    return Promise.reject(e);
+    return Promise.reject(new Error(e));
   }
 }
