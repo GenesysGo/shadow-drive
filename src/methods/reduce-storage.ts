@@ -116,6 +116,8 @@ export default async function reduceStorage(
       signedTx = await this.wallet.signTransaction(txn);
       serializedTxn = signedTx.serialize({ requireAllSignatures: false });
     }
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 7200000);
     const reduceStorageResponse = await fetch(
       `${SHDW_DRIVE_ENDPOINT}/reduce-storage`,
       {
@@ -131,6 +133,7 @@ export default async function reduceStorage(
           amount_to_reduce: storageInputAsBytes,
           storageUsed: storageUsed,
         }),
+        signal: controller.signal,
       }
     );
     const res = await reduceStorageResponse.json();

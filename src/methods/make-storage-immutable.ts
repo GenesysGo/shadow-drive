@@ -99,6 +99,8 @@ export default async function makeStorageImmutable(
       signedTx = await this.wallet.signTransaction(txn);
       serializedTxn = signedTx.serialize({ requireAllSignatures: false });
     }
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 7200000);
     const makeImmutableResponse = await fetch(
       `${SHDW_DRIVE_ENDPOINT}/make-immutable`,
       {
@@ -112,6 +114,7 @@ export default async function makeStorageImmutable(
           ),
           storageUsed: storageUsed,
         }),
+        signal: controller.signal,
       }
     );
     if (!makeImmutableResponse.ok) {

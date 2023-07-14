@@ -116,6 +116,8 @@ export default async function createStorageAccount(
       signedTx = await this.wallet.signTransaction(txn);
       serializedTxn = signedTx.serialize({ requireAllSignatures: false });
     }
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 7200000);
     const createStorageResponse = await fetch(
       `${SHDW_DRIVE_ENDPOINT}/storage-account`,
       {
@@ -128,6 +130,7 @@ export default async function createStorageAccount(
             "base64"
           ),
         }),
+        signal: controller.signal,
       }
     );
     if (!createStorageResponse.ok) {
