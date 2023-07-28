@@ -1,7 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { isBrowser, SHDW_DRIVE_ENDPOINT } from "../utils/common";
 import crypto from "crypto";
-import { ShadowDriveVersion, ShadowFile, ShadowEditResponse } from "../types";
+import { ShadowFile, ShadowEditResponse } from "../types";
 import fetch from "cross-fetch";
 import NodeFormData from "form-data";
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
@@ -11,29 +11,19 @@ import nacl from "tweetnacl";
  * @param {anchor.web3.PublicKey} key - Publickey of Storage Account
  * @param {string} url - URL of existing file
  * @param {File | ShadowFile} data - File or ShadowFile object, file extensions should be included in the name property of ShadowFiles.
- * @param {ShadowDriveVersion} version - ShadowDrive version (v1 or v2)
  * @returns {ShadowEditResponse} - File location
  */
 
 export default async function editFile(
   key: anchor.web3.PublicKey,
   url: string,
-  data: File | ShadowFile,
-  version: ShadowDriveVersion
+  data: File | ShadowFile
 ): Promise<ShadowEditResponse> {
   let fileErrors = [];
   let fileBuffer: Buffer | ArrayBuffer;
   let form;
   let file;
-  let selectedAccount;
-  switch (version.toLocaleLowerCase()) {
-    case "v1":
-      selectedAccount = await this.program.account.storageAccount.fetch(key);
-      break;
-    case "v2":
-      selectedAccount = await this.program.account.storageAccountV2.fetch(key);
-      break;
-  }
+
   if (!isBrowser) {
     data = data as ShadowFile;
     form = new NodeFormData();

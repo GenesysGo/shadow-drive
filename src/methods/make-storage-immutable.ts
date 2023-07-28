@@ -15,30 +15,20 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { ShadowDriveVersion, ShadowDriveResponse } from "../types";
+import { ShadowDriveResponse } from "../types";
 import fetch from "node-fetch";
-import { StorageAccount, StorageAccountV2 } from "accounts";
-import { makeAccountImmutable, makeAccountImmutable2 } from "instructions";
+import { StorageAccountV2 } from "accounts";
+import { makeAccountImmutable2 } from "instructions";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Publickey of a Storage Account
- * @param {ShadowDriveVersion} version - ShadowDrive version (v1 or v2)
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 export default async function makeStorageImmutable(
-  key: anchor.web3.PublicKey,
-  version: ShadowDriveVersion
+  key: anchor.web3.PublicKey
 ): Promise<ShadowDriveResponse> {
-  let selectedAccount;
+  let selectedAccount = await StorageAccountV2.fetch(this.connection, key);
   try {
-    switch (version.toLocaleLowerCase()) {
-      case "v1":
-        selectedAccount = await StorageAccount.fetch(this.connection, key);
-        break;
-      case "v2":
-        selectedAccount = await StorageAccountV2.fetch(this.connection, key);
-        break;
-    }
     const ownerAta = await findAssociatedTokenAddress(
       selectedAccount.owner1,
       tokenMint
@@ -47,47 +37,24 @@ export default async function makeStorageImmutable(
     const emissionsAta = await findAssociatedTokenAddress(emissions, tokenMint);
     let stakeAccount = (await getStakeAccount(this.program, key))[0];
     let txn = new anchor.web3.Transaction();
-    switch (version.toLocaleLowerCase()) {
-      case "v1":
-        const makeImmutableIx = makeAccountImmutable(
-          { storageUsed: new anchor.BN(storageUsed) },
-          {
-            storageConfig: this.storageConfigPDA,
-            storageAccount: key,
-            stakeAccount,
-            emissionsWallet: emissionsAta,
-            owner: selectedAccount.owner1,
-            uploader: uploader,
-            ownerAta,
-            tokenMint: tokenMint,
-            systemProgram: anchor.web3.SystemProgram.programId,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-            rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-          }
-        );
-        txn.add(makeImmutableIx);
-      case "v2":
-        const makeImmutableIx2 = makeAccountImmutable2(
-          { storageUsed: new anchor.BN(storageUsed) },
-          {
-            storageConfig: this.storageConfigPDA,
-            storageAccount: key,
-            stakeAccount,
-            emissionsWallet: emissionsAta,
-            owner: selectedAccount.owner1,
-            uploader: uploader,
-            ownerAta,
-            tokenMint: tokenMint,
-            systemProgram: anchor.web3.SystemProgram.programId,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-            rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-          }
-        );
-        txn.add(makeImmutableIx2);
-        break;
-    }
+    const makeImmutableIx2 = makeAccountImmutable2(
+      { storageUsed: new anchor.BN(storageUsed) },
+      {
+        storageConfig: this.storageConfigPDA,
+        storageAccount: key,
+        stakeAccount,
+        emissionsWallet: emissionsAta,
+        owner: selectedAccount.owner1,
+        uploader: uploader,
+        ownerAta,
+        tokenMint: tokenMint,
+        systemProgram: anchor.web3.SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+      }
+    );
+    txn.add(makeImmutableIx2);
     txn.recentBlockhash = (
       await this.connection.getLatestBlockhash()
     ).blockhash;

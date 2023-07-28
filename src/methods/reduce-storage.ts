@@ -13,38 +13,30 @@ import {
   uploader,
 } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { ShadowDriveVersion, ShadowDriveResponse } from "../types";
+import { ShadowDriveResponse } from "../types";
 import fetch from "node-fetch";
-import { decreaseStorage, decreaseStorage2 } from "instructions";
+import { decreaseStorage2 } from "instructions";
+import { StorageAccountV2 } from "accounts";
+import { PROGRAM_ID } from "programId";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Publickey of a Storage Account
  * @param {string} size - Amount of storage you are requesting to reduce from your storage account. Should be in a string like '1KB', '1MB', '1GB'. Only KB, MB, and GB storage delineations are supported currently.
- * @param {ShadowDriveVersion} version - ShadowDrive version (v1 or v2)
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 export default async function reduceStorage(
   key: anchor.web3.PublicKey,
-  size: string,
-  version: ShadowDriveVersion
+  size: string
 ): Promise<ShadowDriveResponse> {
   let storageInputAsBytes = humanSizeToBytes(size);
-  let selectedAccount;
-  switch (version.toLocaleLowerCase()) {
-    case "v1":
-      selectedAccount = await this.program.account.storageAccount.fetch(key);
-      break;
-    case "v2":
-      selectedAccount = await this.program.account.storageAccountV2.fetch(key);
-      break;
-  }
+  let selectedAccount = await StorageAccountV2.fetch(this.connection, key);
   const [unstakeAccount] = await anchor.web3.PublicKey.findProgramAddress(
     [Buffer.from("unstake-account"), key.toBytes()],
-    this.program.programId
+    PROGRAM_ID
   );
   const [unstakeInfo] = await anchor.web3.PublicKey.findProgramAddress(
     [Buffer.from("unstake-info"), key.toBytes()],
-    this.program.programId
+    PROGRAM_ID
   );
   const ownerAta = await findAssociatedTokenAddress(
     selectedAccount.owner1,
@@ -55,56 +47,28 @@ export default async function reduceStorage(
   try {
     const storageUsed = await getStorageAccountSize(key.toString());
     let txn = new anchor.web3.Transaction();
-    switch (version.toLocaleLowerCase()) {
-      case "v1":
-        const decreaseStorageIx = decreaseStorage(
-          {
-            storageUsed: new anchor.BN(storageUsed),
-            removeStorage: new anchor.BN(storageInputAsBytes.toString()),
-          },
-          {
-            storageConfig: this.storageConfigPDA,
-            storageAccount: key,
-            unstakeInfo,
-            unstakeAccount,
-            owner: selectedAccount.owner1,
-            ownerAta,
-            uploader: uploader,
-            stakeAccount,
-            emissionsWallet: emissionsAta,
-            tokenMint: tokenMint,
-            systemProgram: anchor.web3.SystemProgram.programId,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-          }
-        );
-        txn.add(decreaseStorageIx);
-        break;
-      case "v2":
-        const decreaseStorageIx2 = decreaseStorage2(
-          {
-            storageUsed: new anchor.BN(storageUsed),
-            removeStorage: new anchor.BN(storageInputAsBytes.toString()),
-          },
-          {
-            storageConfig: this.storageConfigPDA,
-            storageAccount: key,
-            unstakeInfo,
-            unstakeAccount,
-            owner: selectedAccount.owner1,
-            ownerAta,
-            uploader: uploader,
-            stakeAccount,
-            emissionsWallet: emissionsAta,
-            tokenMint: tokenMint,
-            systemProgram: anchor.web3.SystemProgram.programId,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-          }
-        );
-        txn.add(decreaseStorageIx2);
-        break;
-    }
+    const decreaseStorageIx2 = decreaseStorage2(
+      {
+        storageUsed: new anchor.BN(storageUsed),
+        removeStorage: new anchor.BN(storageInputAsBytes.toString()),
+      },
+      {
+        storageConfig: this.storageConfigPDA,
+        storageAccount: key,
+        unstakeInfo,
+        unstakeAccount,
+        owner: selectedAccount.owner1,
+        ownerAta,
+        uploader: uploader,
+        stakeAccount,
+        emissionsWallet: emissionsAta,
+        tokenMint: tokenMint,
+        systemProgram: anchor.web3.SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+      }
+    );
+    txn.add(decreaseStorageIx2);
 
     txn.recentBlockhash = (
       await this.connection.getLatestBlockhash()

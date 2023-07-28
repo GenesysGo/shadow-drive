@@ -13,15 +13,10 @@ import {
   emissions,
 } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { ShadowDriveVersion, ShadowDriveResponse } from "../types";
+import { ShadowDriveResponse } from "../types";
 import fetch from "node-fetch";
-import {
-  increaseImmutableStorage,
-  increaseImmutableStorage2,
-  increaseStorage,
-  increaseStorage2,
-} from "instructions";
-import { StorageAccount, StorageAccountV2, UserInfo } from "accounts";
+import { increaseImmutableStorage2, increaseStorage2 } from "instructions";
+import { StorageAccountV2, UserInfo } from "accounts";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Public Key of the existing storage to increase size on
@@ -31,19 +26,10 @@ import { StorageAccount, StorageAccountV2, UserInfo } from "accounts";
  */
 export default async function addStorage(
   key: anchor.web3.PublicKey,
-  size: string,
-  version: ShadowDriveVersion
+  size: string
 ): Promise<ShadowDriveResponse> {
   let storageInputAsBytes = humanSizeToBytes(size);
-  let selectedAccount;
-  switch (version.toLocaleLowerCase()) {
-    case "v1":
-      selectedAccount = await StorageAccount.fetch(this.connection, key);
-      break;
-    case "v2":
-      selectedAccount = await StorageAccountV2.fetch(this.connection, key);
-      break;
-  }
+  let selectedAccount = await StorageAccountV2.fetch(this.connection, key);
   if (storageInputAsBytes === false) {
     return Promise.reject(
       new Error(
@@ -69,90 +55,44 @@ export default async function addStorage(
     const storageUsed = await getStorageAccountSize(key.toString());
     const emissionsAta = await findAssociatedTokenAddress(emissions, tokenMint);
     let txn = new anchor.web3.Transaction();
-    switch (version.toLocaleLowerCase()) {
-      case "v1":
-        switch (selectedAccount.immutable) {
-          case true:
-            const increaseImmutableStorageIx = increaseImmutableStorage(
-              {
-                additionalStorage: new anchor.BN(storageInputAsBytes as number),
-              },
-              {
-                storageConfig: this.storageConfigPDA,
-                storageAccount: key,
-                owner: selectedAccount.owner1,
-                ownerAta,
-                uploader: uploader,
-                emissionsWallet: emissionsAta,
-                tokenMint: tokenMint,
-                systemProgram: anchor.web3.SystemProgram.programId,
-                tokenProgram: TOKEN_PROGRAM_ID,
-              }
-            );
-            txn.add(increaseImmutableStorageIx);
-            break;
-          case false:
-            const increaseStorageIx = increaseStorage(
-              {
-                additionalStorage: new anchor.BN(storageInputAsBytes as number),
-              },
-              {
-                storageConfig: this.storageConfigPDA,
-                storageAccount: key,
-                owner: selectedAccount.owner1,
-                ownerAta,
-                stakeAccount,
-                uploader: uploader,
-                tokenMint: tokenMint,
-                systemProgram: anchor.web3.SystemProgram.programId,
-                tokenProgram: TOKEN_PROGRAM_ID,
-              }
-            );
-            txn.add(increaseStorageIx);
-            break;
-        }
+    switch (selectedAccount.immutable) {
+      case true:
+        const increaseImmutableStorageIx = increaseImmutableStorage2(
+          {
+            additionalStorage: new anchor.BN(storageInputAsBytes as number),
+          },
+          {
+            storageConfig: this.storageConfigPDA,
+            storageAccount: key,
+            owner: selectedAccount.owner1,
+            ownerAta,
+            uploader: uploader,
+            emissionsWallet: emissionsAta,
+            tokenMint: tokenMint,
+            systemProgram: anchor.web3.SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+          }
+        );
+        txn.add(increaseImmutableStorageIx);
         break;
-      case "v2":
-        switch (selectedAccount.immutable) {
-          case true:
-            const increaseImmutableStorageIx = increaseImmutableStorage2(
-              {
-                additionalStorage: new anchor.BN(storageInputAsBytes as number),
-              },
-              {
-                storageConfig: this.storageConfigPDA,
-                storageAccount: key,
-                owner: selectedAccount.owner1,
-                ownerAta,
-                uploader: uploader,
-                emissionsWallet: emissionsAta,
-                tokenMint: tokenMint,
-                systemProgram: anchor.web3.SystemProgram.programId,
-                tokenProgram: TOKEN_PROGRAM_ID,
-              }
-            );
-            txn.add(increaseImmutableStorageIx);
-            break;
-          case false:
-            const increaseStorageIx = increaseStorage2(
-              {
-                additionalStorage: new anchor.BN(storageInputAsBytes as number),
-              },
-              {
-                storageConfig: this.storageConfigPDA,
-                storageAccount: key,
-                owner: selectedAccount.owner1,
-                ownerAta,
-                stakeAccount,
-                uploader: uploader,
-                tokenMint: tokenMint,
-                systemProgram: anchor.web3.SystemProgram.programId,
-                tokenProgram: TOKEN_PROGRAM_ID,
-              }
-            );
-            txn.add(increaseStorageIx);
-            break;
-        }
+      case false:
+        const increaseStorageIx = increaseStorage2(
+          {
+            additionalStorage: new anchor.BN(storageInputAsBytes as number),
+          },
+          {
+            storageConfig: this.storageConfigPDA,
+            storageAccount: key,
+            owner: selectedAccount.owner1,
+            ownerAta,
+            stakeAccount,
+            uploader: uploader,
+            tokenMint: tokenMint,
+            systemProgram: anchor.web3.SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+          }
+        );
+        txn.add(increaseStorageIx);
         break;
     }
     txn.recentBlockhash = (

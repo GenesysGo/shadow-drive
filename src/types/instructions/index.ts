@@ -23,8 +23,6 @@ export { unmarkDeleteAccount } from "./unmarkDeleteAccount";
 export type { UnmarkDeleteAccountAccounts } from "./unmarkDeleteAccount";
 export { unmarkDeleteAccount2 } from "./unmarkDeleteAccount2";
 export type { UnmarkDeleteAccount2Accounts } from "./unmarkDeleteAccount2";
-export { redeemRent } from "./redeemRent";
-export type { RedeemRentAccounts } from "./redeemRent";
 export { deleteAccount } from "./deleteAccount";
 export type { DeleteAccountArgs, DeleteAccountAccounts } from "./deleteAccount";
 export { deleteAccount2 } from "./deleteAccount2";

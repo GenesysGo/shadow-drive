@@ -1,4 +1,4 @@
-import { Program, Wallet, web3 } from "@coral-xyz/anchor";
+import { Program, web3 } from "@coral-xyz/anchor";
 import {
   getStorageConfigPDA,
   getUserInfo,
@@ -16,12 +16,10 @@ import {
   getStorageAccs,
   makeStorageImmutable,
   reduceStorage,
-  //   cancelDeleteFile,
   cancelDeleteStorageAccount,
   uploadFile,
   uploadMultipleFiles,
   listObjects,
-  redeemRent,
   migrate,
   topUp,
   refreshStake,
@@ -35,15 +33,12 @@ import {
 } from "./types/accounts";
 import * as Errors from "./types/errors/custom";
 import {
-  ShadowDriveVersion,
   CreateStorageResponse,
   ShadowBatchUploadResponse,
   ShadowDriveResponse,
   ShadowFile,
   ShadowUploadResponse,
   ShadowEditResponse,
-  //   StorageAccount,
-  StorageAccountResponse,
   ListObjectsResponse,
   StorageAccountInfo,
 } from "./types";
@@ -51,38 +46,22 @@ interface ShadowDrive {
   createStorageAccount(
     name: string,
     size: string,
-    version: ShadowDriveVersion,
     owner2: web3.PublicKey
   ): Promise<CreateStorageResponse>;
-  addStorage(
-    key: web3.PublicKey,
-    size: string,
-    version: ShadowDriveVersion
-  ): Promise<ShadowDriveResponse>;
-  claimStake(
-    key: web3.PublicKey,
-    version: ShadowDriveVersion
-  ): Promise<{ txid: string }>;
-  deleteFile(
-    key: web3.PublicKey,
-    url: string,
-    version: ShadowDriveVersion
-  ): Promise<ShadowDriveResponse>;
+  addStorage(key: web3.PublicKey, size: string): Promise<ShadowDriveResponse>;
+  claimStake(key: web3.PublicKey): Promise<{ txid: string }>;
+  deleteFile(key: web3.PublicKey, url: string): Promise<ShadowDriveResponse>;
   editFile(
     key: web3.PublicKey,
     url: string,
-    data: File | ShadowFile,
-    version: ShadowDriveVersion
+    data: File | ShadowFile
   ): Promise<ShadowEditResponse>;
   getStorageAcc?(key: web3.PublicKey): Promise<StorageAccount>;
   getStorageAccs?(): Promise<StorageAccount[]>;
   listObjects(key: web3.PublicKey): Promise<ListObjectsResponse>;
-  makeStorageImmutable(
-    key: web3.PublicKey,
-    version: ShadowDriveVersion
-  ): Promise<ShadowDriveResponse>;
+  makeStorageImmutable(key: web3.PublicKey): Promise<ShadowDriveResponse>;
   getStorageAccount(key: web3.PublicKey): Promise<StorageAccountInfo>;
-  getStorageAccounts(version: ShadowDriveVersion): Promise<
+  getStorageAccounts(): Promise<
     Array<{
       publicKey: web3.PublicKey;
       account: StorageAccount | StorageAccountV2;
@@ -90,18 +69,12 @@ interface ShadowDrive {
   >;
   reduceStorage(
     key: web3.PublicKey,
-    size: string,
-    version: ShadowDriveVersion
+    size: string
   ): Promise<ShadowDriveResponse>;
-  //   cancelDeleteFile(key: web3.PublicKey, url: string): Promise<{ txid: string }>;
-  cancelDeleteStorageAccount(
-    key: web3.PublicKey,
-    version: ShadowDriveVersion
-  ): Promise<{ txid: string }>;
+  cancelDeleteStorageAccount(key: web3.PublicKey): Promise<{ txid: string }>;
   uploadFile(
     key: web3.PublicKey,
-    data: File | ShadowFile,
-    version: ShadowDriveVersion
+    data: File | ShadowFile
   ): Promise<ShadowUploadResponse>;
   uploadMultipleFiles(
     key: web3.PublicKey,
@@ -109,22 +82,12 @@ interface ShadowDrive {
     concurrent?: number,
     callback?: Function
   ): Promise<ShadowBatchUploadResponse[]>;
-  deleteStorageAccount(
-    key: web3.PublicKey,
-    version: ShadowDriveVersion
-  ): Promise<{ txid: string }>;
-  redeemRent(
-    key: web3.PublicKey,
-    fileAccount: web3.PublicKey
-  ): Promise<{ txid: string }>;
+  deleteStorageAccount(key: web3.PublicKey): Promise<{ txid: string }>;
   migrate(
     key: web3.PublicKey
   ): Promise<{ step1_sig: string; step2_sig: string }>;
   topUp(key: web3.PublicKey, amount: number): Promise<{ txid: string }>;
-  refreshStake(
-    key: web3.PublicKey,
-    version: ShadowDriveVersion
-  ): Promise<{ txid: string }>;
+  refreshStake(key: web3.PublicKey): Promise<{ txid: string }>;
 }
 /**
  *
@@ -149,14 +112,9 @@ export class ShdwDrive implements ShadowDrive {
   reduceStorage = reduceStorage;
   topUp = topUp;
   refreshStake = refreshStake;
-  /**
-   * @deprecated The method should not be used as of Shadow Drive v1.5
-   */
-  //   cancelDeleteFile = cancelDeleteFile;
   cancelDeleteStorageAccount = cancelDeleteStorageAccount;
   uploadFile = uploadFile;
   uploadMultipleFiles = uploadMultipleFiles;
-  redeemRent = redeemRent;
   migrate = migrate;
   /**
    *
@@ -180,13 +138,11 @@ export class ShdwDrive implements ShadowDrive {
 }
 
 export {
-  ShadowDriveVersion,
   CreateStorageResponse,
   ShadowDriveResponse,
   ShadowUploadResponse,
   ShadowEditResponse,
   ShadowFile,
-  StorageAccountResponse,
   ShadowBatchUploadResponse,
   ListObjectsResponse,
   StorageAccountInfo,

@@ -1,6 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { fromTxError } from "../types/errors";
 import { migrateStep1, migrateStep2 } from "instructions";
+import { StorageAccount } from "accounts";
 
 /**
  *
@@ -11,7 +12,7 @@ import { migrateStep1, migrateStep2 } from "instructions";
 export default async function migrate(
   key: anchor.web3.PublicKey
 ): Promise<{ step1_sig: string; step2_sig: string }> {
-  const selectedAccount = await this.program.account.storageAccount.fetch(key);
+  const selectedAccount = await StorageAccount.fetch(this.connection, key);
 
   let [migration, migrationBump] =
     await anchor.web3.PublicKey.findProgramAddress(
@@ -24,7 +25,7 @@ export default async function migrate(
     const migrateIx = migrateStep1({
       storageAccount: key,
       migration: migration,
-      owner: selectedAccount.owner1.publicKey,
+      owner: selectedAccount.owner1,
       systemProgram: anchor.web3.SystemProgram.programId,
     });
     tx.add(migrateIx);
@@ -52,7 +53,7 @@ export default async function migrate(
     const migrate2Ix = migrateStep2({
       storageAccount: key,
       migration: migration,
-      owner: selectedAccount.owner1.publicKey,
+      owner: selectedAccount.owner1,
       systemProgram: anchor.web3.SystemProgram.programId,
     });
     tx2.add(migrate2Ix);

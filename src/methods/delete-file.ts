@@ -1,6 +1,6 @@
 import * as anchor from "@coral-xyz/anchor";
 import { SHDW_DRIVE_ENDPOINT } from "../utils/common";
-import { ShadowDriveVersion, ShadowDriveResponse } from "../types";
+import { ShadowDriveResponse } from "../types";
 import fetch from "cross-fetch";
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 import nacl from "tweetnacl";
@@ -8,34 +8,28 @@ import nacl from "tweetnacl";
  *
  * @param {anchor.web3.PublicKey} key - Publickey of Storage Account
  * @param {string} url - Shadow Drive URL of the file you are requesting to delete.
- * @param {ShadowDriveVersion} version - ShadowDrive version (v1 or v2)
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 
 export default async function deleteFile(
   key: anchor.web3.PublicKey,
-  url: string,
-  version: ShadowDriveVersion
+  url: string
 ): Promise<ShadowDriveResponse> {
-  let selectedAccount;
-  switch (version.toLocaleLowerCase()) {
-    case "v1":
-      selectedAccount = await this.program.account.storageAccount.fetch(key);
-      break;
-    case "v2":
-      selectedAccount = await this.program.account.storageAccountV2.fetch(key);
-      break;
+  let fileData, fileDataResponse;
+  try {
+    fileData = await fetch(`${SHDW_DRIVE_ENDPOINT}/get-object-data`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        location: decodeURI(url),
+      }),
+    });
+    fileDataResponse = await fileData.json();
+  } catch (e: any) {
+    return Promise.reject(new Error(`${e.message}`));
   }
-  const fileData = await fetch(`${SHDW_DRIVE_ENDPOINT}/get-object-data`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      location: decodeURI(url),
-    }),
-  });
-  const fileDataResponse = await fileData.json();
   const fileOwnerOnChain = new anchor.web3.PublicKey(
     fileDataResponse.file_data["owner-account-pubkey"]
   );
@@ -76,7 +70,7 @@ export default async function deleteFile(
     }
     const responseJson = await deleteFileResponse.json();
     return Promise.resolve(responseJson);
-  } catch (e) {
-    return Promise.reject(new Error(e));
+  } catch (e: any) {
+    return Promise.reject(new Error(`${e.message}`));
   }
 }

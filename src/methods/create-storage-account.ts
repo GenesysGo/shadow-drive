@@ -13,21 +13,18 @@ import {
 } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import fetch from "cross-fetch";
-import { ShadowDriveVersion, CreateStorageResponse } from "../types";
-import { initializeAccount, initializeAccount2 } from "instructions";
+import { CreateStorageResponse } from "../types";
+import { initializeAccount2 } from "instructions";
+import { PROGRAM_ID } from "programId";
 /**
  *
  * @param {string} name - What you want your storage account to be named. (Does not have to be unique)
  * @param {string} size - Amount of storage you are requesting to create. Should be in a string like '1KB', '1MB', '1GB'. Only KB, MB, and GB storage delineations are supported currently.
- * @param {ShadowDriveVersion} version - ShadowDrive version(v1 or v2)
- * @param {anchor.web3.PublicKey} owner2 - Optional secondary owner for the storage account.
  * @returns {CreateStorageResponse} Created bucket and transaction signature
  */
 export default async function createStorageAccount(
   name: string,
-  size: string,
-  version: ShadowDriveVersion,
-  owner2?: anchor.web3.PublicKey
+  size: string
 ): Promise<CreateStorageResponse> {
   let storageInputAsBytes = humanSizeToBytes(size);
   if (storageInputAsBytes === false) {
@@ -39,7 +36,7 @@ export default async function createStorageAccount(
   }
   let [userInfo, userInfoBump] = await anchor.web3.PublicKey.findProgramAddress(
     [Buffer.from("user-info"), this.wallet.publicKey.toBytes()],
-    this.program.programId
+    PROGRAM_ID
   );
   // If userInfo hasn't been initialized, default to 0 for account seed
   let userInfoAccount = await this.connection.getAccountInfo(this.userInfo);
@@ -65,53 +62,27 @@ export default async function createStorageAccount(
     tokenMint
   );
   let txn = new anchor.web3.Transaction();
-  switch (version.toLocaleLowerCase()) {
-    case "v1":
-      const initializeAccountIx = initializeAccount(
-        {
-          identifier: name,
-          storage: storageRequested,
-          owner2: owner2 ? owner2 : null,
-        },
-        {
-          storageConfig: this.storageConfigPDA,
-          userInfo: this.userInfo,
-          storageAccount,
-          stakeAccount,
-          tokenMint,
-          owner1: this.wallet.publicKey,
-          uploader: uploader,
-          owner1TokenAccount: ownerAta,
-          systemProgram: anchor.web3.SystemProgram.programId,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-        }
-      );
-      txn.add(initializeAccountIx);
-      break;
-    case "v2":
-      const initializeAccountIx2 = initializeAccount2(
-        {
-          identifier: name,
-          storage: storageRequested,
-        },
-        {
-          storageConfig: this.storageConfigPDA,
-          userInfo: this.userInfo,
-          storageAccount,
-          stakeAccount,
-          tokenMint,
-          owner1: this.wallet.publicKey,
-          uploader: uploader,
-          owner1TokenAccount: ownerAta,
-          systemProgram: anchor.web3.SystemProgram.programId,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-        }
-      );
-      txn.add(initializeAccountIx2);
-      break;
-  }
+  const initializeAccountIx2 = initializeAccount2(
+    {
+      identifier: name,
+      storage: storageRequested,
+    },
+    {
+      storageConfig: this.storageConfigPDA,
+      userInfo: this.userInfo,
+      storageAccount,
+      stakeAccount,
+      tokenMint,
+      owner1: this.wallet.publicKey,
+      uploader: uploader,
+      owner1TokenAccount: ownerAta,
+      systemProgram: anchor.web3.SystemProgram.programId,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+    }
+  );
+  txn.add(initializeAccountIx2);
+
   try {
     txn.recentBlockhash = (
       await this.connection.getLatestBlockhash()
