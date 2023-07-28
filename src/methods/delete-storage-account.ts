@@ -1,8 +1,8 @@
 import * as anchor from "@coral-xyz/anchor";
 import { tokenMint } from "../utils/common";
 import { fromTxError } from "../types/errors";
-import { requestDeleteAccount2 } from "instructions";
-import { StorageAccountV2 } from "accounts";
+import { requestDeleteAccount2 } from "../types/instructions";
+import { StorageAccountV2 } from "../types/accounts";
 
 /**
  *
@@ -39,7 +39,7 @@ export default async function deleteStorageAccount(
     if (parsedError !== null) {
       return Promise.reject(new Error(parsedError.msg));
     } else {
-      return Promise.reject(new Error(e));
+      return Promise.reject(new Error(e.message));
     }
   }
 }

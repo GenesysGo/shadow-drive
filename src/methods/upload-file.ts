@@ -83,7 +83,7 @@ export default async function uploadFile(
     form.append("storage_account", key.toString());
     form.append("signer", this.wallet.publicKey.toString());
   } catch (e) {
-    return Promise.reject(new Error(e));
+    return Promise.reject(new Error(e.message));
   }
   try {
     const controller = new AbortController();
@@ -103,6 +103,6 @@ export default async function uploadFile(
     const responseJson = await uploadResponse.json();
     return Promise.resolve(responseJson);
   } catch (e) {
-    return Promise.reject(new Error(e));
+    return Promise.reject(new Error(e.message));
   }
 }

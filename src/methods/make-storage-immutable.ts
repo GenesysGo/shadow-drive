@@ -17,8 +17,8 @@ import {
 } from "@solana/spl-token";
 import { ShadowDriveResponse } from "../types";
 import fetch from "node-fetch";
-import { StorageAccountV2 } from "accounts";
-import { makeAccountImmutable2 } from "instructions";
+import { StorageAccountV2 } from "../types/accounts";
+import { makeAccountImmutable2 } from "../types/instructions";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Publickey of a Storage Account
@@ -97,6 +97,6 @@ export default async function makeStorageImmutable(
     const responseJson = await makeImmutableResponse.json();
     return Promise.resolve(responseJson);
   } catch (e) {
-    return Promise.reject(new Error(e));
+    return Promise.reject(new Error(e.message));
   }
 }

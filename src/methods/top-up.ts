@@ -45,7 +45,7 @@ export default async function topUp(
     if (parsedError !== null) {
       return Promise.reject(new Error(parsedError.msg));
     } else {
-      return Promise.reject(new Error(e));
+      return Promise.reject(new Error(e.message));
     }
   }
 }

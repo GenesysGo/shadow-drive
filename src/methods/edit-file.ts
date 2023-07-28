@@ -6,6 +6,7 @@ import fetch from "cross-fetch";
 import NodeFormData from "form-data";
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 import nacl from "tweetnacl";
+import { UserInfo } from "../types/accounts";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Publickey of Storage Account
@@ -29,7 +30,6 @@ export default async function editFile(
     form = new NodeFormData();
     file = data.file;
     form.append("file", file, data.name);
-    fileBuffer = file;
   } else {
     file = data as File;
     form = new FormData();
@@ -46,7 +46,7 @@ export default async function editFile(
   if (fileErrors.length) {
     return Promise.reject(fileErrors);
   }
-  const userInfoAccount = await this.connection.getAccountInfo(this.userInfo);
+  const userInfoAccount = await UserInfo.fetch(this.connection, this.userInfo);
   if (userInfoAccount === null) {
     return Promise.reject(
       new Error(
@@ -54,9 +54,9 @@ export default async function editFile(
       )
     );
   }
-  const existingFileData = await fetch(
-    `${SHDW_DRIVE_ENDPOINT}/get-object-data`,
-    {
+  let existingFileData, fileDataResponse;
+  try {
+    existingFileData = await fetch(`${SHDW_DRIVE_ENDPOINT}/get-object-data`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -64,18 +64,17 @@ export default async function editFile(
       body: JSON.stringify({
         location: url,
       }),
-    }
-  );
-  const fileDataResponse = await existingFileData.json();
+    });
+    fileDataResponse = await existingFileData.json();
+  } catch (e) {
+    return Promise.reject(new Error(e.message));
+  }
   const fileOwnerOnChain = new anchor.web3.PublicKey(
     fileDataResponse.file_data["owner-account-pubkey"]
   );
   if (!fileOwnerOnChain.equals(this.wallet.publicKey)) {
     return Promise.reject(new Error("Permission denied: Not file owner"));
   }
-  const storageAccount = new anchor.web3.PublicKey(
-    fileDataResponse.file_data["storage-account-pubkey"]
-  );
   const hashSum = crypto.createHash("sha256");
   hashSum.update(
     Buffer.isBuffer(fileBuffer) ? fileBuffer : Buffer.from(fileBuffer)
@@ -98,6 +97,10 @@ export default async function editFile(
     form.append("signer", this.wallet.publicKey.toString());
     form.append("storage_account", key.toString());
     form.append("url", url);
+  } catch (e) {
+    return Promise.reject(new Error(e.message));
+  }
+  try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 7200000);
     const uploadResponse = await fetch(`${SHDW_DRIVE_ENDPOINT}/edit`, {
@@ -115,6 +118,6 @@ export default async function editFile(
     const responseJson: ShadowEditResponse = await uploadResponse.json();
     return Promise.resolve(responseJson);
   } catch (e) {
-    return Promise.reject(new Error(e));
+    return Promise.reject(new Error(e.message));
   }
 }

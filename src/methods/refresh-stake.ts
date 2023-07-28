@@ -3,8 +3,8 @@ import { getStakeAccount, findAssociatedTokenAddress } from "../utils/helpers";
 import { tokenMint } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { fromTxError } from "../types/errors";
-import { refreshStake2, refreshStake as refresh } from "instructions";
-import { StorageAccountV2 } from "accounts";
+import { refreshStake2, refreshStake as refresh } from "../types/instructions";
+import { StorageAccountV2 } from "../types/accounts";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Public Key of the existing storage to increase size on
@@ -48,7 +48,7 @@ export default async function refreshStake(
     if (parsedError !== null) {
       return Promise.reject(new Error(parsedError.message));
     } else {
-      return Promise.reject(new Error(e));
+      return Promise.reject(new Error(e.message));
     }
   }
 }

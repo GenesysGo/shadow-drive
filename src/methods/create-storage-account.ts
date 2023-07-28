@@ -14,8 +14,8 @@ import {
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import fetch from "cross-fetch";
 import { CreateStorageResponse } from "../types";
-import { initializeAccount2 } from "instructions";
-import { PROGRAM_ID } from "programId";
+import { initializeAccount2 } from "../types/instructions";
+import { UserInfo } from "../types/accounts";
 /**
  *
  * @param {string} name - What you want your storage account to be named. (Does not have to be unique)
@@ -34,18 +34,11 @@ export default async function createStorageAccount(
       )
     );
   }
-  let [userInfo, userInfoBump] = await anchor.web3.PublicKey.findProgramAddress(
-    [Buffer.from("user-info"), this.wallet.publicKey.toBytes()],
-    PROGRAM_ID
-  );
   // If userInfo hasn't been initialized, default to 0 for account seed
-  let userInfoAccount = await this.connection.getAccountInfo(this.userInfo);
+  let userInfoAccount = await UserInfo.fetch(this.connection, this.userInfo);
   let accountSeed = new anchor.BN(0);
   if (userInfoAccount !== null) {
-    let userInfoData = await this.program.account.userInfo.fetch(this.userInfo);
-    accountSeed = new anchor.BN(userInfoData.accountCounter);
-  } else {
-    this.userInfo = userInfo;
+    accountSeed = new anchor.BN(userInfoAccount.accountCounter);
   }
 
   let storageRequested = new anchor.BN(storageInputAsBytes.toString()); // 2^30 B <==> 1GB
@@ -126,7 +119,6 @@ export default async function createStorageAccount(
       (await createStorageResponse.json()) as CreateStorageResponse;
     return Promise.resolve(responseJson);
   } catch (e) {
-    console.log(`Error from fileserver ${e}`);
-    return Promise.reject(new Error(e));
+    return Promise.reject(new Error(e.message));
   }
 }

@@ -15,9 +15,9 @@ import {
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ShadowDriveResponse } from "../types";
 import fetch from "node-fetch";
-import { decreaseStorage2 } from "instructions";
-import { StorageAccountV2 } from "accounts";
-import { PROGRAM_ID } from "programId";
+import { decreaseStorage2 } from "../types/instructions";
+import { StorageAccountV2 } from "../types/accounts";
+import { PROGRAM_ID } from "../types/programId";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Publickey of a Storage Account
@@ -113,6 +113,6 @@ export default async function reduceStorage(
     const responseJson = res;
     return Promise.resolve(responseJson);
   } catch (e) {
-    return Promise.reject(new Error(e));
+    return Promise.reject(new Error(e.message));
   }
 }

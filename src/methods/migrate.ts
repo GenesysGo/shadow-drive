@@ -1,7 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { fromTxError } from "../types/errors";
-import { migrateStep1, migrateStep2 } from "instructions";
-import { StorageAccount } from "accounts";
+import { migrateStep1, migrateStep2 } from "../types/instructions";
+import { StorageAccount } from "../types/accounts";
 
 /**
  *

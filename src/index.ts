@@ -131,8 +131,8 @@ export class ShdwDrive implements ShadowDrive {
     if (!this.wallet && !this.wallet.publicKey) {
       return;
     }
-    this.storageConfigPDA = (await getStorageConfigPDA(this.program))[0];
-    this.userInfo = (await getUserInfo(this.program, this.wallet.publicKey))[0];
+    [this.storageConfigPDA] = await getStorageConfigPDA(this.program);
+    [this.userInfo] = await getUserInfo(this.program, this.wallet.publicKey);
     return this;
   }
 }

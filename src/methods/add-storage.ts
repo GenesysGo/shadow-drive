@@ -15,8 +15,11 @@ import {
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ShadowDriveResponse } from "../types";
 import fetch from "node-fetch";
-import { increaseImmutableStorage2, increaseStorage2 } from "instructions";
-import { StorageAccountV2, UserInfo } from "accounts";
+import {
+  increaseImmutableStorage2,
+  increaseStorage2,
+} from "../types/instructions";
+import { StorageAccountV2, UserInfo } from "../types/accounts";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Public Key of the existing storage to increase size on
@@ -37,8 +40,10 @@ export default async function addStorage(
       )
     );
   }
+
   let userInfoAccount = await UserInfo.fetch(this.connection, this.userInfo);
-  if (!userInfoAccount !== null) {
+
+  if (userInfoAccount === null) {
     return Promise.reject(
       new Error(
         "You have not created a storage account on Shadow Drive yet. Please see the 'create-storage-account' command to get started."

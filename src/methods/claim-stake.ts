@@ -3,9 +3,9 @@ import { findAssociatedTokenAddress } from "../utils/helpers";
 import { tokenMint } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { fromTxError } from "../types/errors";
-import { claimStake2, claimStake as claim } from "instructions";
-import { StorageAccountV2 } from "accounts";
-import { PROGRAM_ID } from "programId";
+import { claimStake2, claimStake as claim } from "../types/instructions";
+import { StorageAccountV2 } from "../types/accounts";
+import { PROGRAM_ID } from "../types/programId";
 /**
  *
  * @param {anchor.web3.PublicKey} key - PublicKey of a Storage Account
@@ -57,7 +57,7 @@ export default async function claimStake(
     if (parsedError !== null) {
       return Promise.reject(new Error(parsedError.msg));
     } else {
-      return Promise.reject(new Error(e));
+      return Promise.reject(new Error(e.message));
     }
   }
 }

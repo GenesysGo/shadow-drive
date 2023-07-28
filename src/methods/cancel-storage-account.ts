@@ -2,8 +2,8 @@ import * as anchor from "@coral-xyz/anchor";
 import { getStakeAccount } from "../utils/helpers";
 import { tokenMint } from "../utils/common";
 import { fromTxError } from "../types/errors";
-import { unmarkDeleteAccount2 } from "instructions";
-import { StorageAccountV2 } from "accounts";
+import { unmarkDeleteAccount2 } from "../types/instructions";
+import { StorageAccountV2 } from "../types/accounts";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Publickey of a Storage Account
@@ -42,7 +42,7 @@ export default async function cancelDeleteStorageAccount(
     if (parsedError !== null) {
       return Promise.reject(new Error(parsedError.msg));
     } else {
-      return Promise.reject(new Error(e));
+      return Promise.reject(new Error(e.message));
     }
   }
 }
