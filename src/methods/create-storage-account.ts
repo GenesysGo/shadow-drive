@@ -14,6 +14,7 @@ import {
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import fetch from "cross-fetch";
 import { ShadowDriveVersion, CreateStorageResponse } from "../types";
+import { initializeAccount, initializeAccount2 } from "instructions";
 /**
  *
  * @param {string} name - What you want your storage account to be named. (Does not have to be unique)
@@ -63,12 +64,16 @@ export default async function createStorageAccount(
     this.wallet.publicKey,
     tokenMint
   );
-  let txn;
+  let txn = new anchor.web3.Transaction();
   switch (version.toLocaleLowerCase()) {
     case "v1":
-      txn = await this.program.methods
-        .initializeAccount(name, storageRequested, owner2 ? owner2 : null)
-        .accounts({
+      const initializeAccountIx = initializeAccount(
+        {
+          identifier: name,
+          storage: storageRequested,
+          owner2: owner2 ? owner2 : null,
+        },
+        {
           storageConfig: this.storageConfigPDA,
           userInfo: this.userInfo,
           storageAccount,
@@ -80,13 +85,17 @@ export default async function createStorageAccount(
           systemProgram: anchor.web3.SystemProgram.programId,
           tokenProgram: TOKEN_PROGRAM_ID,
           rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-        })
-        .transaction();
+        }
+      );
+      txn.add(initializeAccountIx);
       break;
     case "v2":
-      txn = await this.program.methods
-        .initializeAccount2(name, storageRequested)
-        .accounts({
+      const initializeAccountIx2 = initializeAccount2(
+        {
+          identifier: name,
+          storage: storageRequested,
+        },
+        {
           storageConfig: this.storageConfigPDA,
           userInfo: this.userInfo,
           storageAccount,
@@ -98,8 +107,9 @@ export default async function createStorageAccount(
           systemProgram: anchor.web3.SystemProgram.programId,
           tokenProgram: TOKEN_PROGRAM_ID,
           rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-        })
-        .transaction();
+        }
+      );
+      txn.add(initializeAccountIx2);
       break;
   }
   try {

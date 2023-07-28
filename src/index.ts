@@ -16,7 +16,7 @@ import {
   getStorageAccs,
   makeStorageImmutable,
   reduceStorage,
-  cancelDeleteFile,
+  //   cancelDeleteFile,
   cancelDeleteStorageAccount,
   uploadFile,
   uploadMultipleFiles,
@@ -26,7 +26,14 @@ import {
   topUp,
   refreshStake,
 } from "./methods";
-
+import {
+  StorageAccount,
+  StorageAccountV2,
+  StorageConfig,
+  UserInfo,
+  UnstakeInfo,
+} from "./types/accounts";
+import * as Errors from "./types/errors/custom";
 import {
   ShadowDriveVersion,
   CreateStorageResponse,
@@ -35,7 +42,7 @@ import {
   ShadowFile,
   ShadowUploadResponse,
   ShadowEditResponse,
-  StorageAccount,
+  //   StorageAccount,
   StorageAccountResponse,
   ListObjectsResponse,
   StorageAccountInfo,
@@ -75,15 +82,18 @@ interface ShadowDrive {
     version: ShadowDriveVersion
   ): Promise<ShadowDriveResponse>;
   getStorageAccount(key: web3.PublicKey): Promise<StorageAccountInfo>;
-  getStorageAccounts(
-    version: ShadowDriveVersion
-  ): Promise<StorageAccountResponse[]>;
+  getStorageAccounts(version: ShadowDriveVersion): Promise<
+    Array<{
+      publicKey: web3.PublicKey;
+      account: StorageAccount | StorageAccountV2;
+    }>
+  >;
   reduceStorage(
     key: web3.PublicKey,
     size: string,
     version: ShadowDriveVersion
   ): Promise<ShadowDriveResponse>;
-  cancelDeleteFile(key: web3.PublicKey, url: string): Promise<{ txid: string }>;
+  //   cancelDeleteFile(key: web3.PublicKey, url: string): Promise<{ txid: string }>;
   cancelDeleteStorageAccount(
     key: web3.PublicKey,
     version: ShadowDriveVersion
@@ -107,7 +117,9 @@ interface ShadowDrive {
     key: web3.PublicKey,
     fileAccount: web3.PublicKey
   ): Promise<{ txid: string }>;
-  migrate(key: web3.PublicKey): Promise<{ txid: string }>;
+  migrate(
+    key: web3.PublicKey
+  ): Promise<{ step1_sig: string; step2_sig: string }>;
   topUp(key: web3.PublicKey, amount: number): Promise<{ txid: string }>;
   refreshStake(
     key: web3.PublicKey,
@@ -140,7 +152,7 @@ export class ShdwDrive implements ShadowDrive {
   /**
    * @deprecated The method should not be used as of Shadow Drive v1.5
    */
-  cancelDeleteFile = cancelDeleteFile;
+  //   cancelDeleteFile = cancelDeleteFile;
   cancelDeleteStorageAccount = cancelDeleteStorageAccount;
   uploadFile = uploadFile;
   uploadMultipleFiles = uploadMultipleFiles;
@@ -174,9 +186,14 @@ export {
   ShadowUploadResponse,
   ShadowEditResponse,
   ShadowFile,
-  StorageAccount,
   StorageAccountResponse,
   ShadowBatchUploadResponse,
   ListObjectsResponse,
   StorageAccountInfo,
+  StorageAccount,
+  StorageAccountV2,
+  StorageConfig,
+  UserInfo,
+  UnstakeInfo,
+  Errors,
 };

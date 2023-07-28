@@ -1,6 +1,6 @@
 import * as anchor from "@coral-xyz/anchor";
-import { sendAndConfirm } from "../utils/helpers";
-import { isBrowser } from "../utils/common";
+import { fromTxError } from "../types/errors";
+import { migrateStep1, migrateStep2 } from "instructions";
 
 /**
  *
@@ -10,7 +10,7 @@ import { isBrowser } from "../utils/common";
 
 export default async function migrate(
   key: anchor.web3.PublicKey
-): Promise<{ txid: string }> {
+): Promise<{ step1_sig: string; step2_sig: string }> {
   const selectedAccount = await this.program.account.storageAccount.fetch(key);
 
   let [migration, migrationBump] =
@@ -18,55 +18,60 @@ export default async function migrate(
       [Buffer.from("migration-helper"), key.toBytes()],
       this.program.programId
     );
-
+  let step1Res;
   try {
-    let tx = await this.program.methods
-      .migrateStep1()
-      .accounts({
-        storageAccount: key,
-        migration: migration,
-        owner: selectedAccount.owner1.publicKey,
-      })
-      .transaction();
+    let tx = new anchor.web3.Transaction();
+    const migrateIx = migrateStep1({
+      storageAccount: key,
+      migration: migration,
+      owner: selectedAccount.owner1.publicKey,
+      systemProgram: anchor.web3.SystemProgram.programId,
+    });
+    tx.add(migrateIx);
 
-    tx.recentBlockhash = (await this.connection.getLatestBlockhash()).blockhash;
+    let blockInfo = await this.connection.getLatestBlockhash();
+    tx.recentBlockhash = blockInfo.blockhash;
     tx.feePayer = this.wallet.publicKey;
     const signedTx = await this.wallet.signTransaction(tx);
-
-    await sendAndConfirm(
+    step1Res = await anchor.web3.sendAndConfirmRawTransaction(
       this.connection,
       signedTx.serialize(),
-      { skipPreflight: false },
-      "max",
-      120000
+      { skipPreflight: false, commitment: "confirmed" }
     );
   } catch (err) {
-    return Promise.reject(new Error(err));
+    const parsedError = fromTxError(err);
+    if (parsedError !== null) {
+      return Promise.reject(new Error(parsedError.msg));
+    } else {
+      return Promise.reject(new Error(err));
+    }
   }
-  let res;
+  let step2Res;
   try {
-    let tx2 = await this.program.methods
-      .migrateStep2()
-      .accounts({
-        storageAccount: key,
-        migration: migration,
-        owner: selectedAccount.owner1.publicKey,
-      })
-      .transaction();
-    tx2.recentBlockhash = (
-      await this.connection.getLatestBlockhash()
-    ).blockhash;
+    let tx2 = new anchor.web3.Transaction();
+    const migrate2Ix = migrateStep2({
+      storageAccount: key,
+      migration: migration,
+      owner: selectedAccount.owner1.publicKey,
+      systemProgram: anchor.web3.SystemProgram.programId,
+    });
+    tx2.add(migrate2Ix);
+    let blockInfo = await this.connection.getLatestBlockhash();
+    tx2.recentBlockhash = blockInfo.blockhash;
     tx2.feePayer = this.wallet.publicKey;
-    let signedTx = await this.wallet.signTransaction(tx2);
-    res = await sendAndConfirm(
+    const signedTx = await this.wallet.signTransaction(tx2);
+    step2Res = await anchor.web3.sendAndConfirmRawTransaction(
       this.connection,
       signedTx.serialize(),
-      { skipPreflight: true },
-      "confirmed",
-      120000
+      { skipPreflight: false, commitment: "confirmed" }
     );
   } catch (err) {
-    return Promise.reject(new Error(err));
+    const parsedError = fromTxError(err);
+    if (parsedError !== null) {
+      return Promise.reject(new Error(parsedError.msg));
+    } else {
+      return Promise.reject(new Error(err));
+    }
   }
-  return Promise.resolve(res);
+  return Promise.resolve({ step1_sig: step1Res, step2_sig: step2Res });
 }

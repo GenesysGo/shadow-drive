@@ -1,5 +1,6 @@
 import { ShadowDriveVersion, StorageAccountResponse } from "../types";
-
+import { web3 } from "@coral-xyz/anchor";
+import { StorageAccount, StorageAccountV2 } from "accounts";
 /**
  *
  * Get all storage accounts for the current user
@@ -9,7 +10,12 @@ import { ShadowDriveVersion, StorageAccountResponse } from "../types";
  */
 export default async function getStorageAccs(
   version: ShadowDriveVersion
-): Promise<StorageAccountResponse[]> {
+): Promise<
+  Array<{
+    publicKey: web3.PublicKey;
+    account: StorageAccount | StorageAccountV2;
+  }>
+> {
   let storageAccounts;
   try {
     const walletPubKey =

@@ -1,11 +1,8 @@
 import * as anchor from "@coral-xyz/anchor";
-import {
-  getStakeAccount,
-  findAssociatedTokenAddress,
-  sendAndConfirm,
-} from "../utils/helpers";
+import { getStakeAccount, findAssociatedTokenAddress } from "../utils/helpers";
 import { tokenMint } from "../utils/common";
 import { TOKEN_PROGRAM_ID, createTransferInstruction } from "@solana/spl-token";
+import { fromTxError } from "../types/errors";
 
 /**
  *
@@ -33,20 +30,22 @@ export default async function topUp(
     )
   );
   try {
-    tx.recentBlockhash = (
-      await this.connection.getLatestBlockhash("max")
-    ).blockhash;
+    let blockInfo = await this.connection.getLatestBlockhash();
+    tx.recentBlockhash = blockInfo.blockhash;
     tx.feePayer = this.wallet.publicKey;
-    let signedTx = await this.wallet.signTransaction(tx);
-    let txid;
-    txid = await sendAndConfirm(
+    const signedTx = await this.wallet.signTransaction(tx);
+    const res = await anchor.web3.sendAndConfirmRawTransaction(
       this.connection,
       signedTx.serialize(),
-      { skipPreflight: false },
-      "max"
+      { skipPreflight: false, commitment: "confirmed" }
     );
-    return Promise.resolve(txid);
+    return Promise.resolve({ txid: res });
   } catch (e) {
-    return Promise.reject(new Error(e));
+    const parsedError = fromTxError(e);
+    if (parsedError !== null) {
+      return Promise.reject(new Error(parsedError.msg));
+    } else {
+      return Promise.reject(new Error(e));
+    }
   }
 }

@@ -1,12 +1,10 @@
 import * as anchor from "@coral-xyz/anchor";
-import {
-  getStakeAccount,
-  findAssociatedTokenAddress,
-  sendAndConfirm,
-} from "../utils/helpers";
+import { getStakeAccount, findAssociatedTokenAddress } from "../utils/helpers";
 import { tokenMint } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ShadowDriveVersion } from "../types";
+import { fromTxError } from "../types/errors";
+import { refreshStake2, refreshStake as refresh } from "instructions";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Public Key of the existing storage to increase size on
@@ -32,55 +30,52 @@ export default async function refreshStake(
     this.wallet.publicKey,
     tokenMint
   );
-  let txn;
+  let txn = new anchor.web3.Transaction();
   try {
     switch (version.toLocaleLowerCase()) {
       case "v1":
-        txn = await this.program.methods
-          .refreshStake()
-          .accounts({
-            storageConfig: this.storageConfigPDA,
-            storageAccount: key,
-            owner: selectedAccount.owner1,
-            ownerAta: ownerAta,
-            stakeAccount: stakeAccount,
-            tokenMint: tokenMint,
-            systemProgram: anchor.web3.SystemProgram.programId,
-            tokenProgram: TOKEN_PROGRAM_ID,
-          })
-          .transaction();
+        const refreshStakeIx = refresh({
+          storageConfig: this.storageConfigPDA,
+          storageAccount: key,
+          owner: selectedAccount.owner1,
+          ownerAta: ownerAta,
+          stakeAccount: stakeAccount,
+          tokenMint: tokenMint,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        });
+        txn.add(refreshStakeIx);
         break;
       case "v2":
-        txn = await this.program.methods
-          .refreshStake2()
-          .accounts({
-            storageConfig: this.storageConfigPDA,
-            storageAccount: key,
-            owner: selectedAccount.owner1,
-            ownerAta: ownerAta,
-            stakeAccount: stakeAccount,
-            tokenMint: tokenMint,
-            systemProgram: anchor.web3.SystemProgram.programId,
-            tokenProgram: TOKEN_PROGRAM_ID,
-          })
-          .transaction();
+        const refreshStakeIx2 = refreshStake2({
+          storageConfig: this.storageConfigPDA,
+          storageAccount: key,
+          owner: selectedAccount.owner1,
+          ownerAta: ownerAta,
+          stakeAccount: stakeAccount,
+          tokenMint: tokenMint,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        });
+        txn.add(refreshStakeIx2);
         break;
     }
-    txn.recentBlockhash = (
-      await this.connection.getLatestBlockhash()
-    ).blockhash;
+    let blockInfo = await this.connection.getLatestBlockhash();
+    txn.recentBlockhash = blockInfo.blockhash;
     txn.feePayer = this.wallet.publicKey;
     const signedTx = await this.wallet.signTransaction(txn);
-
-    const res = await sendAndConfirm(
+    const res = await anchor.web3.sendAndConfirmRawTransaction(
       this.connection,
       signedTx.serialize(),
-      { skipPreflight: false },
-      "confirmed",
-      120000
+      { skipPreflight: false, commitment: "confirmed" }
     );
-    return Promise.resolve(res);
+    return Promise.resolve({ txid: res });
   } catch (e) {
-    return Promise.reject(new Error(e));
+    const parsedError = fromTxError(e);
+    if (parsedError !== null) {
+      return Promise.reject(new Error(parsedError.message));
+    } else {
+      return Promise.reject(new Error(e));
+    }
   }
 }

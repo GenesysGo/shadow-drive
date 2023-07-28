@@ -15,6 +15,7 @@ import {
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ShadowDriveVersion, ShadowDriveResponse } from "../types";
 import fetch from "node-fetch";
+import { decreaseStorage, decreaseStorage2 } from "instructions";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Publickey of a Storage Account
@@ -53,15 +54,15 @@ export default async function reduceStorage(
   const emissionsAta = await findAssociatedTokenAddress(emissions, tokenMint);
   try {
     const storageUsed = await getStorageAccountSize(key.toString());
-    let txn;
+    let txn = new anchor.web3.Transaction();
     switch (version.toLocaleLowerCase()) {
       case "v1":
-        txn = await this.program.methods
-          .decreaseStorage(
-            new anchor.BN(storageInputAsBytes.toString()),
-            new anchor.BN(storageUsed)
-          )
-          .accounts({
+        const decreaseStorageIx = decreaseStorage(
+          {
+            storageUsed: new anchor.BN(storageUsed),
+            removeStorage: new anchor.BN(storageInputAsBytes.toString()),
+          },
+          {
             storageConfig: this.storageConfigPDA,
             storageAccount: key,
             unstakeInfo,
@@ -75,16 +76,17 @@ export default async function reduceStorage(
             systemProgram: anchor.web3.SystemProgram.programId,
             tokenProgram: TOKEN_PROGRAM_ID,
             rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-          })
-          .transaction();
+          }
+        );
+        txn.add(decreaseStorageIx);
         break;
       case "v2":
-        txn = await this.program.methods
-          .decreaseStorage2(
-            new anchor.BN(storageInputAsBytes.toString()),
-            new anchor.BN(storageUsed)
-          )
-          .accounts({
+        const decreaseStorageIx2 = decreaseStorage2(
+          {
+            storageUsed: new anchor.BN(storageUsed),
+            removeStorage: new anchor.BN(storageInputAsBytes.toString()),
+          },
+          {
             storageConfig: this.storageConfigPDA,
             storageAccount: key,
             unstakeInfo,
@@ -98,8 +100,9 @@ export default async function reduceStorage(
             systemProgram: anchor.web3.SystemProgram.programId,
             tokenProgram: TOKEN_PROGRAM_ID,
             rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-          })
-          .transaction();
+          }
+        );
+        txn.add(decreaseStorageIx2);
         break;
     }
 

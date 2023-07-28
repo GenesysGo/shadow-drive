@@ -1,7 +1,8 @@
 import * as anchor from "@coral-xyz/anchor";
-import { findAssociatedTokenAddress, sendAndConfirm } from "../utils/helpers";
-import { isBrowser, tokenMint } from "../utils/common";
-
+import { findAssociatedTokenAddress } from "../utils/helpers";
+import { tokenMint } from "../utils/common";
+import { fromTxError } from "../types/errors";
+import { redeemRent as redeem } from "instructions";
 /**
  *
  * @param {anchor.web3.PublicKey} key - PublicKey of a Storage Account
@@ -29,28 +30,29 @@ export default async function redeemRent(
     tokenMint
   );
   try {
-    const txn = await this.program.methods
-      .redeemRent()
-      .accounts({
-        storageAccount: key,
-        file: fileAccount,
-        owner: selectedAccount.owner1,
-      })
-      .transaction();
-    txn.recentBlockhash = (
-      await this.connection.getLatestBlockhash()
-    ).blockhash;
+    let txn = new anchor.web3.Transaction();
+    const redeemRentIx = redeem({
+      storageAccount: key,
+      file: fileAccount,
+      owner: selectedAccount.owner1,
+    });
+    txn.add(redeemRentIx);
+    let blockInfo = await this.connection.getLatestBlockhash();
+    txn.recentBlockhash = blockInfo.blockhash;
     txn.feePayer = this.wallet.publicKey;
-    let signedTx = await this.wallet.signTransaction(txn);
-    const res = await sendAndConfirm(
+    const signedTx = await this.wallet.signTransaction(txn);
+    const res = await anchor.web3.sendAndConfirmRawTransaction(
       this.connection,
       signedTx.serialize(),
-      { skipPreflight: false },
-      "confirmed",
-      120000
+      { skipPreflight: true, commitment: "confirmed" }
     );
-    return Promise.resolve(res);
+    return Promise.resolve({ txid: res });
   } catch (e) {
-    return Promise.reject(new Error(e));
+    const parsedError = fromTxError(e);
+    if (parsedError !== null) {
+      return Promise.reject(new Error(parsedError.msg));
+    } else {
+      return Promise.reject(new Error(e));
+    }
   }
 }

@@ -15,6 +15,13 @@ import {
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ShadowDriveVersion, ShadowDriveResponse } from "../types";
 import fetch from "node-fetch";
+import {
+  increaseImmutableStorage,
+  increaseImmutableStorage2,
+  increaseStorage,
+  increaseStorage2,
+} from "instructions";
+import { StorageAccount, StorageAccountV2, UserInfo } from "accounts";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Public Key of the existing storage to increase size on
@@ -31,10 +38,10 @@ export default async function addStorage(
   let selectedAccount;
   switch (version.toLocaleLowerCase()) {
     case "v1":
-      selectedAccount = await this.program.account.storageAccount.fetch(key);
+      selectedAccount = await StorageAccount.fetch(this.connection, key);
       break;
     case "v2":
-      selectedAccount = await this.program.account.storageAccountV2.fetch(key);
+      selectedAccount = await StorageAccountV2.fetch(this.connection, key);
       break;
   }
   if (storageInputAsBytes === false) {
@@ -44,13 +51,8 @@ export default async function addStorage(
       )
     );
   }
-  let userInfoAccount = await this.connection.getAccountInfo(this.userInfo);
-  let userInfoData;
-  let accountSeed;
-  if (userInfoAccount !== null) {
-    userInfoData = await this.program.account.userInfo.fetch(this.userInfo);
-    accountSeed = new anchor.BN(userInfoData.accountCounter);
-  } else {
+  let userInfoAccount = await UserInfo.fetch(this.connection, this.userInfo);
+  if (!userInfoAccount !== null) {
     return Promise.reject(
       new Error(
         "You have not created a storage account on Shadow Drive yet. Please see the 'create-storage-account' command to get started."
@@ -66,14 +68,16 @@ export default async function addStorage(
   try {
     const storageUsed = await getStorageAccountSize(key.toString());
     const emissionsAta = await findAssociatedTokenAddress(emissions, tokenMint);
-    let txn;
+    let txn = new anchor.web3.Transaction();
     switch (version.toLocaleLowerCase()) {
       case "v1":
         switch (selectedAccount.immutable) {
           case true:
-            txn = await this.program.methods
-              .increaseImmutableStorage(new anchor.BN(storageInputAsBytes))
-              .accounts({
+            const increaseImmutableStorageIx = increaseImmutableStorage(
+              {
+                additionalStorage: new anchor.BN(storageInputAsBytes as number),
+              },
+              {
                 storageConfig: this.storageConfigPDA,
                 storageAccount: key,
                 owner: selectedAccount.owner1,
@@ -83,13 +87,16 @@ export default async function addStorage(
                 tokenMint: tokenMint,
                 systemProgram: anchor.web3.SystemProgram.programId,
                 tokenProgram: TOKEN_PROGRAM_ID,
-              })
-              .transaction();
+              }
+            );
+            txn.add(increaseImmutableStorageIx);
             break;
           case false:
-            txn = await this.program.methods
-              .increaseStorage(new anchor.BN(storageInputAsBytes))
-              .accounts({
+            const increaseStorageIx = increaseStorage(
+              {
+                additionalStorage: new anchor.BN(storageInputAsBytes as number),
+              },
+              {
                 storageConfig: this.storageConfigPDA,
                 storageAccount: key,
                 owner: selectedAccount.owner1,
@@ -99,17 +106,20 @@ export default async function addStorage(
                 tokenMint: tokenMint,
                 systemProgram: anchor.web3.SystemProgram.programId,
                 tokenProgram: TOKEN_PROGRAM_ID,
-              })
-              .transaction();
+              }
+            );
+            txn.add(increaseStorageIx);
             break;
         }
         break;
       case "v2":
         switch (selectedAccount.immutable) {
           case true:
-            txn = await this.program.methods
-              .increaseImmutableStorage2(new anchor.BN(storageInputAsBytes))
-              .accounts({
+            const increaseImmutableStorageIx = increaseImmutableStorage2(
+              {
+                additionalStorage: new anchor.BN(storageInputAsBytes as number),
+              },
+              {
                 storageConfig: this.storageConfigPDA,
                 storageAccount: key,
                 owner: selectedAccount.owner1,
@@ -119,13 +129,16 @@ export default async function addStorage(
                 tokenMint: tokenMint,
                 systemProgram: anchor.web3.SystemProgram.programId,
                 tokenProgram: TOKEN_PROGRAM_ID,
-              })
-              .transaction();
+              }
+            );
+            txn.add(increaseImmutableStorageIx);
             break;
           case false:
-            txn = await this.program.methods
-              .increaseStorage2(new anchor.BN(storageInputAsBytes))
-              .accounts({
+            const increaseStorageIx = increaseStorage2(
+              {
+                additionalStorage: new anchor.BN(storageInputAsBytes as number),
+              },
+              {
                 storageConfig: this.storageConfigPDA,
                 storageAccount: key,
                 owner: selectedAccount.owner1,
@@ -135,8 +148,9 @@ export default async function addStorage(
                 tokenMint: tokenMint,
                 systemProgram: anchor.web3.SystemProgram.programId,
                 tokenProgram: TOKEN_PROGRAM_ID,
-              })
-              .transaction();
+              }
+            );
+            txn.add(increaseStorageIx);
             break;
         }
         break;
@@ -182,7 +196,7 @@ export default async function addStorage(
     }
     const responseJson = await addStorageResponse.json();
     return Promise.resolve(responseJson);
-  } catch (e) {
-    return Promise.reject(new Error(e));
+  } catch (e: any) {
+    return Promise.reject(new Error(e.message));
   }
 }

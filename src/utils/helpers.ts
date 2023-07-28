@@ -7,7 +7,7 @@ import {
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import fetch from "node-fetch";
-const DEFAULT_TIMEOUT = 3 * 60 * 1000; // 3 minutes
+
 /**
  *
  * Todo - expand Wallet Type support
@@ -288,86 +288,7 @@ async function simulateTransaction(
   }
   return res.result;
 }
-/*
-    Original comment from Strata:
-    -----------------------------------------------
-    A validator has up to 120s to accept the transaction and send it into a block.
-    If it doesn’t happen within that timeframe, your transaction is dropped and you’ll need 
-    to send the transaction again. You can get the transaction signature and periodically 
-    Ping the network for that transaction signature. If you never get anything back, 
-    that means it’s definitely been dropped. If you do get a response back, you can keep pinging 
-    until it’s gone to a confirmed status to move on.
-  */
-export async function sendAndConfirm(
-  connection: anchor.web3.Connection,
-  txn: Buffer,
-  sendOptions: anchor.web3.SendOptions,
-  commitment: anchor.web3.Commitment,
-  timeout = DEFAULT_TIMEOUT
-): Promise<{ txid: string }> {
-  try {
-    let done = false;
-    let slot = 0;
-    const txid = await connection.sendRawTransaction(txn, sendOptions);
-    const startTime = getUnixTime();
-    try {
-      const confirmation = await awaitTransactionSignatureConfirmation(
-        txid,
-        timeout,
-        connection,
-        commitment,
-        true
-      );
 
-      if (!confirmation)
-        throw new Error("Timed out awaiting confirmation on transaction");
-
-      if (confirmation.err) {
-        const tx = await connection.getTransaction(txid);
-        console.error(tx?.meta?.logMessages?.join("\n"));
-        console.error(confirmation.err);
-        throw new Error("Transaction failed: Custom instruction error");
-      }
-
-      slot = confirmation?.slot || 0;
-    } catch (err: any) {
-      console.error("Timeout Error caught", err);
-      if (err.timeout) {
-        throw new Error("Timed out awaiting confirmation on transaction");
-      }
-      let simulateResult: anchor.web3.SimulatedTransactionResponse | null =
-        null;
-      try {
-        simulateResult = (
-          await simulateTransaction(
-            connection,
-            anchor.web3.Transaction.from(txn),
-            "single"
-          )
-        ).value;
-      } catch (e) {}
-      if (simulateResult && simulateResult.err) {
-        if (simulateResult.logs) {
-          console.error(simulateResult.logs.join("\n"));
-        }
-      }
-
-      if (err.err) {
-        throw err.err;
-      }
-
-      throw err;
-    } finally {
-      done = true;
-    }
-
-    console.log("Latency", txid, getUnixTime() - startTime);
-
-    return { txid };
-  } catch (e) {
-    throw new Error(e);
-  }
-}
 export function chunks(array: any, size: any) {
   return Array.apply(0, new Array(Math.ceil(array.length / size))).map(
     (_: any, index: any) => array.slice(index * size, (index + 1) * size)
