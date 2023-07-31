@@ -108,10 +108,13 @@ export default async function editFile(
     form.append("signer", this.wallet.publicKey.toString());
     form.append("storage_account", key.toString());
     form.append("url", url);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 7200000);
     const uploadResponse = await fetch(`${SHDW_DRIVE_ENDPOINT}/edit`, {
       method: "POST",
       //@ts-ignore
       body: form,
+      signal: controller.signal,
     });
     if (!uploadResponse.ok) {
       return Promise.reject(

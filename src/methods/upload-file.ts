@@ -86,10 +86,13 @@ export default async function uploadFile(
     return Promise.reject(new Error(e));
   }
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 7200000);
     const uploadResponse = await fetch(`${SHDW_DRIVE_ENDPOINT}/upload`, {
       method: "POST",
       //@ts-ignore
       body: form,
+      signal: controller.signal,
     });
     if (!uploadResponse.ok) {
       return Promise.reject(

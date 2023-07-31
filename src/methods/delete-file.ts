@@ -54,6 +54,8 @@ export default async function deleteFile(
       msgSig = await this.wallet.signMessage(msg);
     }
     const encodedMsg = bs58.encode(msgSig);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 7200000);
     deleteFileResponse = await fetch(`${SHDW_DRIVE_ENDPOINT}/delete-file`, {
       method: "POST",
       headers: {
@@ -64,6 +66,7 @@ export default async function deleteFile(
         message: encodedMsg,
         location: url,
       }),
+      signal: controller.signal,
     });
     if (!deleteFileResponse.ok) {
       return Promise.reject(

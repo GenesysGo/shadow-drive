@@ -154,6 +154,8 @@ export default async function addStorage(
       signedTx = await this.wallet.signTransaction(txn);
       serializedTxn = signedTx.serialize({ requireAllSignatures: false });
     }
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 7200000);
     const addStorageResponse = await fetch(
       `${SHDW_DRIVE_ENDPOINT}/add-storage`,
       {
@@ -169,6 +171,7 @@ export default async function addStorage(
           amount_to_add: storageInputAsBytes,
           storageUsed: storageUsed,
         }),
+        signal: controller.signal,
       }
     );
     if (!addStorageResponse.ok) {
