@@ -65,7 +65,7 @@ export default async function uploadFile(
     Buffer.isBuffer(fileBuffer) ? fileBuffer : Buffer.from(fileBuffer)
   );
   fileNameHashSum.update(data.name);
-  const fileHash = fileHashSum.digest("hex");
+
   const fileNameHash = fileNameHashSum.digest("hex");
   try {
     const msg = new TextEncoder().encode(

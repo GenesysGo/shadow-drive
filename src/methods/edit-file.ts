@@ -75,16 +75,15 @@ export default async function editFile(
   if (!fileOwnerOnChain.equals(this.wallet.publicKey)) {
     return Promise.reject(new Error("Permission denied: Not file owner"));
   }
-  const hashSum = crypto.createHash("sha256");
-  hashSum.update(
+  const fileHashSum = crypto.createHash("sha256");
+  fileHashSum.update(
     Buffer.isBuffer(fileBuffer) ? fileBuffer : Buffer.from(fileBuffer)
   );
-  const sha256Hash = hashSum.digest("hex");
-  let size = new anchor.BN(fileBuffer.byteLength);
+  const fileHash = fileHashSum.digest("hex");
 
   try {
     const msg = Buffer.from(
-      `Shadow Drive Signed Message:\n StorageAccount: ${key}\nFile to edit: ${data.name}\nNew file hash: ${sha256Hash}`
+      `Shadow Drive Signed Message:\n StorageAccount: ${key}\nFile to edit: ${data.name}\nNew file hash: ${fileHash}`
     );
     let msgSig;
     if (!this.wallet.signMessage) {
