@@ -37,6 +37,6 @@ export default async function getStorageAcc(
     }
     return Promise.resolve(await storageInfoResponse.json());
   } catch (e) {
-    return Promise.reject(new Error(e));
+    return Promise.reject(new Error(e.message));
   }
 }

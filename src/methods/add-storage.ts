@@ -13,8 +13,13 @@ import {
   emissions,
 } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { ShadowDriveVersion, ShadowDriveResponse } from "../types";
+import { ShadowDriveResponse } from "../types";
 import fetch from "node-fetch";
+import {
+  increaseImmutableStorage2,
+  increaseStorage2,
+} from "../types/instructions";
+import { StorageAccountV2, UserInfo } from "../types/accounts";
 /**
  *
  * @param {anchor.web3.PublicKey} key - Public Key of the existing storage to increase size on
@@ -24,19 +29,10 @@ import fetch from "node-fetch";
  */
 export default async function addStorage(
   key: anchor.web3.PublicKey,
-  size: string,
-  version: ShadowDriveVersion
+  size: string
 ): Promise<ShadowDriveResponse> {
   let storageInputAsBytes = humanSizeToBytes(size);
-  let selectedAccount;
-  switch (version.toLocaleLowerCase()) {
-    case "v1":
-      selectedAccount = await this.program.account.storageAccount.fetch(key);
-      break;
-    case "v2":
-      selectedAccount = await this.program.account.storageAccountV2.fetch(key);
-      break;
-  }
+  let selectedAccount = await StorageAccountV2.fetch(this.connection, key);
   if (storageInputAsBytes === false) {
     return Promise.reject(
       new Error(
@@ -44,13 +40,10 @@ export default async function addStorage(
       )
     );
   }
-  let userInfoAccount = await this.connection.getAccountInfo(this.userInfo);
-  let userInfoData;
-  let accountSeed;
-  if (userInfoAccount !== null) {
-    userInfoData = await this.program.account.userInfo.fetch(this.userInfo);
-    accountSeed = new anchor.BN(userInfoData.accountCounter);
-  } else {
+
+  let userInfoAccount = await UserInfo.fetch(this.connection, this.userInfo);
+
+  if (userInfoAccount === null) {
     return Promise.reject(
       new Error(
         "You have not created a storage account on Shadow Drive yet. Please see the 'create-storage-account' command to get started."
@@ -66,79 +59,45 @@ export default async function addStorage(
   try {
     const storageUsed = await getStorageAccountSize(key.toString());
     const emissionsAta = await findAssociatedTokenAddress(emissions, tokenMint);
-    let txn;
-    switch (version.toLocaleLowerCase()) {
-      case "v1":
-        switch (selectedAccount.immutable) {
-          case true:
-            txn = await this.program.methods
-              .increaseImmutableStorage(new anchor.BN(storageInputAsBytes))
-              .accounts({
-                storageConfig: this.storageConfigPDA,
-                storageAccount: key,
-                owner: selectedAccount.owner1,
-                ownerAta,
-                uploader: uploader,
-                emissionsWallet: emissionsAta,
-                tokenMint: tokenMint,
-                systemProgram: anchor.web3.SystemProgram.programId,
-                tokenProgram: TOKEN_PROGRAM_ID,
-              })
-              .transaction();
-            break;
-          case false:
-            txn = await this.program.methods
-              .increaseStorage(new anchor.BN(storageInputAsBytes))
-              .accounts({
-                storageConfig: this.storageConfigPDA,
-                storageAccount: key,
-                owner: selectedAccount.owner1,
-                ownerAta,
-                stakeAccount,
-                uploader: uploader,
-                tokenMint: tokenMint,
-                systemProgram: anchor.web3.SystemProgram.programId,
-                tokenProgram: TOKEN_PROGRAM_ID,
-              })
-              .transaction();
-            break;
-        }
+    let txn = new anchor.web3.Transaction();
+    switch (selectedAccount.immutable) {
+      case true:
+        const increaseImmutableStorageIx = increaseImmutableStorage2(
+          {
+            additionalStorage: new anchor.BN(storageInputAsBytes as number),
+          },
+          {
+            storageConfig: this.storageConfigPDA,
+            storageAccount: key,
+            owner: selectedAccount.owner1,
+            ownerAta,
+            uploader: uploader,
+            emissionsWallet: emissionsAta,
+            tokenMint: tokenMint,
+            systemProgram: anchor.web3.SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+          }
+        );
+        txn.add(increaseImmutableStorageIx);
         break;
-      case "v2":
-        switch (selectedAccount.immutable) {
-          case true:
-            txn = await this.program.methods
-              .increaseImmutableStorage2(new anchor.BN(storageInputAsBytes))
-              .accounts({
-                storageConfig: this.storageConfigPDA,
-                storageAccount: key,
-                owner: selectedAccount.owner1,
-                ownerAta,
-                uploader: uploader,
-                emissionsWallet: emissionsAta,
-                tokenMint: tokenMint,
-                systemProgram: anchor.web3.SystemProgram.programId,
-                tokenProgram: TOKEN_PROGRAM_ID,
-              })
-              .transaction();
-            break;
-          case false:
-            txn = await this.program.methods
-              .increaseStorage2(new anchor.BN(storageInputAsBytes))
-              .accounts({
-                storageConfig: this.storageConfigPDA,
-                storageAccount: key,
-                owner: selectedAccount.owner1,
-                ownerAta,
-                stakeAccount,
-                uploader: uploader,
-                tokenMint: tokenMint,
-                systemProgram: anchor.web3.SystemProgram.programId,
-                tokenProgram: TOKEN_PROGRAM_ID,
-              })
-              .transaction();
-            break;
-        }
+      case false:
+        const increaseStorageIx = increaseStorage2(
+          {
+            additionalStorage: new anchor.BN(storageInputAsBytes as number),
+          },
+          {
+            storageConfig: this.storageConfigPDA,
+            storageAccount: key,
+            owner: selectedAccount.owner1,
+            ownerAta,
+            stakeAccount,
+            uploader: uploader,
+            tokenMint: tokenMint,
+            systemProgram: anchor.web3.SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+          }
+        );
+        txn.add(increaseStorageIx);
         break;
     }
     txn.recentBlockhash = (
@@ -182,7 +141,7 @@ export default async function addStorage(
     }
     const responseJson = await addStorageResponse.json();
     return Promise.resolve(responseJson);
-  } catch (e) {
-    return Promise.reject(new Error(e));
+  } catch (e: any) {
+    return Promise.reject(new Error(e.message));
   }
 }

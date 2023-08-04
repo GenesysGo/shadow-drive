@@ -1,69 +1,45 @@
 import * as anchor from "@coral-xyz/anchor";
-import { isBrowser, tokenMint } from "../utils/common";
-import { ShadowDriveVersion } from "../types";
-import { sendAndConfirm } from "../utils/helpers";
+import { tokenMint } from "../utils/common";
+import { fromTxError } from "../types/errors";
+import { requestDeleteAccount2 } from "../types/instructions";
+import { StorageAccountV2 } from "../types/accounts";
 
 /**
  *
  * @param {anchor.web3.PublicKey} key - PublicKey of a StorageAccount
- *	@param {ShadowDriveVersion} version - ShadowDrive (v1 or v2)
  * @returns {{ txid: string }} - Confirmed transaction ID
  */
 
 export default async function deleteStorageAccount(
-  key: anchor.web3.PublicKey,
-  version: ShadowDriveVersion
+  key: anchor.web3.PublicKey
 ): Promise<{ txid: string }> {
-  let selectedAccount;
-  switch (version.toLocaleLowerCase()) {
-    case "v1":
-      selectedAccount = await this.program.account.storageAccount.fetch(key);
-      break;
-    case "v2":
-      selectedAccount = await this.program.account.storageAccountV2.fetch(key);
-      break;
-  }
+  let selectedAccount = await StorageAccountV2.fetch(this.connection, key);
   try {
-    let txn;
-    switch (version.toLocaleLowerCase()) {
-      case "v1":
-        txn = await this.program.methods
-          .requestDeleteAccount()
-          .accounts({
-            storageConfig: this.storageConfigPDA,
-            storageAccount: key,
-            owner: selectedAccount.owner1,
-            tokenMint: tokenMint,
-            systemProgram: anchor.web3.SystemProgram.programId,
-          })
-          .transaction();
-      case "v2":
-        txn = await this.program.methods
-          .requestDeleteAccount2()
-          .accounts({
-            storageConfig: this.storageConfigPDA,
-            storageAccount: key,
-            owner: selectedAccount.owner1,
-            tokenMint: tokenMint,
-            systemProgram: anchor.web3.SystemProgram.programId,
-          })
-          .transaction();
-        break;
-    }
-    txn.recentBlockhash = (
-      await this.connection.getLatestBlockhash()
-    ).blockhash;
+    let txn = new anchor.web3.Transaction();
+    const reqDeleteAccountIx2 = requestDeleteAccount2({
+      storageConfig: this.storageConfigPDA,
+      storageAccount: key,
+      owner: selectedAccount.owner1,
+      tokenMint: tokenMint,
+      systemProgram: anchor.web3.SystemProgram.programId,
+    });
+    txn.add(reqDeleteAccountIx2);
+    let blockInfo = await this.connection.getLatestBlockhash();
+    txn.recentBlockhash = blockInfo.blockhash;
     txn.feePayer = this.wallet.publicKey;
     const signedTx = await this.wallet.signTransaction(txn);
-    const res = await sendAndConfirm(
+    const res = await anchor.web3.sendAndConfirmRawTransaction(
       this.connection,
       signedTx.serialize(),
-      { skipPreflight: false },
-      "confirmed",
-      120000
+      { skipPreflight: false, commitment: "confirmed" }
     );
-    return Promise.resolve(res);
+    return Promise.resolve({ txid: res });
   } catch (e) {
-    return Promise.reject(e);
+    const parsedError = fromTxError(e);
+    if (parsedError !== null) {
+      return Promise.reject(new Error(parsedError.msg));
+    } else {
+      return Promise.reject(new Error(e.message));
+    }
   }
 }

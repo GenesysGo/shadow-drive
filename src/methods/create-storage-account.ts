@@ -13,20 +13,18 @@ import {
 } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import fetch from "cross-fetch";
-import { ShadowDriveVersion, CreateStorageResponse } from "../types";
+import { CreateStorageResponse } from "../types";
+import { initializeAccount2 } from "../types/instructions";
+import { UserInfo } from "../types/accounts";
 /**
  *
  * @param {string} name - What you want your storage account to be named. (Does not have to be unique)
  * @param {string} size - Amount of storage you are requesting to create. Should be in a string like '1KB', '1MB', '1GB'. Only KB, MB, and GB storage delineations are supported currently.
- * @param {ShadowDriveVersion} version - ShadowDrive version(v1 or v2)
- * @param {anchor.web3.PublicKey} owner2 - Optional secondary owner for the storage account.
  * @returns {CreateStorageResponse} Created bucket and transaction signature
  */
 export default async function createStorageAccount(
   name: string,
-  size: string,
-  version: ShadowDriveVersion,
-  owner2?: anchor.web3.PublicKey
+  size: string
 ): Promise<CreateStorageResponse> {
   let storageInputAsBytes = humanSizeToBytes(size);
   if (storageInputAsBytes === false) {
@@ -36,18 +34,11 @@ export default async function createStorageAccount(
       )
     );
   }
-  let [userInfo, userInfoBump] = await anchor.web3.PublicKey.findProgramAddress(
-    [Buffer.from("user-info"), this.wallet.publicKey.toBytes()],
-    this.program.programId
-  );
   // If userInfo hasn't been initialized, default to 0 for account seed
-  let userInfoAccount = await this.connection.getAccountInfo(this.userInfo);
+  let userInfoAccount = await UserInfo.fetch(this.connection, this.userInfo);
   let accountSeed = new anchor.BN(0);
   if (userInfoAccount !== null) {
-    let userInfoData = await this.program.account.userInfo.fetch(this.userInfo);
-    accountSeed = new anchor.BN(userInfoData.accountCounter);
-  } else {
-    this.userInfo = userInfo;
+    accountSeed = new anchor.BN(userInfoAccount.accountCounter);
   }
 
   let storageRequested = new anchor.BN(storageInputAsBytes.toString()); // 2^30 B <==> 1GB
@@ -63,45 +54,28 @@ export default async function createStorageAccount(
     this.wallet.publicKey,
     tokenMint
   );
-  let txn;
-  switch (version.toLocaleLowerCase()) {
-    case "v1":
-      txn = await this.program.methods
-        .initializeAccount(name, storageRequested, owner2 ? owner2 : null)
-        .accounts({
-          storageConfig: this.storageConfigPDA,
-          userInfo: this.userInfo,
-          storageAccount,
-          stakeAccount,
-          tokenMint,
-          owner1: this.wallet.publicKey,
-          uploader: uploader,
-          owner1TokenAccount: ownerAta,
-          systemProgram: anchor.web3.SystemProgram.programId,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-        })
-        .transaction();
-      break;
-    case "v2":
-      txn = await this.program.methods
-        .initializeAccount2(name, storageRequested)
-        .accounts({
-          storageConfig: this.storageConfigPDA,
-          userInfo: this.userInfo,
-          storageAccount,
-          stakeAccount,
-          tokenMint,
-          owner1: this.wallet.publicKey,
-          uploader: uploader,
-          owner1TokenAccount: ownerAta,
-          systemProgram: anchor.web3.SystemProgram.programId,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-        })
-        .transaction();
-      break;
-  }
+  let txn = new anchor.web3.Transaction();
+  const initializeAccountIx2 = initializeAccount2(
+    {
+      identifier: name,
+      storage: storageRequested,
+    },
+    {
+      storageConfig: this.storageConfigPDA,
+      userInfo: this.userInfo,
+      storageAccount,
+      stakeAccount,
+      tokenMint,
+      owner1: this.wallet.publicKey,
+      uploader: uploader,
+      owner1TokenAccount: ownerAta,
+      systemProgram: anchor.web3.SystemProgram.programId,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+    }
+  );
+  txn.add(initializeAccountIx2);
+
   try {
     txn.recentBlockhash = (
       await this.connection.getLatestBlockhash()
@@ -145,7 +119,6 @@ export default async function createStorageAccount(
       (await createStorageResponse.json()) as CreateStorageResponse;
     return Promise.resolve(responseJson);
   } catch (e) {
-    console.log(`Error from fileserver ${e}`);
-    return Promise.reject(new Error(e));
+    return Promise.reject(new Error(e.message));
   }
 }

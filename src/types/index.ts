@@ -1,7 +1,4 @@
-import * as anchor from "@coral-xyz/anchor";
-import { PublicKey, Transaction } from "@solana/web3.js";
-
-export type ShadowDriveVersion = "v1" | "v2";
+import { PublicKey } from "@solana/web3.js";
 
 export type CreateStorageResponse = {
   shdw_bucket: string;
@@ -39,11 +36,6 @@ export type ListObjectsResponse = {
   keys: string[];
 };
 
-export type StorageAccountResponse = {
-  publicKey: anchor.web3.PublicKey;
-  account: StorageAccount;
-};
-
 export type StorageAccountInfo = {
   storage_account: PublicKey;
   reserved_bytes: number;
@@ -57,28 +49,7 @@ export type StorageAccountInfo = {
   creation_epoch: number;
   last_fee_epoch: number;
   identifier: string;
-  version: `${Uppercase<ShadowDriveVersion>}`;
-};
-
-export type StorageAccount = {
-  isStatic: boolean;
-  initCounter: number;
-  delCounter: number;
-  immutable: boolean;
-  toBeDeleted: boolean;
-  deleteRequestEpoch: number;
-  storage: number;
-  storageAvailable: number;
-  owner1: anchor.web3.PublicKey;
-  owner2: anchor.web3.PublicKey;
-  shdwPayer: anchor.web3.PublicKey;
-  accountCounterSeed: number;
-  totalCostOfCurrentStorage: number;
-  totalFeesPaid: number;
-  creationTime: number;
-  creationEpoch: number;
-  lastFeeEpoch: number;
-  identifier: string;
+  version: "V1" | "V2";
 };
 
 export type ShadowFile = {

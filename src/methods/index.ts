@@ -9,11 +9,9 @@ import getStorageAccs from "./get-storage-accounts";
 import listObjects from "./list-objects";
 import makeStorageImmutable from "./make-storage-immutable";
 import reduceStorage from "./reduce-storage";
-import cancelDeleteFile from "./cancel-delete-file";
 import cancelDeleteStorageAccount from "./cancel-storage-account";
 import uploadFile from "./upload-file";
 import uploadMultipleFiles from "./upload-multiple-files";
-import redeemRent from "./redeem-rent";
 import migrate from "./migrate";
 import topUp from "./top-up";
 import refreshStake from "./refresh-stake";
@@ -29,11 +27,9 @@ export {
   listObjects,
   makeStorageImmutable,
   reduceStorage,
-  cancelDeleteFile,
   cancelDeleteStorageAccount,
   uploadFile,
   uploadMultipleFiles,
-  redeemRent,
   migrate,
   topUp,
   refreshStake,
