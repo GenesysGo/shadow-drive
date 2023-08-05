@@ -3,7 +3,7 @@ import { findAssociatedTokenAddress } from "../utils/helpers";
 import { tokenMint } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { fromTxError } from "../types/errors";
-import { claimStake2, claimStake as claim } from "../types/instructions";
+import { claimStake2 } from "../types/instructions";
 import { StorageAccountV2 } from "../types/accounts";
 import { PROGRAM_ID } from "../types/programId";
 /**

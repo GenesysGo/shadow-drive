@@ -3,7 +3,7 @@ import { getStakeAccount, findAssociatedTokenAddress } from "../utils/helpers";
 import { tokenMint } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { fromTxError } from "../types/errors";
-import { refreshStake2, refreshStake as refresh } from "../types/instructions";
+import { refreshStake2 } from "../types/instructions";
 import { StorageAccountV2 } from "../types/accounts";
 /**
  *
