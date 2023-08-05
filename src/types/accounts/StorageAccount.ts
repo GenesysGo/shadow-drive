@@ -1,5 +1,4 @@
-import { PublicKey, Connection } from "@solana/web3.js";
-import BN from "bn.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { web3, BN } from "@coral-xyz/anchor";
 import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import * as types from "../types"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { PROGRAM_ID } from "../programId";
@@ -28,11 +27,11 @@ export interface StorageAccountFields {
   /** Bytes available for use */
   storageAvailable: BN;
   /** Primary owner of StorageAccount (immutable) */
-  owner1: PublicKey;
+  owner1: web3.PublicKey;
   /** Optional owner 2 */
-  owner2: PublicKey;
+  owner2: web3.PublicKey;
   /** Pubkey of the token account that staked SHDW */
-  shdwPayer: PublicKey;
+  shdwPayer: web3.PublicKey;
   /** Counter at time of initialization */
   accountCounterSeed: number;
   /** Total shades paid for current box size */
@@ -122,11 +121,11 @@ export class StorageAccount {
   /** Bytes available for use */
   readonly storageAvailable: BN;
   /** Primary owner of StorageAccount (immutable) */
-  readonly owner1: PublicKey;
+  readonly owner1: web3.PublicKey;
   /** Optional owner 2 */
-  readonly owner2: PublicKey;
+  readonly owner2: web3.PublicKey;
   /** Pubkey of the token account that staked SHDW */
-  readonly shdwPayer: PublicKey;
+  readonly shdwPayer: web3.PublicKey;
   /** Counter at time of initialization */
   readonly accountCounterSeed: number;
   /** Total shades paid for current box size */
@@ -191,8 +190,8 @@ export class StorageAccount {
   }
 
   static async fetch(
-    c: Connection,
-    address: PublicKey
+    c: web3.Connection,
+    address: web3.PublicKey
   ): Promise<StorageAccount | null> {
     const info = await c.getAccountInfo(address);
     if (info === null) {
@@ -205,8 +204,8 @@ export class StorageAccount {
   }
 
   static async fetchMultiple(
-    c: Connection,
-    addresses: PublicKey[]
+    c: web3.Connection,
+    addresses: web3.PublicKey[]
   ): Promise<Array<StorageAccount | null>> {
     const infos = await c.getMultipleAccountsInfo(addresses);
 
@@ -284,9 +283,9 @@ export class StorageAccount {
       deleteRequestEpoch: obj.deleteRequestEpoch,
       storage: new BN(obj.storage),
       storageAvailable: new BN(obj.storageAvailable),
-      owner1: new PublicKey(obj.owner1),
-      owner2: new PublicKey(obj.owner2),
-      shdwPayer: new PublicKey(obj.shdwPayer),
+      owner1: new web3.PublicKey(obj.owner1),
+      owner2: new web3.PublicKey(obj.owner2),
+      shdwPayer: new web3.PublicKey(obj.shdwPayer),
       accountCounterSeed: obj.accountCounterSeed,
       totalCostOfCurrentStorage: new BN(obj.totalCostOfCurrentStorage),
       totalFeesPaid: new BN(obj.totalFeesPaid),

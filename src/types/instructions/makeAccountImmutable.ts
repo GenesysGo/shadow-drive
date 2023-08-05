@@ -1,11 +1,10 @@
-import { TransactionInstruction, PublicKey, AccountMeta } from "@solana/web3.js" // eslint-disable-line @typescript-eslint/no-unused-vars
-import BN from "bn.js" // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from "@coral-xyz/borsh" // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from "../types" // eslint-disable-line @typescript-eslint/no-unused-vars
-import { PROGRAM_ID } from "../programId"
+import { web3, BN } from "@coral-xyz/anchor"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as types from "../types"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { PROGRAM_ID } from "../programId";
 
 export interface MakeAccountImmutableArgs {
-  storageUsed: BN
+  storageUsed: BN;
 }
 
 export interface MakeAccountImmutableAccounts {
@@ -13,38 +12,38 @@ export interface MakeAccountImmutableAccounts {
    * This is the `StorageConfig` accounts that holds all of the admin, uploader keys.
    * Requires mutability to update global storage counter.
    */
-  storageConfig: PublicKey
+  storageConfig: web3.PublicKey;
   /**
    * Parent storage account.
    * Requires mutability to update user storage account storage counter.
    */
-  storageAccount: PublicKey
+  storageAccount: web3.PublicKey;
   /** This token account serves as the account which holds user's stake for file storage. */
-  stakeAccount: PublicKey
+  stakeAccount: web3.PublicKey;
   /** This token account is the SHDW operator emissions wallet */
-  emissionsWallet: PublicKey
+  emissionsWallet: web3.PublicKey;
   /**
    * File owner, user, fee-payer
    * Requires mutability since owner/user is fee payer.
    */
-  owner: PublicKey
+  owner: web3.PublicKey;
   /** Uploader needs to sign off on make immutable */
-  uploader: PublicKey
+  uploader: web3.PublicKey;
   /** User's token account */
-  ownerAta: PublicKey
+  ownerAta: web3.PublicKey;
   /** Token mint account */
-  tokenMint: PublicKey
+  tokenMint: web3.PublicKey;
   /** System Program */
-  systemProgram: PublicKey
+  systemProgram: web3.PublicKey;
   /** Token Program */
-  tokenProgram: PublicKey
+  tokenProgram: web3.PublicKey;
   /** Associated Token Program */
-  associatedTokenProgram: PublicKey
+  associatedTokenProgram: web3.PublicKey;
   /** Rent */
-  rent: PublicKey
+  rent: web3.PublicKey;
 }
 
-export const layout = borsh.struct([borsh.u64("storageUsed")])
+export const layout = borsh.struct([borsh.u64("storageUsed")]);
 
 /**
  * Context: This is user-facing.
@@ -55,7 +54,7 @@ export function makeAccountImmutable(
   args: MakeAccountImmutableArgs,
   accounts: MakeAccountImmutableAccounts
 ) {
-  const keys: Array<AccountMeta> = [
+  const keys: Array<web3.AccountMeta> = [
     { pubkey: accounts.storageConfig, isSigner: false, isWritable: true },
     { pubkey: accounts.storageAccount, isSigner: false, isWritable: true },
     { pubkey: accounts.stakeAccount, isSigner: false, isWritable: true },
@@ -72,16 +71,20 @@ export function makeAccountImmutable(
       isWritable: false,
     },
     { pubkey: accounts.rent, isSigner: false, isWritable: false },
-  ]
-  const identifier = Buffer.from([101, 64, 199, 31, 224, 32, 157, 231])
-  const buffer = Buffer.alloc(1000)
+  ];
+  const identifier = Buffer.from([101, 64, 199, 31, 224, 32, 157, 231]);
+  const buffer = Buffer.alloc(1000);
   const len = layout.encode(
     {
       storageUsed: args.storageUsed,
     },
     buffer
-  )
-  const data = Buffer.concat([identifier, buffer]).slice(0, 8 + len)
-  const ix = new TransactionInstruction({ keys, programId: PROGRAM_ID, data })
-  return ix
+  );
+  const data = Buffer.concat([identifier, buffer]).slice(0, 8 + len);
+  const ix = new web3.TransactionInstruction({
+    keys,
+    programId: PROGRAM_ID,
+    data,
+  });
+  return ix;
 }
