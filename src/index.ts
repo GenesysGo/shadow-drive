@@ -32,7 +32,7 @@ import {
   UserInfo,
   UnstakeInfo,
 } from "./types/accounts";
-import * as ShadowDriveInstructionTypes from "./types/index";
+import * as ShadowDriveInstructionTypes from "./types/instructions/index";
 import * as Errors from "./types/errors/custom";
 import {
   CreateStorageResponse,
