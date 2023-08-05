@@ -1,4 +1,4 @@
-import * as anchor from "@coral-xyz/anchor";
+import { web3 } from "@coral-xyz/anchor";
 import { isBrowser, SHDW_DRIVE_ENDPOINT } from "../utils/common";
 import crypto from "crypto";
 import fetch from "cross-fetch";
@@ -8,12 +8,12 @@ import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 import nacl from "tweetnacl";
 /**
  *
- * @param {anchor.web3.PublicKey} key - Publickey of Storage Account.
+ * @param {web3.PublicKey} key - Publickey of Storage Account.
  * @param {File | ShadowFile} data - File or ShadowFile object, file extensions should be included in the name property of ShadowFiles.
  * @returns {ShadowUploadResponse} File location and transaction signature.
  */
 export default async function uploadFile(
-  key: anchor.web3.PublicKey,
+  key: web3.PublicKey,
   data: File | ShadowFile
 ): Promise<ShadowUploadResponse> {
   let fileErrors = [];

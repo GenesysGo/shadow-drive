@@ -1,4 +1,4 @@
-import * as anchor from "@coral-xyz/anchor";
+import { web3 } from "@coral-xyz/anchor";
 import { findAssociatedTokenAddress } from "../utils/helpers";
 import { tokenMint } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
@@ -8,19 +8,24 @@ import { StorageAccountV2 } from "../types/accounts";
 import { PROGRAM_ID } from "../types/programId";
 /**
  *
- * @param {anchor.web3.PublicKey} key - PublicKey of a Storage Account
+ * @param {web3.PublicKey} key - PublicKey of a Storage Account
  * @returns {{ txid: string }} - Confirmed transaction ID
  */
 
 export default async function claimStake(
-  key: anchor.web3.PublicKey
+  key: web3.PublicKey
 ): Promise<{ txid: string }> {
-  let selectedAccount = await StorageAccountV2.fetch(this.connection, key);
-  const [unstakeAccount] = await anchor.web3.PublicKey.findProgramAddress(
+  let selectedAccount;
+  try {
+    selectedAccount = await StorageAccountV2.fetch(this.connection, key);
+  } catch (e) {
+    return Promise.reject(new Error(e.message));
+  }
+  const [unstakeAccount] = await web3.PublicKey.findProgramAddress(
     [Buffer.from("unstake-account"), key.toBytes()],
     PROGRAM_ID
   );
-  const [unstakeInfo] = await anchor.web3.PublicKey.findProgramAddress(
+  const [unstakeInfo] = await web3.PublicKey.findProgramAddress(
     [Buffer.from("unstake-info"), key.toBytes()],
     PROGRAM_ID
   );
@@ -28,7 +33,7 @@ export default async function claimStake(
     selectedAccount.owner1,
     tokenMint
   );
-  let txn = new anchor.web3.Transaction();
+  let txn = new web3.Transaction();
   try {
     const claimStakeIx2 = claimStake2({
       storageConfig: this.storageConfigPDA,
@@ -38,7 +43,7 @@ export default async function claimStake(
       owner: selectedAccount.owner1,
       ownerAta,
       tokenMint,
-      systemProgram: anchor.web3.SystemProgram.programId,
+      systemProgram: web3.SystemProgram.programId,
       tokenProgram: TOKEN_PROGRAM_ID,
     });
     txn.add(claimStakeIx2);
@@ -46,7 +51,7 @@ export default async function claimStake(
     txn.recentBlockhash = blockInfo.blockhash;
     txn.feePayer = this.wallet.publicKey;
     const signedTx = await this.wallet.signTransaction(txn);
-    const res = await anchor.web3.sendAndConfirmRawTransaction(
+    const res = await web3.sendAndConfirmRawTransaction(
       this.connection,
       signedTx.serialize(),
       { skipPreflight: true, commitment: "confirmed" }

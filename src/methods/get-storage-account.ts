@@ -1,41 +1,29 @@
 import { web3 } from "@coral-xyz/anchor";
-import { SHDW_DRIVE_ENDPOINT } from "../utils/common";
-import { StorageAccountInfo } from "../types";
-import fetch from "node-fetch";
+import { StorageAccountV2, UserInfo } from "../types/accounts";
 /**
- * Get storage account details
+ *
+ * Get a single storage account for the current user
  * @param {PublicKey} key - Publickey of a Storage Account
- * @returns {StorageAccountInfo} Storage Account
+ * @returns {StorageAccountResponse} - Requested Storage Account
  *
  */
-export default async function getStorageAcc(
-  key: web3.PublicKey
-): Promise<StorageAccountInfo> {
-  try {
-    const storageInfoResponse = await fetch(
-      `${SHDW_DRIVE_ENDPOINT}/storage-account-info`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          storage_account: key,
-        }),
-      }
+export default async function getStorageAcc(key: web3.PublicKey): Promise<{
+  publicKey: web3.PublicKey;
+  account: StorageAccountV2;
+}> {
+  let storageAccount;
+  let userInfoAccount = await UserInfo.fetch(this.connection, this.userInfo);
+  if (userInfoAccount === null) {
+    return Promise.reject(
+      new Error(
+        "You have not created a storage account on Shadow Drive yet. Please see the 'create-storage-account' command to get started."
+      )
     );
-    if (!storageInfoResponse.ok) {
-      return Promise.reject(
-        new Error(
-          `Server response status code: ${
-            storageInfoResponse.status
-          } \n Server response status message: ${
-            (await storageInfoResponse.json()).error
-          }`
-        )
-      );
-    }
-    return Promise.resolve(await storageInfoResponse.json());
+  }
+  try {
+    storageAccount = await this.program.account.storageAccountV2.fetch(key);
+
+    return Promise.resolve(storageAccount);
   } catch (e) {
     return Promise.reject(new Error(e.message));
   }

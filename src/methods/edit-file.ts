@@ -1,4 +1,4 @@
-import * as anchor from "@coral-xyz/anchor";
+import { web3 } from "@coral-xyz/anchor";
 import { isBrowser, SHDW_DRIVE_ENDPOINT } from "../utils/common";
 import crypto from "crypto";
 import { ShadowFile, ShadowEditResponse } from "../types";
@@ -9,14 +9,14 @@ import nacl from "tweetnacl";
 import { UserInfo } from "../types/accounts";
 /**
  *
- * @param {anchor.web3.PublicKey} key - Publickey of Storage Account
+ * @param {web3.PublicKey} key - Publickey of Storage Account
  * @param {string} url - URL of existing file
  * @param {File | ShadowFile} data - File or ShadowFile object, file extensions should be included in the name property of ShadowFiles.
  * @returns {ShadowEditResponse} - File location
  */
 
 export default async function editFile(
-  key: anchor.web3.PublicKey,
+  key: web3.PublicKey,
   url: string,
   data: File | ShadowFile
 ): Promise<ShadowEditResponse> {
@@ -26,10 +26,12 @@ export default async function editFile(
   let file;
 
   if (!isBrowser) {
+    console.log(`not browser`);
     data = data as ShadowFile;
     form = new NodeFormData();
     file = data.file;
     form.append("file", file, data.name);
+    fileBuffer = file;
   } else {
     file = data as File;
     form = new FormData();
@@ -69,7 +71,7 @@ export default async function editFile(
   } catch (e) {
     return Promise.reject(new Error(e.message));
   }
-  const fileOwnerOnChain = new anchor.web3.PublicKey(
+  const fileOwnerOnChain = new web3.PublicKey(
     fileDataResponse.file_data["owner-account-pubkey"]
   );
   if (!fileOwnerOnChain.equals(this.wallet.publicKey)) {

@@ -1,4 +1,4 @@
-import * as anchor from "@coral-xyz/anchor";
+import { web3, BN } from "@coral-xyz/anchor";
 import { getStakeAccount, findAssociatedTokenAddress } from "../utils/helpers";
 import { tokenMint } from "../utils/common";
 import { TOKEN_PROGRAM_ID, createTransferInstruction } from "@solana/spl-token";
@@ -6,12 +6,12 @@ import { fromTxError } from "../types/errors";
 
 /**
  *
- * @param {anchor.web3.PublicKey} key - Public Key of the existing storage account
+ * @param {web3.PublicKey} key - Public Key of the existing storage account
  * @param {number} amount - amount of $SHDW to transfer to stake account
  * @returns {txid: string} - confirmed transaction id
  */
 export default async function topUp(
-  key: anchor.web3.PublicKey,
+  key: web3.PublicKey,
   amount: number
 ): Promise<{ txid: string }> {
   let stakeAccount = (await getStakeAccount(this.program, key))[0];
@@ -19,12 +19,12 @@ export default async function topUp(
     this.wallet.publicKey,
     tokenMint
   );
-  const tx = new anchor.web3.Transaction().add(
+  const tx = new web3.Transaction().add(
     createTransferInstruction(
       ownerAta,
       stakeAccount,
       this.wallet.publicKey,
-      new anchor.BN(amount).toNumber(),
+      new BN(amount).toNumber(),
       undefined,
       TOKEN_PROGRAM_ID
     )
@@ -34,7 +34,7 @@ export default async function topUp(
     tx.recentBlockhash = blockInfo.blockhash;
     tx.feePayer = this.wallet.publicKey;
     const signedTx = await this.wallet.signTransaction(tx);
-    const res = await anchor.web3.sendAndConfirmRawTransaction(
+    const res = await web3.sendAndConfirmRawTransaction(
       this.connection,
       signedTx.serialize(),
       { skipPreflight: false, commitment: "confirmed" }

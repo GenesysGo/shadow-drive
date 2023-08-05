@@ -1,4 +1,4 @@
-import * as anchor from "@coral-xyz/anchor";
+import { web3, BN } from "@coral-xyz/anchor";
 import {
   humanSizeToBytes,
   getStakeAccount,
@@ -22,13 +22,13 @@ import {
 import { StorageAccountV2, UserInfo } from "../types/accounts";
 /**
  *
- * @param {anchor.web3.PublicKey} key - Public Key of the existing storage to increase size on
+ * @param {web3.PublicKey} key - Public Key of the existing storage to increase size on
  * @param {string} size - Amount of storage you are requesting to add to your storage account. Should be in a string like '1KB', '1MB', '1GB'. Only KB, MB, and GB storage delineations are supported currently.
  * @param {ShadowDriveVersion} version - ShadowDrive version (v1 or v2)
  * @returns {ShadowDriveResponse} Confirmed transaction ID
  */
 export default async function addStorage(
-  key: anchor.web3.PublicKey,
+  key: web3.PublicKey,
   size: string
 ): Promise<ShadowDriveResponse> {
   let storageInputAsBytes = humanSizeToBytes(size);
@@ -59,12 +59,12 @@ export default async function addStorage(
   try {
     const storageUsed = await getStorageAccountSize(key.toString());
     const emissionsAta = await findAssociatedTokenAddress(emissions, tokenMint);
-    let txn = new anchor.web3.Transaction();
+    let txn = new web3.Transaction();
     switch (selectedAccount.immutable) {
       case true:
         const increaseImmutableStorageIx = increaseImmutableStorage2(
           {
-            additionalStorage: new anchor.BN(storageInputAsBytes as number),
+            additionalStorage: new BN(storageInputAsBytes as number),
           },
           {
             storageConfig: this.storageConfigPDA,
@@ -74,7 +74,7 @@ export default async function addStorage(
             uploader: uploader,
             emissionsWallet: emissionsAta,
             tokenMint: tokenMint,
-            systemProgram: anchor.web3.SystemProgram.programId,
+            systemProgram: web3.SystemProgram.programId,
             tokenProgram: TOKEN_PROGRAM_ID,
           }
         );
@@ -83,7 +83,7 @@ export default async function addStorage(
       case false:
         const increaseStorageIx = increaseStorage2(
           {
-            additionalStorage: new anchor.BN(storageInputAsBytes as number),
+            additionalStorage: new BN(storageInputAsBytes as number),
           },
           {
             storageConfig: this.storageConfigPDA,
@@ -93,7 +93,7 @@ export default async function addStorage(
             stakeAccount,
             uploader: uploader,
             tokenMint: tokenMint,
-            systemProgram: anchor.web3.SystemProgram.programId,
+            systemProgram: web3.SystemProgram.programId,
             tokenProgram: TOKEN_PROGRAM_ID,
           }
         );

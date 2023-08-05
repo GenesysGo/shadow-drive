@@ -1,4 +1,4 @@
-import * as anchor from "@coral-xyz/anchor";
+import { web3, BN } from "@coral-xyz/anchor";
 import { isBrowser, SHDW_DRIVE_ENDPOINT } from "../utils/common";
 import crypto from "crypto";
 import {
@@ -18,12 +18,12 @@ interface FileData {
   buffer: Buffer;
   file: Buffer | File;
   form?: any;
-  size: anchor.BN;
+  size: BN;
   url: string;
 }
 /**
  *
- * @param {anchor.web3.PublicKey} key - Storage account PublicKey to upload the files to.
+ * @param {web3.PublicKey} key - Storage account PublicKey to upload the files to.
  * @param {FileList | ShadowFile[]} data[] - Array of Files or ShadowFile objects to be uploaded
  * @param {Number} concurrent - Number of files to concurrently upload. Default: 3
  * @param {Function} callback - Callback function for every batch of files uploaded. A number will be passed into the callback like `callback(num)` indicating the number of files that were confirmed in that specific batch.
@@ -31,7 +31,7 @@ interface FileData {
  */
 
 export default async function uploadMultipleFiles(
-  key: anchor.web3.PublicKey,
+  key: web3.PublicKey,
   data: FileList | ShadowFile[],
   concurrent = 3,
   callback?: Function
@@ -59,7 +59,7 @@ export default async function uploadMultipleFiles(
       const url = `https://shdw-drive.genesysgo.net/${key.toString()}/${encodeURIComponent(
         shdwFile.name
       )}`;
-      let size = new anchor.BN(fileBuffer.byteLength);
+      let size = new BN(fileBuffer.byteLength);
       fileData.push({
         name: shdwFile.name,
         buffer: fileBuffer,
@@ -85,7 +85,7 @@ export default async function uploadMultipleFiles(
       const url = `https://shdw-drive.genesysgo.net/${key.toString()}/${encodeURIComponent(
         shdwFile.name
       )}`;
-      let size = new anchor.BN(fileBuffer.byteLength);
+      let size = new BN(fileBuffer.byteLength);
       fileData.push({
         name: shdwFile.name,
         buffer: fileBuffer,

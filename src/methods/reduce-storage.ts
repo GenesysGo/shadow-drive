@@ -1,4 +1,4 @@
-import * as anchor from "@coral-xyz/anchor";
+import { web3, BN } from "@coral-xyz/anchor";
 import {
   humanSizeToBytes,
   getStakeAccount,
@@ -20,21 +20,21 @@ import { StorageAccountV2 } from "../types/accounts";
 import { PROGRAM_ID } from "../types/programId";
 /**
  *
- * @param {anchor.web3.PublicKey} key - Publickey of a Storage Account
+ * @param {web3.PublicKey} key - Publickey of a Storage Account
  * @param {string} size - Amount of storage you are requesting to reduce from your storage account. Should be in a string like '1KB', '1MB', '1GB'. Only KB, MB, and GB storage delineations are supported currently.
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 export default async function reduceStorage(
-  key: anchor.web3.PublicKey,
+  key: web3.PublicKey,
   size: string
 ): Promise<ShadowDriveResponse> {
   let storageInputAsBytes = humanSizeToBytes(size);
   let selectedAccount = await StorageAccountV2.fetch(this.connection, key);
-  const [unstakeAccount] = await anchor.web3.PublicKey.findProgramAddress(
+  const [unstakeAccount] = await web3.PublicKey.findProgramAddress(
     [Buffer.from("unstake-account"), key.toBytes()],
     PROGRAM_ID
   );
-  const [unstakeInfo] = await anchor.web3.PublicKey.findProgramAddress(
+  const [unstakeInfo] = await web3.PublicKey.findProgramAddress(
     [Buffer.from("unstake-info"), key.toBytes()],
     PROGRAM_ID
   );
@@ -46,11 +46,11 @@ export default async function reduceStorage(
   const emissionsAta = await findAssociatedTokenAddress(emissions, tokenMint);
   try {
     const storageUsed = await getStorageAccountSize(key.toString());
-    let txn = new anchor.web3.Transaction();
+    let txn = new web3.Transaction();
     const decreaseStorageIx2 = decreaseStorage2(
       {
-        storageUsed: new anchor.BN(storageUsed),
-        removeStorage: new anchor.BN(storageInputAsBytes.toString()),
+        storageUsed: new BN(storageUsed),
+        removeStorage: new BN(storageInputAsBytes.toString()),
       },
       {
         storageConfig: this.storageConfigPDA,
@@ -63,9 +63,9 @@ export default async function reduceStorage(
         stakeAccount,
         emissionsWallet: emissionsAta,
         tokenMint: tokenMint,
-        systemProgram: anchor.web3.SystemProgram.programId,
+        systemProgram: web3.SystemProgram.programId,
         tokenProgram: TOKEN_PROGRAM_ID,
-        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+        rent: web3.SYSVAR_RENT_PUBKEY,
       }
     );
     txn.add(decreaseStorageIx2);

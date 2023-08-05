@@ -1,4 +1,4 @@
-import * as anchor from "@coral-xyz/anchor";
+import { web3 } from "@coral-xyz/anchor";
 import { SHDW_DRIVE_ENDPOINT } from "../utils/common";
 import { ShadowDriveResponse } from "../types";
 import fetch from "cross-fetch";
@@ -6,13 +6,13 @@ import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 import nacl from "tweetnacl";
 /**
  *
- * @param {anchor.web3.PublicKey} key - Publickey of Storage Account
+ * @param {web3.PublicKey} key - Publickey of Storage Account
  * @param {string} url - Shadow Drive URL of the file you are requesting to delete.
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 
 export default async function deleteFile(
-  key: anchor.web3.PublicKey,
+  key: web3.PublicKey,
   url: string
 ): Promise<ShadowDriveResponse> {
   let fileData, fileDataResponse;
@@ -30,7 +30,7 @@ export default async function deleteFile(
   } catch (e: any) {
     return Promise.reject(new Error(`${e.message}`));
   }
-  const fileOwnerOnChain = new anchor.web3.PublicKey(
+  const fileOwnerOnChain = new web3.PublicKey(
     fileDataResponse.file_data["owner-account-pubkey"]
   );
   if (!fileOwnerOnChain.equals(this.wallet.publicKey)) {
