@@ -4,6 +4,7 @@ import createStorageAccount from "./create-storage-account";
 import deleteFile from "./delete-file";
 import deleteStorageAccount from "./delete-storage-account";
 import editFile from "./edit-file";
+import getStorageAccInfo from "./get-account-info";
 import getStorageAcc from "./get-storage-account";
 import getStorageAccs from "./get-storage-accounts";
 import listObjects from "./list-objects";
@@ -33,4 +34,5 @@ export {
   migrate,
   topUp,
   refreshStake,
+  getStorageAccInfo,
 };

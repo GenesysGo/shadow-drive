@@ -23,6 +23,7 @@ import {
   migrate,
   topUp,
   refreshStake,
+  getStorageAccInfo,
 } from "./methods";
 import {
   StorageAccount,
@@ -31,6 +32,7 @@ import {
   UserInfo,
   UnstakeInfo,
 } from "./types/accounts";
+import * as ShadowDriveInstructionTypes from "./types/index";
 import * as Errors from "./types/errors/custom";
 import {
   CreateStorageResponse,
@@ -60,7 +62,11 @@ interface ShadowDrive {
   getStorageAccs?(): Promise<StorageAccount[]>;
   listObjects(key: web3.PublicKey): Promise<ListObjectsResponse>;
   makeStorageImmutable(key: web3.PublicKey): Promise<ShadowDriveResponse>;
-  getStorageAccount(key: web3.PublicKey): Promise<StorageAccountInfo>;
+  getStorageAccount(key: web3.PublicKey): Promise<{
+    publicKey: web3.PublicKey;
+    account: StorageAccountV2;
+  }>;
+  getStorageAccountInfo(key: web3.PublicKey): Promise<StorageAccountInfo>;
   getStorageAccounts(): Promise<
     Array<{
       publicKey: web3.PublicKey;
@@ -105,6 +111,7 @@ export class ShdwDrive implements ShadowDrive {
   deleteFile = deleteFile;
   deleteStorageAccount = deleteStorageAccount;
   editFile = editFile;
+  getStorageAccountInfo = getStorageAccInfo;
   getStorageAccount = getStorageAcc;
   getStorageAccounts = getStorageAccs;
   listObjects = listObjects;
@@ -151,5 +158,6 @@ export {
   StorageConfig,
   UserInfo,
   UnstakeInfo,
+  ShadowDriveInstructionTypes,
   Errors,
 };
