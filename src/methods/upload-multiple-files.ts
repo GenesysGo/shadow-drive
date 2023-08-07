@@ -38,7 +38,6 @@ export default async function uploadMultipleFiles(
 ): Promise<ShadowBatchUploadResponse[]> {
   let fileData: Array<FileData> = [];
   const fileErrors: Array<object> = [];
-  let existingUploadJSON: ShadowBatchUploadResponse[] = [];
   /**
    *
    * Prepare files for uploading.
@@ -104,21 +103,6 @@ export default async function uploadMultipleFiles(
       "You have not created a storage account on Shadow Drive yet. Please see the 'create-storage-account' command to get started."
     );
   }
-  let allObjectsRequest = await fetch(`${SHDW_DRIVE_ENDPOINT}/list-objects`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ storageAccount: key.toString() }),
-  });
-  if (!allObjectsRequest.status) {
-    return Promise.reject(
-      new Error(`Server response status code: ${allObjectsRequest.status} \n
-        			Server response status message: ${
-                (await allObjectsRequest.json()).error
-              }`)
-    );
-  }
 
   /*
 		Note: Currently if there are no objects stored in an account the API will throw a 500 http error.
@@ -129,25 +113,7 @@ export default async function uploadMultipleFiles(
     
 		For now we'll need to handle this from here by initializing the objects ourselves.
 	  */
-  let allObjects: ListObjectsResponse = { keys: [] };
   let existingFiles: ShadowBatchUploadResponse[] = [];
-
-  // Only if successful, we assign the objects coming from the response.
-  if (allObjectsRequest.status === 200)
-    allObjects = (await allObjectsRequest.json()) as ListObjectsResponse;
-
-  fileData = fileData.filter((item: FileData) => {
-    if (!allObjects.keys.includes(item.name)) {
-      return true;
-    } else {
-      existingFiles.push({
-        fileName: item.name,
-        status: "Not uploaded: File already exists.",
-        location: item.url,
-      });
-      return false;
-    }
-  });
 
   // Only continue with upload process if there's files to process
   if (fileData.length) {
@@ -266,10 +232,11 @@ export default async function uploadMultipleFiles(
               });
 
               if (!response.ok) {
-                const error = (await response.json()).error;
+                const data = await response.json();
                 return items.map((item) => ({
                   fileName: item.name,
-                  status: `Not uploaded: ${error}`,
+                  status: `Not uploaded: ${data.error}`,
+                  upload_errors: JSON.stringify(data.upload_errors),
                   location: null,
                 }));
               } else {
