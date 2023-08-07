@@ -1,11 +1,7 @@
 import { web3, BN } from "@coral-xyz/anchor";
 import { isBrowser, SHDW_DRIVE_ENDPOINT } from "../utils/common";
 import crypto from "crypto";
-import {
-  ShadowBatchUploadResponse,
-  ShadowFile,
-  ListObjectsResponse,
-} from "../types";
+import { ShadowBatchUploadResponse, ShadowFile } from "../types";
 import NodeFormData from "form-data";
 import { getChunkLength } from "../utils/helpers";
 import fetch from "cross-fetch";
