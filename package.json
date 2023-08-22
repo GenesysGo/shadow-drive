@@ -1,6 +1,6 @@
 {
   "name": "@shadow-drive/sdk",
-  "version": "4.0.3",
+  "version": "4.1.0",
   "description": "Interfaces for GenesysGo ShadowDrive",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.27.0",
+    "@coral-xyz/borsh": "^0.28.0",
     "@solana/spl-token": "^0.2.0",
     "@types/bn.js": "^5.1.1",
     "cross-fetch": "^3.1.5",
