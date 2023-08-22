@@ -20,4 +20,4 @@ jobs:
                -H "Accept: application/vnd.github.everest-preview+json" \
                -H "Authorization: token ${{ secrets.REPO_ACCESS_TOKEN }}" \
                --data "{\"event_type\": \"new-release\", \"client_payload\": {\"tag_name\": \"${{ github.event.release.tag_name }}\", \"html_url\": \"${{ github.event.release.html_url }}\", \"body\": $body, \"published_at\": \"${{ github.event.release.published_at }}\", \"sender_login\": \"${{ github.event.sender.login }}\", \"release_url\": \"${{ github.event.release.url }}\"} }" \
-               "https://api.github.com/repos/GummersGG/test-things/dispatches"
+               "https://api.github.com/repos/GenesysGo/docs-shadow-cloud/dispatches"
