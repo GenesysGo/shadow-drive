@@ -1,0 +1,23 @@
+# package new version releases and dispatch them to tech docs markdown file (changelog.md)
+
+name: Dispatch on Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install jq
+        run: sudo apt-get install jq
+
+      - name: Send repository_dispatch event
+        run: |
+          body=$(echo "${{ github.event.release.body }}" | jq -R -s -r '@json')
+          curl -X POST \
+               -H "Accept: application/vnd.github.everest-preview+json" \
+               -H "Authorization: token ${{ secrets.REPO_ACCESS_TOKEN }}" \
+               --data "{\"event_type\": \"new-release\", \"client_payload\": {\"tag_name\": \"${{ github.event.release.tag_name }}\", \"html_url\": \"${{ github.event.release.html_url }}\", \"body\": $body, \"published_at\": \"${{ github.event.release.published_at }}\", \"sender_login\": \"${{ github.event.sender.login }}\", \"release_url\": \"${{ github.event.release.url }}\"} }" \
+               "https://api.github.com/repos/GenesysGo/docs-shadow-cloud/dispatches"
