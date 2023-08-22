@@ -4,6 +4,11 @@ import fetch from "cross-fetch";
 import { ListObjectsResponse } from "../types";
 import { SHDW_DRIVE_ENDPOINT } from "../utils/common";
 
+/**
+ *
+ * @param storageAccount - Publickey of a Storage Account
+ * @returns
+ */
 export default function listObjects(
   storageAccount: web3.PublicKey
 ): Promise<ListObjectsResponse> {
