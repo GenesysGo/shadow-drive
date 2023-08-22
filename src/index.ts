@@ -23,6 +23,7 @@ import {
   migrate,
   topUp,
   refreshStake,
+  getStorageAccInfo,
 } from "./methods";
 import {
   StorageAccount,
@@ -31,7 +32,29 @@ import {
   UserInfo,
   UnstakeInfo,
 } from "./types/accounts";
-import * as Errors from "./types/errors/custom";
+import {
+  InitializeAccount2Args,
+  InitializeAccount2Accounts,
+  UpdateAccount2Args,
+  UpdateAccount2Accounts,
+  RequestDeleteAccount2Accounts,
+  UnmarkDeleteAccount2Accounts,
+  DeleteAccount2Args,
+  DeleteAccount2Accounts,
+  MakeAccountImmutable2Args,
+  MakeAccountImmutable2Accounts,
+  IncreaseStorage2Args,
+  IncreaseStorage2Accounts,
+  IncreaseImmutableStorage2Args,
+  IncreaseImmutableStorage2Accounts,
+  DecreaseStorage2Args,
+  DecreaseStorage2Accounts,
+  ClaimStake2Accounts,
+  RefreshStake2Accounts,
+  MigrateStep1Accounts,
+  MigrateStep2Accounts,
+} from "./types/instructions/index";
+import { CustomError } from "./types/errors/custom";
 import {
   CreateStorageResponse,
   ShadowBatchUploadResponse,
@@ -60,7 +83,11 @@ interface ShadowDrive {
   getStorageAccs?(): Promise<StorageAccount[]>;
   listObjects(key: web3.PublicKey): Promise<ListObjectsResponse>;
   makeStorageImmutable(key: web3.PublicKey): Promise<ShadowDriveResponse>;
-  getStorageAccount(key: web3.PublicKey): Promise<StorageAccountInfo>;
+  getStorageAccount(key: web3.PublicKey): Promise<{
+    publicKey: web3.PublicKey;
+    account: StorageAccountV2;
+  }>;
+  getStorageAccountInfo(key: web3.PublicKey): Promise<StorageAccountInfo>;
   getStorageAccounts(): Promise<
     Array<{
       publicKey: web3.PublicKey;
@@ -89,13 +116,7 @@ interface ShadowDrive {
   topUp(key: web3.PublicKey, amount: number): Promise<{ txid: string }>;
   refreshStake(key: web3.PublicKey): Promise<{ txid: string }>;
 }
-/**
- *
- * Todo - Typescript does not currently support splitting up class definition into multiple files. These methods
- * are therefore added as properties to the ShdwDrive class. Can move all method definitions into this file to resolve.
- *
- */
-export class ShdwDrive implements ShadowDrive {
+export class ShdwDrive {
   private program: Program<ShadowDriveUserStaking>;
   public storageConfigPDA: web3.PublicKey;
   public userInfo: web3.PublicKey;
@@ -105,6 +126,7 @@ export class ShdwDrive implements ShadowDrive {
   deleteFile = deleteFile;
   deleteStorageAccount = deleteStorageAccount;
   editFile = editFile;
+  getStorageAccountInfo = getStorageAccInfo;
   getStorageAccount = getStorageAcc;
   getStorageAccounts = getStorageAccs;
   listObjects = listObjects;
@@ -151,5 +173,25 @@ export {
   StorageConfig,
   UserInfo,
   UnstakeInfo,
-  Errors,
+  InitializeAccount2Args,
+  InitializeAccount2Accounts,
+  UpdateAccount2Args,
+  UpdateAccount2Accounts,
+  RequestDeleteAccount2Accounts,
+  UnmarkDeleteAccount2Accounts,
+  DeleteAccount2Args,
+  DeleteAccount2Accounts,
+  MakeAccountImmutable2Args,
+  MakeAccountImmutable2Accounts,
+  IncreaseStorage2Args,
+  IncreaseStorage2Accounts,
+  IncreaseImmutableStorage2Args,
+  IncreaseImmutableStorage2Accounts,
+  DecreaseStorage2Args,
+  DecreaseStorage2Accounts,
+  ClaimStake2Accounts,
+  RefreshStake2Accounts,
+  MigrateStep1Accounts,
+  MigrateStep2Accounts,
+  CustomError,
 };

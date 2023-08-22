@@ -1,4 +1,4 @@
-import * as anchor from "@coral-xyz/anchor";
+import { web3, BN } from "@coral-xyz/anchor";
 import {
   getStakeAccount,
   findAssociatedTokenAddress,
@@ -21,11 +21,11 @@ import { StorageAccountV2 } from "../types/accounts";
 import { makeAccountImmutable2 } from "../types/instructions";
 /**
  *
- * @param {anchor.web3.PublicKey} key - Publickey of a Storage Account
+ * @param {web3.PublicKey} key - Publickey of a Storage Account
  * @returns {ShadowDriveResponse} - Confirmed transaction ID
  */
 export default async function makeStorageImmutable(
-  key: anchor.web3.PublicKey
+  key: web3.PublicKey
 ): Promise<ShadowDriveResponse> {
   let selectedAccount = await StorageAccountV2.fetch(this.connection, key);
   try {
@@ -36,9 +36,9 @@ export default async function makeStorageImmutable(
     const storageUsed = await getStorageAccountSize(key.toString());
     const emissionsAta = await findAssociatedTokenAddress(emissions, tokenMint);
     let stakeAccount = (await getStakeAccount(this.program, key))[0];
-    let txn = new anchor.web3.Transaction();
+    let txn = new web3.Transaction();
     const makeImmutableIx2 = makeAccountImmutable2(
-      { storageUsed: new anchor.BN(storageUsed) },
+      { storageUsed: new BN(storageUsed) },
       {
         storageConfig: this.storageConfigPDA,
         storageAccount: key,
@@ -48,10 +48,10 @@ export default async function makeStorageImmutable(
         uploader: uploader,
         ownerAta,
         tokenMint: tokenMint,
-        systemProgram: anchor.web3.SystemProgram.programId,
+        systemProgram: web3.SystemProgram.programId,
         tokenProgram: TOKEN_PROGRAM_ID,
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+        rent: web3.SYSVAR_RENT_PUBKEY,
       }
     );
     txn.add(makeImmutableIx2);

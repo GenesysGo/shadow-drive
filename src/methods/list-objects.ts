@@ -1,11 +1,16 @@
-import { PublicKey } from "@solana/web3.js";
+import { web3 } from "@coral-xyz/anchor";
 import fetch from "cross-fetch";
 
 import { ListObjectsResponse } from "../types";
 import { SHDW_DRIVE_ENDPOINT } from "../utils/common";
 
+/**
+ *
+ * @param storageAccount - Publickey of a Storage Account
+ * @returns
+ */
 export default function listObjects(
-  storageAccount: PublicKey
+  storageAccount: web3.PublicKey
 ): Promise<ListObjectsResponse> {
   return fetch(`${SHDW_DRIVE_ENDPOINT}/list-objects`, {
     method: "POST",

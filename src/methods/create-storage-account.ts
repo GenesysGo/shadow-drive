@@ -1,4 +1,4 @@
-import * as anchor from "@coral-xyz/anchor";
+import { web3, BN } from "@coral-xyz/anchor";
 import {
   humanSizeToBytes,
   getStorageAccount,
@@ -36,12 +36,12 @@ export default async function createStorageAccount(
   }
   // If userInfo hasn't been initialized, default to 0 for account seed
   let userInfoAccount = await UserInfo.fetch(this.connection, this.userInfo);
-  let accountSeed = new anchor.BN(0);
+  let accountSeed = new BN(0);
   if (userInfoAccount !== null) {
-    accountSeed = new anchor.BN(userInfoAccount.accountCounter);
+    accountSeed = new BN(userInfoAccount.accountCounter);
   }
 
-  let storageRequested = new anchor.BN(storageInputAsBytes.toString()); // 2^30 B <==> 1GB
+  let storageRequested = new BN(storageInputAsBytes.toString()); // 2^30 B <==> 1GB
 
   // Retreive storageAccount
   let storageAccount = (
@@ -54,7 +54,7 @@ export default async function createStorageAccount(
     this.wallet.publicKey,
     tokenMint
   );
-  let txn = new anchor.web3.Transaction();
+  let txn = new web3.Transaction();
   const initializeAccountIx2 = initializeAccount2(
     {
       identifier: name,
@@ -69,9 +69,9 @@ export default async function createStorageAccount(
       owner1: this.wallet.publicKey,
       uploader: uploader,
       owner1TokenAccount: ownerAta,
-      systemProgram: anchor.web3.SystemProgram.programId,
+      systemProgram: web3.SystemProgram.programId,
       tokenProgram: TOKEN_PROGRAM_ID,
-      rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+      rent: web3.SYSVAR_RENT_PUBKEY,
     }
   );
   txn.add(initializeAccountIx2);

@@ -1,4 +1,4 @@
-import { PublicKey } from "@solana/web3.js";
+import { web3 } from "@coral-xyz/anchor";
 
 export type CreateStorageResponse = {
   shdw_bucket: string;
@@ -37,13 +37,13 @@ export type ListObjectsResponse = {
 };
 
 export type StorageAccountInfo = {
-  storage_account: PublicKey;
+  storage_account: web3.PublicKey;
   reserved_bytes: number;
   current_usage: number;
   immutable: boolean;
   to_be_deleted: boolean;
   delete_request_epoch: number;
-  owner1: PublicKey;
+  owner1: web3.PublicKey;
   account_counter_seed: number;
   creation_time: number;
   creation_epoch: number;

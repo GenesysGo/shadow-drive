@@ -1,5 +1,5 @@
 import { web3 } from "@coral-xyz/anchor";
-import { StorageAccount, StorageAccountV2, UserInfo } from "../types/accounts";
+import { StorageAccountV2, UserInfo } from "../types/accounts";
 /**
  *
  * Get all storage accounts for the current user
@@ -9,7 +9,7 @@ import { StorageAccount, StorageAccountV2, UserInfo } from "../types/accounts";
 export default async function getStorageAccs(): Promise<
   Array<{
     publicKey: web3.PublicKey;
-    account: StorageAccount | StorageAccountV2;
+    account: StorageAccountV2;
   }>
 > {
   let storageAccounts;
