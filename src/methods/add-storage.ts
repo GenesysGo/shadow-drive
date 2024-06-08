@@ -101,11 +101,13 @@ export default async function addStorage(
                         ),
                         this.connection,
                     ]);
-                txn.add(
-                    web3.ComputeBudgetProgram.setComputeUnitLimit({
-                        units: immutableUnits,
-                    })
-                );
+                if (typeof immutableUnits !== "undefined") {
+                    txn.add(
+                        web3.ComputeBudgetProgram.setComputeUnitLimit({
+                            units: immutableUnits,
+                        })
+                    );
+                }
                 txn.add(immutableComputePriceIx);
                 txn.add(increaseImmutableStorageIx);
                 break;
@@ -141,6 +143,8 @@ export default async function addStorage(
                     ),
                     this.connection,
                 ]);
+                if (typeof units !== "undefined") {
+                }
                 txn.add(
                     web3.ComputeBudgetProgram.setComputeUnitLimit({ units })
                 );

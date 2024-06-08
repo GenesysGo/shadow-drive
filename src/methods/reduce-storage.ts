@@ -82,7 +82,9 @@ export default async function reduceStorage(
             ),
             this.connection,
         ]);
-        txn.add(web3.ComputeBudgetProgram.setComputeUnitLimit({ units }));
+        if (typeof units !== "undefined") {
+            txn.add(web3.ComputeBudgetProgram.setComputeUnitLimit({ units }));
+        }
         txn.add(computePriceIx);
         txn.add(decreaseStorageIx2);
 
