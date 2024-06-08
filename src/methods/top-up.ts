@@ -45,7 +45,9 @@ export default async function topUp(
         ),
         this.connection,
     ]);
-    txn.add(web3.ComputeBudgetProgram.setComputeUnitLimit({ units }));
+    if (typeof units !== "undefined") {
+        txn.add(web3.ComputeBudgetProgram.setComputeUnitLimit({ units }));
+    }
     txn.add(computePriceIx);
 
     txn.add(transferInstruction);
