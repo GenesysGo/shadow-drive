@@ -15,7 +15,7 @@ import {
 } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ShadowDriveResponse } from "../types";
-import fetch from "node-fetch";
+import fetch from "cross-fetch";
 import { decreaseStorage2 } from "../types/instructions";
 import { StorageAccountV2 } from "../types/accounts";
 import { PROGRAM_ID } from "../types/programId";

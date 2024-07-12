@@ -15,7 +15,7 @@ import {
 } from "../utils/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ShadowDriveResponse } from "../types";
-import fetch from "node-fetch";
+import fetch from "cross-fetch";
 import {
     increaseImmutableStorage2,
     increaseStorage2,

@@ -17,7 +17,7 @@ import {
     TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import { ShadowDriveResponse } from "../types";
-import fetch from "node-fetch";
+import fetch from "cross-fetch";
 import { StorageAccountV2 } from "../types/accounts";
 import { makeAccountImmutable2 } from "../types/instructions";
 /**
