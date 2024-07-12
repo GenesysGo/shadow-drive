@@ -10,11 +10,13 @@ import nacl from "tweetnacl";
  *
  * @param {web3.PublicKey} key - Publickey of Storage Account.
  * @param {File | ShadowFile} data - File or ShadowFile object, file extensions should be included in the name property of ShadowFiles.
+ * @param {Boolean} overwrite - If true, overwrites if existing. Default is false.
  * @returns {ShadowUploadResponse} File location and transaction signature.
  */
 export default async function uploadFile(
   key: web3.PublicKey,
-  data: File | ShadowFile
+  data: File | ShadowFile,
+  overwrite: Boolean = false
 ): Promise<ShadowUploadResponse> {
   let fileErrors = [];
   let fileBuffer: Buffer;
@@ -82,6 +84,9 @@ export default async function uploadFile(
     form.append("message", encodedMsg);
     form.append("storage_account", key.toString());
     form.append("signer", this.wallet.publicKey.toString());
+    if(overwrite) {
+      form.append("overwrite", "true");
+    }
   } catch (e) {
     return Promise.reject(new Error(e.message));
   }
