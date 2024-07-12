@@ -22,6 +22,7 @@ interface FileData {
  * @param {web3.PublicKey} key - Storage account PublicKey to upload the files to.
  * @param {FileList | ShadowFile[]} data[] - Array of Files or ShadowFile objects to be uploaded
  * @param {Number} concurrent - Number of files to concurrently upload. Default: 3
+ * @param {Boolean} overwrite - If true, overwrites if existing. Default is false.
  * @param {Function} callback - Callback function for every batch of files uploaded. A number will be passed into the callback like `callback(num)` indicating the number of files that were confirmed in that specific batch.
  * @returns {ShadowBatchUploadResponse[]} - File names, locations and transaction signatures for uploaded files.
  */
@@ -30,7 +31,8 @@ export default async function uploadMultipleFiles(
   key: web3.PublicKey,
   data: FileList | ShadowFile[],
   concurrent = 3,
-  callback?: Function
+  overwrite: Boolean = false,
+  callback?: Function,
 ): Promise<ShadowBatchUploadResponse[]> {
   let fileData: Array<FileData> = [];
   const fileErrors: Array<object> = [];
@@ -218,6 +220,9 @@ export default async function uploadMultipleFiles(
               fd.append("storage_account", key.toString());
               fd.append("signer", this.wallet.publicKey.toString());
               fd.append("fileNames", allFileNames.toString());
+              if (overwrite) {
+                fd.append("overwrite", "true");
+              }
               const controller = new AbortController();
               const timeoutId = setTimeout(() => controller.abort(), 7200000);
               const response = await fetch(`${SHDW_DRIVE_ENDPOINT}/upload`, {
