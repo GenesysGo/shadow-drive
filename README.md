@@ -54,6 +54,58 @@ const connection = new web3.Connection("{rpc-url}", "confirmed");
 const drive = await new ShdwDrive(connection, wallet).init();
 ```
 
+## Authentication
+
+To use Shadow Drive, you'll need to obtain credentials from GenesysGo:
+
+### Getting Your GenesysGo Account UUID and Bearer Token
+
+1. **Account UUID**: This is your unique account identifier provided by GenesysGo. You can obtain this by:
+   - Contacting GenesysGo support
+   - Checking your GenesysGo dashboard/account settings
+   - It's typically provided when you set up your GenesysGo account
+
+2. **Bearer Token**: This is your authentication token for API access. You can obtain this by:
+   - Logging into your GenesysGo account
+   - Navigating to API settings or developer section
+   - Generating a new API token
+
+### Using Your Credentials
+
+Once you have your credentials, replace the placeholders in your code:
+
+**For React applications** (see `examples/web/src/App.tsx`):
+```tsx
+const network = "https://us-west-1.genesysgo.net/{YOUR_ACCOUNT_UUID_HERE}";
+// Replace {YOUR_ACCOUNT_UUID_HERE} with your actual UUID
+
+<ConnectionProvider
+    endpoint={network}
+    config={{
+        commitment: "confirmed",
+        httpHeaders: {
+            Authorization: "Bearer {GENESYSGO AUTHENTICATION TOKEN HERE}",
+            // Replace {GENESYSGO AUTHENTICATION TOKEN HERE} with your actual token
+        },
+    }}
+>
+```
+
+**For NodeJS applications**:
+```js
+const connection = new web3.Connection(
+    "https://us-west-1.genesysgo.net/{YOUR_ACCOUNT_UUID_HERE}",
+    {
+        commitment: "confirmed",
+        httpHeaders: {
+            Authorization: "Bearer {YOUR_BEARER_TOKEN_HERE}",
+        },
+    }
+);
+```
+
+> **Note**: Keep your bearer token secure and never commit it to version control. Consider using environment variables to store sensitive credentials.
+
 ### Examples
 
 | package                                                                   | description                                       |
