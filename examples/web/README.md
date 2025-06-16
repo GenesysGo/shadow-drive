@@ -4,20 +4,29 @@
 
 Before running this example, you'll need:
 
-1. **GenesysGo Credentials**: 
-   - Account UUID
-   - Bearer authentication token
-   
-   See the main README for instructions on obtaining these credentials.
+1. **Solana Wallet**: Any Solana-compatible wallet (Phantom, Solflare, etc.)
 
-2. **Update App.tsx**: Replace the placeholders in `src/App.tsx`:
+2. **RPC Endpoint Configuration**: Choose one option for `src/App.tsx`:
+
+   **Option A: Use Public RPC** (No additional setup required)
    ```tsx
-   // Line 28: Replace with your account UUID
-   const network = "https://us-west-1.genesysgo.net/YOUR_ACTUAL_UUID_HERE";
+   // Line 28: Replace with public RPC
+   const network = "https://api.mainnet-beta.solana.com";
    
-   // Line 46: Replace with your bearer token
-   Authorization: "Bearer YOUR_ACTUAL_TOKEN_HERE",
+   // Lines 42-48: Remove the httpHeaders config entirely
+   <ConnectionProvider endpoint={network} config={{ commitment: "confirmed" }}>
    ```
+
+   **Option B: Use GenesysGo RPC** (Requires GenesysGo RPC credentials)
+   ```tsx
+   // Line 28: Replace with your GenesysGo RPC account ID
+   const network = "https://us-west-1.genesysgo.net/YOUR_RPC_ACCOUNT_ID";
+   
+   // Line 46: Replace with your GenesysGo RPC access token
+   Authorization: "Bearer YOUR_RPC_ACCESS_TOKEN",
+   ```
+
+   > **Note**: The placeholders in App.tsx are for **RPC access**, not Shadow Drive. Shadow Drive authentication is handled automatically through your connected wallet.
 
 ## Getting Started
 
