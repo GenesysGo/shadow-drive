@@ -54,6 +54,71 @@ const connection = new web3.Connection("{rpc-url}", "confirmed");
 const drive = await new ShdwDrive(connection, wallet).init();
 ```
 
+## Authentication
+
+Shadow Drive uses **Solana wallet signatures** for authentication. You only need a Solana wallet - no additional API keys or Shadow Drive accounts required.
+
+### RPC Endpoint Configuration
+
+You can use any Solana RPC endpoint. The example code shows GenesysGo's RPC service, but this is optional:
+
+**Option 1: Public Solana RPC (No additional credentials needed)**
+```js
+const connection = new web3.Connection("https://api.mainnet-beta.solana.com");
+```
+
+**Option 2: GenesysGo RPC (Requires their RPC credentials)**
+```js
+const connection = new web3.Connection(
+    "https://us-west-1.genesysgo.net/{YOUR_RPC_ACCOUNT_ID}",
+    {
+        commitment: "confirmed",
+        httpHeaders: {
+            Authorization: "Bearer {YOUR_RPC_ACCESS_TOKEN}",
+        },
+    }
+);
+```
+
+**Option 3: Other RPC providers**
+```js
+// Helius, QuickNode, Alchemy, etc.
+const connection = new web3.Connection("{YOUR_PREFERRED_RPC_URL}");
+```
+
+### Shadow Drive Setup
+
+Regardless of your RPC choice, Shadow Drive setup is the same:
+
+```js
+// Your Solana wallet (browser wallet, keypair, etc.)
+const wallet = /* your wallet instance */;
+
+// Initialize Shadow Drive
+const drive = await new ShdwDrive(connection, wallet).init();
+```
+
+### Understanding the Example Placeholders
+
+In `examples/web/src/App.tsx`, the placeholders refer to **GenesysGo's RPC service credentials**:
+
+- `{YOUR_ACCOUNT_UUID_HERE}` = Your GenesysGo RPC account identifier
+- `{GENESYSGO AUTHENTICATION TOKEN HERE}` = Your GenesysGo RPC access token
+
+**To use the example:**
+1. **Option A**: Replace with your GenesysGo RPC credentials
+2. **Option B**: Change to a public RPC endpoint and remove the Authorization header
+
+### How Shadow Drive Authentication Works
+
+1. **RPC Authentication**: Handled by your connection configuration (varies by provider)
+2. **Shadow Drive Authentication**: Automatic via wallet signatures
+   - No API keys needed
+   - Uses cryptographic message signing
+   - Wallet signs authentication messages for each operation
+
+> **Note**: GenesysGo RPC credentials are for blockchain access only, not Shadow Drive storage. Shadow Drive authenticates through your Solana wallet automatically.
+
 ### Examples
 
 | package                                                                   | description                                       |
