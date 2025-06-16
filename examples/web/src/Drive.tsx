@@ -4,7 +4,7 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import * as anchor from "@project-serum/anchor";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { PublicKey } from "@solana/web3.js";
-import { CircularProgress, TextField, FormControl, Select, InputLabel, MenuItem, Button, FormLabel, RadioGroup, FormControlLabel, Radio, styled, LinearProgress, Container, Grid } from "@mui/material";
+import { CircularProgress, TextField, FormControl, Select, InputLabel, MenuItem, Button, FormLabel, RadioGroup, FormControlLabel, Radio, styled, LinearProgress, Container, Grid, Chip } from "@mui/material";
 
 const bytesToHuman = (bytes: any, si = false, dp = 1) => {
 	const thresh = si ? 1024 : 1024;
@@ -29,6 +29,39 @@ const bytesToHuman = (bytes: any, si = false, dp = 1) => {
 
 	return bytes.toFixed(dp) + " " + units[u];
 }
+
+// SHDW token mint address
+const SHDW_TOKEN_MINT = new PublicKey("SHDWyBxihqiCj6YekG2GUr7wqKLeLAMK1gHZck9pL6y");
+
+// Helper function to find associated token account
+async function findAssociatedTokenAddress(
+	walletAddress: PublicKey,
+	tokenMintAddress: PublicKey
+): Promise<PublicKey> {
+	const [address] = await PublicKey.findProgramAddress(
+		[
+			walletAddress.toBuffer(),
+			new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA").toBuffer(),
+			tokenMintAddress.toBuffer(),
+		],
+		new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL")
+	);
+	return address;
+}
+
+// Calculate maximum storage size based on SHDW balance
+// Rough estimate: 1 SHDW ≈ 1GB storage per year
+function calculateMaxStorageFromBalance(shdwBalance: number): string {
+	if (shdwBalance < 0.1) return "1GB"; // Default to minimum
+	
+	const maxGB = Math.floor(shdwBalance * 0.9); // Use 90% of balance for safety
+	
+	if (maxGB >= 50) return "50GB"; // Max option available
+	if (maxGB >= 10) return "10GB";
+	if (maxGB >= 1) return "1GB";
+	
+	return "1GB"; // Minimum option
+}
 /**
  * 
  * Simple usage examples for Shadow Drive
@@ -51,6 +84,8 @@ export default function Drive() {
 	const [loading, setLoading] = useState<boolean>();
 	const [tx, setTx] = useState<String>();
 	const [version, setVersion] = useState<ShadowDriveVersion>('v2');
+	const [shdwBalance, setShdwBalance] = useState<number>(0);
+	const [balanceLoading, setBalanceLoading] = useState<boolean>(false);
 	const submitForm = async () => {
 		if (!acc?.publicKey || !fileList) return;
 		try {
@@ -100,12 +135,37 @@ export default function Drive() {
 			setLoading(true);
 			const result = await drive?.createStorageAccount(accName, accSize, version);
 			setTx(result!.transaction_signature);
+			// Refresh balance after creating account
+			await getUserShdwBalance();
 		} catch (e) {
 			console.log(e);
 		}
 		refreshAccounts();
 		setLoading(false);
 	}
+
+	// Get user's SHDW token balance
+	const getUserShdwBalance = async () => {
+		if (!wallet.publicKey || !connection) return;
+		
+		try {
+			setBalanceLoading(true);
+			const userATA = await findAssociatedTokenAddress(wallet.publicKey, SHDW_TOKEN_MINT);
+			const balance = await connection.getTokenAccountBalance(userATA);
+			setShdwBalance(balance.value.uiAmount || 0);
+		} catch (e) {
+			console.log("Error fetching SHDW balance:", e);
+			setShdwBalance(0);
+		} finally {
+			setBalanceLoading(false);
+		}
+	};
+
+	// Handle "Max Stake" button click
+	const handleMaxStake = () => {
+		const maxSize = calculateMaxStorageFromBalance(shdwBalance);
+		setAccSize(maxSize);
+	};
 	useEffect(() => {
 		(async () => {
 			if (wallet) {
@@ -121,8 +181,15 @@ export default function Drive() {
 	useEffect(() => {
 		if (drive) {
 			refreshAccounts();
+			getUserShdwBalance();
 		}
 	}, [drive])
+
+	useEffect(() => {
+		if (wallet.connected && connection) {
+			getUserShdwBalance();
+		}
+	}, [wallet.connected])
 	useEffect(() => {
 		console.log('uploaded');
 		if (displayFiles) {
@@ -146,6 +213,16 @@ export default function Drive() {
 
 					<div style={{ marginTop: '50px', maxWidth: '500px' }}>
 						<h2 style={{ marginBottom: '20px' }}>Create a Shadow Drive account:</h2>
+						
+						{/* SHDW Balance Display */}
+						<div style={{ marginBottom: '20px' }}>
+							<Chip 
+								label={balanceLoading ? "Loading balance..." : `SHDW Balance: ${shdwBalance.toFixed(2)}`}
+								color={shdwBalance > 0 ? "success" : "default"}
+								variant="outlined"
+								size="medium"
+							/>
+						</div>
 						<form>
 							<TextField color="secondary" type="text" name="storageAccount" label="Storage Name" variant="standard"
 								focused
@@ -176,6 +253,18 @@ export default function Drive() {
 									<MenuItem value={'50GB'}>50GB</MenuItem>
 								</Select>
 							</FormControl>
+							
+							{/* Max Stake Button */}
+							<Button 
+								size="small"
+								variant="outlined"
+								color="secondary"
+								sx={{ marginLeft: '10px', height: '32px' }}
+								onClick={handleMaxStake}
+								disabled={!shdwBalance || balanceLoading}
+							>
+								Max Stake
+							</Button>
 							<FormControl sx={{ marginLeft: '20px', width: '100px' }}
 								focused>
 								<InputLabel id="version-select"
